@@ -4,12 +4,7 @@ import TheWelcome from './components/TheWelcome.vue'
 import axios from 'axios'
 </script>
 <script>
-  axios.get('http://localhost:8080/hello', {
-  data: {
-    name: 'John',
-    email: 'john@example.com'
-  }
-})
+  axios.get('http://localhost:8014/hello', {})
   .then(response => {
     // 处理响应结果
     console.log(response.data);
@@ -18,14 +13,14 @@ import axios from 'axios'
     // 处理错误
     console.error(error);
   });
-  
+  var msgg = ' Hello World'
 </script>
 <template>
   <header>
     <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
 
     <div class="wrapper">
-      <HelloWorld msg="You did it!" />
+      <HelloWorld msg="biaoti" />
     </div>
   </header>
 

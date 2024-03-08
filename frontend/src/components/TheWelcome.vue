@@ -5,6 +5,34 @@ import ToolingIcon from './icons/IconTooling.vue'
 import EcosystemIcon from './icons/IconEcosystem.vue'
 import CommunityIcon from './icons/IconCommunity.vue'
 import SupportIcon from './icons/IconSupport.vue'
+import axios from 'axios'
+</script>
+
+<script>
+export default
+  {
+    data() {
+      return {
+        responseData: null,
+      }
+    },
+    created() {
+      axios.get('http://localhost:8014/hello', {})
+        .then(response => {
+          // 处理响应结果
+          console.log(response.data);
+          this.responseData = response.data
+        })
+        .catch(error => {
+          // 处理错误
+          console.error(error);
+        });
+    }
+
+  }
+const _response = "welcome"
+// msg = "Welcome"
+
 </script>
 
 <template>
@@ -12,17 +40,20 @@ import SupportIcon from './icons/IconSupport.vue'
     <template #icon>
       <DocumentationIcon />
     </template>
+
     <template #heading>Documentation</template>
 
-    Vue’s
+    <div v-bind:title="responseData">{{ responseData }}</div>
     <a href="https://vuejs.org/" target="_blank" rel="noopener">official documentation</a>
     provides you with all information you need to get started.
   </WelcomeItem>
 
   <WelcomeItem>
+
     <template #icon>
       <ToolingIcon />
     </template>
+
     <template #heading>Tooling</template>
 
     This project is served and bundled with
@@ -32,9 +63,7 @@ import SupportIcon from './icons/IconSupport.vue'
     <a href="https://github.com/johnsoncodehk/volar" target="_blank" rel="noopener">Volar</a>. If
     you need to test your components and web pages, check out
     <a href="https://www.cypress.io/" target="_blank" rel="noopener">Cypress</a> and
-    <a href="https://on.cypress.io/component" target="_blank" rel="noopener"
-      >Cypress Component Testing</a
-    >.
+    <a href="https://on.cypress.io/component" target="_blank" rel="noopener">Cypress Component Testing</a>.
 
     <br />
 
@@ -42,9 +71,11 @@ import SupportIcon from './icons/IconSupport.vue'
   </WelcomeItem>
 
   <WelcomeItem>
+
     <template #icon>
       <EcosystemIcon />
     </template>
+
     <template #heading>Ecosystem</template>
 
     Get official tools and libraries for your project:
@@ -58,17 +89,18 @@ import SupportIcon from './icons/IconSupport.vue'
   </WelcomeItem>
 
   <WelcomeItem>
+
     <template #icon>
       <CommunityIcon />
     </template>
+
     <template #heading>Community</template>
 
     Got stuck? Ask your question on
     <a href="https://chat.vuejs.org" target="_blank" rel="noopener">Vue Land</a>, our official
     Discord server, or
-    <a href="https://stackoverflow.com/questions/tagged/vue.js" target="_blank" rel="noopener"
-      >StackOverflow</a
-    >. You should also subscribe to
+    <a href="https://stackoverflow.com/questions/tagged/vue.js" target="_blank" rel="noopener">StackOverflow</a>. You
+    should also subscribe to
     <a href="https://news.vuejs.org" target="_blank" rel="noopener">our mailing list</a> and follow
     the official
     <a href="https://twitter.com/vuejs" target="_blank" rel="noopener">@vuejs</a>
@@ -76,9 +108,11 @@ import SupportIcon from './icons/IconSupport.vue'
   </WelcomeItem>
 
   <WelcomeItem>
+
     <template #icon>
       <SupportIcon />
     </template>
+
     <template #heading>Support Vue</template>
 
     As an independent project, Vue relies on community backing for its sustainability. You can help
