@@ -20,9 +20,12 @@ import java.util.*;
 public class hellocontroller {
 
     public Kernel kernel;
+    public SysConfig config;
 
     public hellocontroller() {
         this.kernel = new Kernel();
+        this.config = new SysConfig();
+        // new CPU(kernel, config).start();
     }
 
     @GetMapping("/hello")
@@ -54,17 +57,28 @@ public class hellocontroller {
         return this.kernel.queue.Waiting_Queue;
     }
 
-    @PostMapping("/testtaotao")
-    public int postMethodName1(int a, int b) {
-        // TODO: process POST request
+    @PostMapping("testfolder")
+    public String testFolder(String instruction, String option, String args) {
+        if (instruction.equals("mkdir")) {
+            this.kernel.fileSystem.mkdir(args);
+        } else if (instruction.equals("cd")) {
+            boolean res = this.kernel.fileSystem.cd(args);
+            if (res == false)
+                return "cd not successful";
 
-        return a + b;
+        } else if (instruction.equals("touch")) {
+            this.kernel.fileSystem.touch(args);
+        } else if (instruction.equals("rm")) {
+            this.kernel.fileSystem.rm(option, args);
+        }
+
+        return this.kernel.fileSystem.workingPath;
     }
 
-    @PostMapping("/demo")
-    public String postMethodName(String username, String password) {
-        System.out.println("hello" + username);
-        return "helloworld";
+    @PostMapping("testls")
+    public List<String> testFolderls() {
+
+        return this.kernel.fileSystem.ls();
     }
 
 }

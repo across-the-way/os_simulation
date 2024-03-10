@@ -7,8 +7,8 @@ public class Instruction {
 
     public Type type;
     public Args args;
-
+    public int CPI;
     public Instruction() {
-
+ 
     }
 }
