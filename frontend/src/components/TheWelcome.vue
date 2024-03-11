@@ -6,6 +6,7 @@ import EcosystemIcon from './icons/IconEcosystem.vue'
 import CommunityIcon from './icons/IconCommunity.vue'
 import SupportIcon from './icons/IconSupport.vue'
 import axios from 'axios'
+import { serverURL } from './ServerURL'
 </script>
 
 <script>
@@ -17,21 +18,20 @@ export default
       }
     },
     created() {
-      axios.post('http://localhost:8014/test', {
-          'a' : '1',
-          'b' : '2'
-      },{
-        'Content-Type' : 'application/json',
+      axios.post(serverURL + '/testfolder', {
+        instruction: 'cd',
+        option: 2,
+        args: 1
       })
-        .then(response => {
-          // 处理响应结果
-          console.log(response.data);
-          this.responseData = response.data
-        })
-        .catch(error => {
+      .then(response => {
+        // 处理响应结果
+        console.log(response.data);
+        this.responseData = response.data
+      })
+      .catch(error => {
           // 处理错误
-          console.error(error);
-        });
+        console.error(error);
+      });
     }
 
   }

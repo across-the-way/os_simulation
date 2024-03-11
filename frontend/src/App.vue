@@ -8,11 +8,17 @@ import { serverURL } from './components/ServerURL'
 
 <script>
 export default {
+  data() {
+    return {
+      responseData: null,
+    }
+  },
   created() {
     axios.get(serverURL + '/hello', {})
       .then(response => {
         // 处理响应结果
         console.log(response.data);
+        this.responseData = response.data
       })
       .catch(error => {
         // 处理错误
@@ -22,7 +28,7 @@ export default {
 }
 
 
-var biaoti = 'Hello World'
+
 </script>
 
 <template>
@@ -30,7 +36,7 @@ var biaoti = 'Hello World'
     <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
 
     <div class="wrapper">
-      <HelloWorld v-bind:msg=biaoti />
+      <HelloWorld v-bind:msg=responseData />
     </div>
   </header>
 
