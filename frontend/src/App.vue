@@ -2,25 +2,35 @@
 import HelloWorld from './components/HelloWorld.vue'
 import TheWelcome from './components/TheWelcome.vue'
 import axios from 'axios'
+import { serverURL } from './components/ServerURL'
+
 </script>
+
 <script>
-  axios.get('http://localhost:8014/hello', {})
-  .then(response => {
-    // 处理响应结果
-    console.log(response.data);
-  })
-  .catch(error => {
-    // 处理错误
-    console.error(error);
-  });
-  var msgg = ' Hello World'
+export default {
+  created() {
+    axios.get(serverURL + '/hello', {})
+      .then(response => {
+        // 处理响应结果
+        console.log(response.data);
+      })
+      .catch(error => {
+        // 处理错误
+        console.error(error);
+      });
+  }
+}
+
+
+var biaoti = 'Hello World'
 </script>
+
 <template>
   <header>
     <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
 
     <div class="wrapper">
-      <HelloWorld msg="biaoti" />
+      <HelloWorld v-bind:msg=biaoti />
     </div>
   </header>
 

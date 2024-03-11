@@ -17,7 +17,12 @@ export default
       }
     },
     created() {
-      axios.get('http://localhost:8014/hello', {})
+      axios.post('http://localhost:8014/test', {
+          'a' : '1',
+          'b' : '2'
+      },{
+        'Content-Type' : 'application/json',
+      })
         .then(response => {
           // 处理响应结果
           console.log(response.data);
@@ -43,7 +48,7 @@ const _response = "welcome"
 
     <template #heading>Documentation</template>
 
-    <div v-bind:title="responseData">{{ responseData }}</div>
+    <div v-bind:title=responseData>{{ responseData }}</div>
     <a href="https://vuejs.org/" target="_blank" rel="noopener">official documentation</a>
     provides you with all information you need to get started.
   </WelcomeItem>
