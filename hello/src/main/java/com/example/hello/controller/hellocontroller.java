@@ -37,7 +37,6 @@ public class hellocontroller {
             p.setNeed(new LinkedHashMap<>());
             p.setP_id(1000 + i);
             p.setPriority(3);
-            p.setResourceMap(new HashMap<>());
 
             p.setState(P_STATE.ready);
 
