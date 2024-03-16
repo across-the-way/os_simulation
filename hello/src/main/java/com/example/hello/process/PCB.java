@@ -17,7 +17,8 @@ public class PCB {
     public int priority;
 
     // 进程资源分配(设备资源需求,文件资源需求,CPU时间和IO时间需求序列)
-    public Map<String, Integer> resourceMap;
+    public Map<String, Integer> maxresourceMap;
+    public Map<String, Integer> allocateresourceMap;
     public Map<String, Integer> need; // 这里的需求序列应采用有序map,遍历顺序和程序需求序列一致 LinkedHashMap
 
     // 内存分配，包括起始地址和分配空间(连续分配)
@@ -48,14 +49,6 @@ public class PCB {
         this.priority = priority;
     }
 
-    public Map<String, Integer> getResourceMap() {
-        return resourceMap;
-    }
-
-    public void setResourceMap(Map<String, Integer> resourceMap) {
-        this.resourceMap = resourceMap;
-    }
-
     public Map<String, Integer> getNeed() {
         return need;
     }
@@ -70,6 +63,22 @@ public class PCB {
 
     public void setMemory_allocate(int memory_allocate) {
         this.memory_allocate = memory_allocate;
+    }
+
+    public Map<String, Integer> getMaxresourceMap() {
+        return maxresourceMap;
+    }
+
+    public void setMaxresourceMap(Map<String, Integer> maxresourceMap) {
+        this.maxresourceMap = maxresourceMap;
+    }
+
+    public Map<String, Integer> getHoldresourceMap() {
+        return allocateresourceMap;
+    }
+
+    public void setHoldresourceMap(Map<String, Integer> holdresourceMap) {
+        this.allocateresourceMap = holdresourceMap;
     }
 
     public int getMemory_start() {
