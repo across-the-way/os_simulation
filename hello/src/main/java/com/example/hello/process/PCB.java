@@ -19,7 +19,18 @@ public class PCB {
     // 进程资源分配(设备资源需求,文件资源需求,CPU时间和IO时间需求序列)
     public Map<String, Integer> maxresourceMap;
     public Map<String, Integer> allocateresourceMap;
-    public Map<String, Integer> need; // 这里的需求序列应采用有序map,遍历顺序和程序需求序列一致 LinkedHashMap
+    public List<Burst> bursts; // 这里的需求序列应采用有序map,遍历顺序和程序需求序列一致 LinkedHashMap
+
+    // program counter
+    public int pc;
+
+    /*
+     * 等待时间,用于HRRN算法,不一定是int类型
+     * 指的是进程在ready队列中的等待时间
+     */
+    public int waiting_time;
+    // 上一次进入ready队列的时间
+    public int lastready_time;
 
     // 内存分配，包括起始地址和分配空间(连续分配)
     public int memory_allocate;
@@ -47,14 +58,6 @@ public class PCB {
 
     public void setPriority(int priority) {
         this.priority = priority;
-    }
-
-    public Map<String, Integer> getNeed() {
-        return need;
-    }
-
-    public void setNeed(Map<String, Integer> need) {
-        this.need = need;
     }
 
     public int getMemory_allocate() {
