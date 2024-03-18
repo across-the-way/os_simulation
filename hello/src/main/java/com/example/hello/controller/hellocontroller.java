@@ -49,11 +49,6 @@ public class hellocontroller {
         return this.kernel.allProcess.ProcessList;
     }
 
-    @GetMapping("getqueue")
-    public List<PCB> getqueue() {
-        return this.kernel.queue.Waiting_Queue;
-    }
-
     @PostMapping("testfolder")
     public String testFolder(String instruction, String option, String args) {
         if (instruction.equals("mkdir")) {

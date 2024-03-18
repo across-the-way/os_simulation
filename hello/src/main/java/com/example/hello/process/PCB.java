@@ -10,8 +10,10 @@ public class PCB {
     // 进程状态
     public P_STATE state;
 
-    // 进程Pid
+    // 进程Pid / 父进程Pid / 所有子进程Pid
     public int p_id;
+    public int pp_id;
+    public int[] c_id;
 
     // 进程优先级、进程指向调度队列的指针(等后续完善)
     public int priority;
