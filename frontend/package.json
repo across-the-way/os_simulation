@@ -12,6 +12,7 @@
     "axios": "^1.6.7",
     "element-plus": "^2.6.1",
     "vue": "^3.4.15",
+    "vue-router": "^4.3.0",
     "vue-vuecmf-fileexplorer": "^1.7.0"
   },
   "devDependencies": {
