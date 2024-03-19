@@ -7,15 +7,13 @@ import com.example.hello.filesystem.*;
 import java.util.*;
 
 public class Kernel {
-    public ProcessQueue queue;
     public FileSystem fileSystem;
-    public Process allProcess;
+    public Process ProcessController;
     SysConfig sysConfig;
 
     public Kernel() {
         sysConfig = new SysConfig();
-        queue = new ProcessQueue(sysConfig.DeviceNumber);
         fileSystem = new FileSystem();
-        allProcess = new Process();
+        ProcessController = new Process();
     }
 }

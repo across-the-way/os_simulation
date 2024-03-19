@@ -1,5 +1,7 @@
 package com.example.hello.controller;
 
+import java.util.*;
+
 public class SysConfig {
     public enum Dispatch {
         FCFS, SJF, Priority_NonPreemptive, Priority_Preemptive, HRRN, Multilevel
@@ -15,4 +17,7 @@ public class SysConfig {
 
     // 系统中所有设备的数目
     int DeviceNumber;
+
+    // 系统可用资源InitAvailable
+    Map<String, Integer> InitAvailable;
 }

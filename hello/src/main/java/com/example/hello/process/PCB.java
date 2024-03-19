@@ -2,6 +2,8 @@ package com.example.hello.process;
 
 import java.util.*;
 
+import com.example.hello.instrunction.Instruction;
+
 public class PCB {
     public enum P_STATE {
         ready, running, waiting, terminated, swapped_ready
@@ -13,7 +15,7 @@ public class PCB {
     // 进程Pid / 父进程Pid / 所有子进程Pid
     public int p_id;
     public int pp_id;
-    public int[] c_id;
+    public List<Integer> c_id;
 
     // 进程优先级、进程指向调度队列的指针(等后续完善)
     public int priority;
@@ -21,7 +23,8 @@ public class PCB {
     // 进程资源分配(设备资源需求,文件资源需求,CPU时间和IO时间需求序列)
     public Map<String, Integer> maxresourceMap;
     public Map<String, Integer> allocateresourceMap;
-    public List<Burst> bursts; // 这里的需求序列应采用有序map,遍历顺序和程序需求序列一致 LinkedHashMap
+
+    public List<Instruction> bursts; // 这里的需求序列应采用有序map,遍历顺序和程序需求序列一致 LinkedHashMap
 
     // program counter
     public int pc;
@@ -37,6 +40,88 @@ public class PCB {
     // 内存分配，包括起始地址和分配空间(连续分配)
     public int memory_allocate;
     public int memory_start;
+
+    public PCB(List<Instruction> instructions) {
+        state = P_STATE.ready;
+        pc = 0;
+        waiting_time = 0;
+
+        maxresourceMap = new HashMap<>();
+        allocateresourceMap = new HashMap<>();
+        bursts = new ArrayList<Instruction>();
+        c_id = new ArrayList<Integer>();
+
+        for (Instruction instruction : instructions) {
+            switch (instruction.type) {
+                case Instruction.Type.M: {
+                    memory_allocate = instruction.args.process_size;
+                    break;
+                }
+                case Instruction.Type.Y: {
+                    priority = instruction.args.priority_number;
+                    break;
+                }
+                case Instruction.Type.S: {
+                    maxresourceMap.put(instruction.args.resource_name, instruction.args.resource_number);
+                    allocateresourceMap.put(instruction.args.resource_name, 0);
+                    break;
+                }
+                default: {
+                    bursts.add(instruction);
+                    break;
+                }
+
+            }
+        }
+    }
+
+    public int getPp_id() {
+        return pp_id;
+    }
+
+    public void setPp_id(int pp_id) {
+        this.pp_id = pp_id;
+    }
+    
+    public Map<String, Integer> getAllocateresourceMap() {
+        return allocateresourceMap;
+    }
+
+    public void setAllocateresourceMap(Map<String, Integer> allocateresourceMap) {
+        this.allocateresourceMap = allocateresourceMap;
+    }
+
+    public int getPc() {
+        return pc;
+    }
+
+    public void setPc(int pc) {
+        this.pc = pc;
+    }
+
+    public int getWaiting_time() {
+        return waiting_time;
+    }
+
+    public void setWaiting_time(int waiting_time) {
+        this.waiting_time = waiting_time;
+    }
+
+    public List<Integer> getC_id() {
+        return c_id;
+    }
+
+    public void setC_id(List<Integer> c_id) {
+        this.c_id = c_id;
+    }
+
+    public int getLastready_time() {
+        return lastready_time;
+    }
+
+    public void setLastready_time(int lastready_time) {
+        this.lastready_time = lastready_time;
+    }
 
     public P_STATE getState() {
         return state;
@@ -92,5 +177,13 @@ public class PCB {
 
     public void setMemory_start(int memory_start) {
         this.memory_start = memory_start;
+    }
+
+    public List<Instruction> getBursts() {
+        return bursts;
+    }
+
+    public void setBursts(List<Instruction> bursts) {
+        this.bursts = bursts;
     }
 }

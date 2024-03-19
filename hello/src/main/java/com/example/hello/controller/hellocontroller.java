@@ -28,27 +28,6 @@ public class hellocontroller {
         // new CPU(kernel, config).start();
     }
 
-    @GetMapping("/hello")
-    public String hello() {
-        for (int i = 0; i < 10; i++) {
-            PCB p = new PCB();
-            p.setMemory_allocate(30);
-            p.setMemory_start(0);
-            p.setP_id(1000 + i);
-            p.setPriority(3);
-
-            p.setState(P_STATE.ready);
-
-            this.kernel.allProcess.ProcessList.add(p);
-        }
-        return "hello";
-    }
-
-    @GetMapping("get")
-    public List<PCB> getMethodName() {
-        return this.kernel.allProcess.ProcessList;
-    }
-
     @PostMapping("testfolder")
     public String testFolder(String instruction, String option, String args) {
         if (instruction.equals("mkdir")) {

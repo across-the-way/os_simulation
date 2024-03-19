@@ -1,5 +1,6 @@
 package com.example.hello.controller;
 
+import com.example.hello.instrunction.Instruction;
 import com.example.hello.process.*;;
 
 public class CPU extends Thread {
@@ -52,12 +53,12 @@ public class CPU extends Thread {
 
     // 采用FCFS调度进程
     void FCFS() {
-        int size = this.kernel.queue.Ready_Queue.size();
+        int size = this.kernel.ProcessController.queue.Ready_Queue.size();
         // 如果waiting队列不为空,则将第一个进程选为下一个running进程
         if (size > 0) {
 
-            this.kernel.allProcess.Selected_Process = this.kernel.queue.Ready_Queue.getFirst();
-            this.kernel.queue.Ready_Queue.removeFirst();
+            this.kernel.ProcessController.Selected_Process = this.kernel.ProcessController.queue.Ready_Queue.getFirst();
+            this.kernel.ProcessController.queue.Ready_Queue.removeFirst();
         }
     }
 
@@ -81,17 +82,17 @@ public class CPU extends Thread {
 
     // 采用SJF调度进程(非抢占式)
     void SJF() {
-        int size = this.kernel.queue.Ready_Queue.size();
+        int size = this.kernel.ProcessController.queue.Ready_Queue.size();
         // 如果waiting队列不为空,则以SJF策略选择下一个running进程
         if (size > 0) {
             // 计算ready队列中每个进程的剩余CPU执行时间
             Integer[] remain_CPUburst = new Integer[size];
             for (int i = 0; i < size; i++) {
                 int cpu_burst = 0;
-                PCB p = this.kernel.allProcess.ProcessList.get(i);
+                PCB p = this.kernel.ProcessController.ProcessList.get(i);
                 for (int j = p.pc; j < p.bursts.size(); j++) {
-                    if (p.bursts.get(j).isCPUburst()) {
-                        cpu_burst += p.bursts.get(j).time;
+                    if (p.bursts.get(j).type == Instruction.Type.C) {
+                        cpu_burst += p.bursts.get(j).args.cpu_time;
                     }
                 }
                 remain_CPUburst[i] = cpu_burst;
@@ -99,26 +100,28 @@ public class CPU extends Thread {
 
             // 找到CPUburst最小的PCB,更新queue
             int SJF_index = findIndexByMinValue(remain_CPUburst);
-            this.kernel.allProcess.Selected_Process = this.kernel.queue.Ready_Queue.get(SJF_index);
-            this.kernel.queue.Ready_Queue.remove(SJF_index);
+            this.kernel.ProcessController.Selected_Process = this.kernel.ProcessController.queue.Ready_Queue
+                    .get(SJF_index);
+            this.kernel.ProcessController.queue.Ready_Queue.remove(SJF_index);
         }
     }
 
     // 采用非抢占式优先级调度
     void Priority_NonPreemptive() {
-        int size = this.kernel.queue.Ready_Queue.size();
+        int size = this.kernel.ProcessController.queue.Ready_Queue.size();
         // 如果waiting队列不为空,则以SJF策略选择下一个running进程
         if (size > 0) {
             // 将所有process的priority复制到一个数组
             Integer[] processpriority = new Integer[size];
             for (int i = 0; i < size; i++) {
-                processpriority[i] = this.kernel.allProcess.ProcessList.get(i).priority;
+                processpriority[i] = this.kernel.ProcessController.ProcessList.get(i).priority;
             }
 
             // 找到priority最小的PCB,更新queue
             int Pri_Npree_index = findIndexByMinValue(processpriority);
-            this.kernel.allProcess.Selected_Process = this.kernel.queue.Ready_Queue.get(Pri_Npree_index);
-            this.kernel.queue.Ready_Queue.remove(Pri_Npree_index);
+            this.kernel.ProcessController.Selected_Process = this.kernel.ProcessController.queue.Ready_Queue
+                    .get(Pri_Npree_index);
+            this.kernel.ProcessController.queue.Ready_Queue.remove(Pri_Npree_index);
         }
     }
 
@@ -132,17 +135,19 @@ public class CPU extends Thread {
             Priority_NonPreemptive();
         } else {
             // 发生抢占
-            if (this.kernel.queue.Ready_Queue.getLast().priority < this.kernel.allProcess.Selected_Process.priority) {
+            if (this.kernel.ProcessController.queue.Ready_Queue
+                    .getLast().priority < this.kernel.ProcessController.Selected_Process.priority) {
                 // 挂起当前执行的进程(保存现场)
-                this.kernel.allProcess.suspendProcess();
+                this.kernel.ProcessController.suspendProcess();
 
                 // 将当前被抢占的进程加入ready队列
-                this.kernel.queue.Ready_Queue.add(this.kernel.allProcess.Selected_Process);
+                this.kernel.ProcessController.queue.Ready_Queue.add(this.kernel.ProcessController.Selected_Process);
                 // 将抢占的进程设为当前执行的进程
-                this.kernel.allProcess.Selected_Process = this.kernel.queue.Ready_Queue
-                        .get(this.kernel.queue.Ready_Queue.size() - 2);
+                this.kernel.ProcessController.Selected_Process = this.kernel.ProcessController.queue.Ready_Queue
+                        .get(this.kernel.ProcessController.queue.Ready_Queue.size() - 2);
                 // 将抢占的进程从ready队列中移除
-                this.kernel.queue.Ready_Queue.remove(this.kernel.queue.Ready_Queue.size() - 2);
+                this.kernel.ProcessController.queue.Ready_Queue
+                        .remove(this.kernel.ProcessController.queue.Ready_Queue.size() - 2);
             }
 
         }
@@ -151,24 +156,25 @@ public class CPU extends Thread {
 
     // 采用高响应比优先调度
     void HRRN() {
-        int size = this.kernel.queue.Ready_Queue.size();
+        int size = this.kernel.ProcessController.queue.Ready_Queue.size();
         // 如果waiting队列不为空,则以HRRN策略选择下一个running进程
         if (size > 0) {
             Float[] HRRN = new Float[size];
             for (int i = 0; i < size; i++) {
-                PCB p = this.kernel.queue.Ready_Queue.get(i);
+                PCB p = this.kernel.ProcessController.queue.Ready_Queue.get(i);
                 int cpu_burst = 0;
                 for (int j = p.pc; j < p.bursts.size(); j++) {
-                    if (p.bursts.get(j).isCPUburst()) {
-                        cpu_burst += p.bursts.get(j).time;
+                    if (p.bursts.get(j).type == Instruction.Type.C) {
+                        cpu_burst += p.bursts.get(j).args.cpu_time;
                     }
                 }
                 HRRN[i] = (float) p.waiting_time / (float) cpu_burst;
             }
 
             int HRRN_index = findIndexByMaxValue(HRRN);
-            this.kernel.allProcess.Selected_Process = this.kernel.queue.Ready_Queue.get(HRRN_index);
-            this.kernel.queue.Ready_Queue.remove(HRRN_index);
+            this.kernel.ProcessController.Selected_Process = this.kernel.ProcessController.queue.Ready_Queue
+                    .get(HRRN_index);
+            this.kernel.ProcessController.queue.Ready_Queue.remove(HRRN_index);
 
         }
     }
@@ -182,19 +188,20 @@ public class CPU extends Thread {
      */
     void Multilevel(int type) {
         if (type == 1) {
-            int size1 = this.kernel.queue.Ready_Queue.size();
-            int size2 = this.kernel.queue.Second_Queue.size();
+            int size1 = this.kernel.ProcessController.queue.Ready_Queue.size();
+            int size2 = this.kernel.ProcessController.queue.Second_Queue.size();
             if (size1 > 0) {
                 Priority_NonPreemptive();
             } else if (size2 > 0) {
-                this.kernel.allProcess.Selected_Process = this.kernel.queue.Second_Queue.getFirst();
-                this.kernel.queue.Second_Queue.removeFirst();
+                this.kernel.ProcessController.Selected_Process = this.kernel.ProcessController.queue.Second_Queue
+                        .getFirst();
+                this.kernel.ProcessController.queue.Second_Queue.removeFirst();
             }
         } else {
             // 将当前正在进行的进程的执行CPU burst 减少一个timeslice;
 
             // 将当前超时进程加入二级队列尾
-            this.kernel.queue.Second_Queue.add(this.kernel.allProcess.Selected_Process);
+            this.kernel.ProcessController.queue.Second_Queue.add(this.kernel.ProcessController.Selected_Process);
         }
     }
 }
