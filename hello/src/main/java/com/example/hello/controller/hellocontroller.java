@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-
+import com.example.hello.controller.filecommand;
 import java.util.*;
 
 @RestController
@@ -31,18 +31,18 @@ public class hellocontroller {
     }
 
     @PostMapping("testfolder")
-    public String testFolder(String instruction, String option, String args) {
-        if (instruction.equals("mkdir")) {
-            this.sysData.fileSystem.mkdir(args);
-        } else if (instruction.equals("cd")) {
-            boolean res = this.sysData.fileSystem.cd(args);
+    public String testFolder(@RequestBody filecommand filecom) {
+        if (filecom.instruction.equals("mkdir")) {
+            this.kernel.fileSystem.mkdir(filecom.args);
+        } else if (filecom.instruction.equals("cd")) {
+            boolean res = this.kernel.fileSystem.cd(filecom.args);
             if (res == false)
                 return "cd not successful";
 
-        } else if (instruction.equals("touch")) {
-            this.sysData.fileSystem.touch(args);
-        } else if (instruction.equals("rm")) {
-            this.sysData.fileSystem.rm(option, args);
+        } else if (filecom.instruction.equals("touch")) {
+            this.kernel.fileSystem.touch(filecom.args);
+        } else if (filecom.instruction.equals("rm")) {
+            this.kernel.fileSystem.rm(filecom.option, filecom.args);
         }
 
         return this.sysData.fileSystem.workingPath;

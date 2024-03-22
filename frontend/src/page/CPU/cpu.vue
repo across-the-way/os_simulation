@@ -1,8 +1,8 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
+import HelloWorld from '@/components/HelloWorld.vue'
+import TheWelcome from '@/components/TheWelcome.vue'
 import axios from 'axios'
-import { serverURL } from './components/ServerURL'
+import { serverURL } from '@/components/ServerURL'
 
 </script>
 
@@ -32,17 +32,7 @@ export default {
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld v-bind:msg=responseData />
-    </div>
-  </header>
-
-  <main>
-    <TheWelcome />
-  </main>
+   <div v-bind:title="responseData">{{ responseData }}</div>
 </template>
 
 <style scoped>
