@@ -34,21 +34,19 @@ public class hellocontroller {
             PCB p = new PCB();
             p.setMemory_allocate(30);
             p.setMemory_start(0);
-            p.setNeed(new LinkedHashMap<>());
             p.setP_id(1000 + i);
             p.setPriority(3);
 
             p.setState(P_STATE.ready);
 
-            p.need.put("printer", 30);
-            this.kernel.p_list.add(p);
+            this.kernel.allProcess.ProcessList.add(p);
         }
         return "hello";
     }
 
     @GetMapping("get")
     public List<PCB> getMethodName() {
-        return this.kernel.p_list;
+        return this.kernel.allProcess.ProcessList;
     }
 
     @GetMapping("getqueue")
