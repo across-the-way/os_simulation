@@ -1,4 +1,4 @@
-import './assets/main.css'
+import '@/assets/main.css'
 // import VueRouter from 'vue-router';
 import { createApp } from 'vue'
 import App from './cpu.vue'
