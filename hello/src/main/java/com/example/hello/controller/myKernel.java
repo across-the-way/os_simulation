@@ -28,11 +28,16 @@ public class myKernel implements Runnable {
         queue.offer(interrupt);
     }
 
-    private myClock timer = new myClock(instance);
-    private myProcess pm = new myProcess(instance);
-    private myMemory mm = new myMemory(instance);
-    private myFile fs = new myFile(instance);
-    private myDevice io = new myDevice(instance);
+    // private myClock timer = new myClock(getInstance());
+    // private myProcess pm = new myProcess(getInstance());
+    // private myMemory mm = new myMemory(getInstance());
+    // private myFile fs = new myFile(getInstance());
+    // private myDevice io = new myDevice(getInstance());
+    private myClock timer;
+    private myProcess pm;
+    private myMemory mm;
+    private myFile fs;
+    private myDevice io;
     /*
      * 中断处理
      */
@@ -210,6 +215,11 @@ public class myKernel implements Runnable {
 
     @Override
     public void run() {
+        timer = new myClock(getInstance());
+        pm = new myProcess(getInstance());
+        mm = new myMemory(getInstance());
+        fs = new myFile(getInstance());
+        io = new myDevice(getInstance());
         Thread timerThread = new Thread(timer);
         timerThread.start();
 
