@@ -13,74 +13,76 @@ public class Banker {
     public boolean[] checkList;
     public List<PCB> safeList;
 
-    /* public static void main(String[] args) {
-        Map<String, Integer> available = new HashMap<>();
-        available.put("A", 3);
-        available.put("B", 3);
-        available.put("C", 2);
-        List<PCB> pcblist = new ArrayList<>();
-
-        PCB p1 = new PCB();
-        p1.maxresourceMap = new HashMap<>();
-        p1.maxresourceMap.put("A", 7);
-        p1.maxresourceMap.put("B", 5);
-        p1.maxresourceMap.put("C", 3);
-        p1.allocateresourceMap = new HashMap<>();
-        p1.allocateresourceMap.put("A", 0);
-        p1.allocateresourceMap.put("B", 1);
-        p1.allocateresourceMap.put("C", 0);
-        pcblist.add(p1);
-
-        PCB p2 = new PCB();
-        p2.maxresourceMap = new HashMap<>();
-        p2.maxresourceMap.put("A", 3);
-        p2.maxresourceMap.put("B", 2);
-        p2.maxresourceMap.put("C", 2);
-        p2.allocateresourceMap = new HashMap<>();
-        p2.allocateresourceMap.put("A", 2);
-        p2.allocateresourceMap.put("B", 0);
-        p2.allocateresourceMap.put("C", 0);
-        pcblist.add(p2);
-
-        PCB p3 = new PCB();
-        p3.maxresourceMap = new HashMap<>();
-        p3.maxresourceMap.put("A", 9);
-        p3.maxresourceMap.put("B", 0);
-        p3.maxresourceMap.put("C", 2);
-        p3.allocateresourceMap = new HashMap<>();
-        p3.allocateresourceMap.put("A", 3);
-        p3.allocateresourceMap.put("B", 0);
-        p3.allocateresourceMap.put("C", 2);
-        pcblist.add(p3);
-
-        PCB p4 = new PCB();
-        p4.maxresourceMap = new HashMap<>();
-        p4.maxresourceMap.put("A", 2);
-        p4.maxresourceMap.put("B", 2);
-        p4.maxresourceMap.put("C", 2);
-        p4.allocateresourceMap = new HashMap<>();
-        p4.allocateresourceMap.put("A", 2);
-        p4.allocateresourceMap.put("B", 1);
-        p4.allocateresourceMap.put("C", 1);
-        pcblist.add(p4);
-
-        PCB p5 = new PCB();
-        p5.maxresourceMap = new HashMap<>();
-        p5.maxresourceMap.put("A", 4);
-        p5.maxresourceMap.put("B", 3);
-        p5.maxresourceMap.put("C", 3);
-        p5.allocateresourceMap = new HashMap<>();
-        p5.allocateresourceMap.put("A", 0);
-        p5.allocateresourceMap.put("B", 0);
-        p5.allocateresourceMap.put("C", 2);
-        pcblist.add(p5);
-
-        Banker banker = new Banker(pcblist, available);
-        System.out.println(banker.isSafe());
-    } */
+    /*
+     * public static void main(String[] args) {
+     * Map<String, Integer> available = new HashMap<>();
+     * available.put("A", 3);
+     * available.put("B", 3);
+     * available.put("C", 2);
+     * List<PCB> pcblist = new ArrayList<>();
+     * 
+     * PCB p1 = new PCB();
+     * p1.maxresourceMap = new HashMap<>();
+     * p1.maxresourceMap.put("A", 7);
+     * p1.maxresourceMap.put("B", 5);
+     * p1.maxresourceMap.put("C", 3);
+     * p1.allocateresourceMap = new HashMap<>();
+     * p1.allocateresourceMap.put("A", 0);
+     * p1.allocateresourceMap.put("B", 1);
+     * p1.allocateresourceMap.put("C", 0);
+     * pcblist.add(p1);
+     * 
+     * PCB p2 = new PCB();
+     * p2.maxresourceMap = new HashMap<>();
+     * p2.maxresourceMap.put("A", 3);
+     * p2.maxresourceMap.put("B", 2);
+     * p2.maxresourceMap.put("C", 2);
+     * p2.allocateresourceMap = new HashMap<>();
+     * p2.allocateresourceMap.put("A", 2);
+     * p2.allocateresourceMap.put("B", 0);
+     * p2.allocateresourceMap.put("C", 0);
+     * pcblist.add(p2);
+     * 
+     * PCB p3 = new PCB();
+     * p3.maxresourceMap = new HashMap<>();
+     * p3.maxresourceMap.put("A", 9);
+     * p3.maxresourceMap.put("B", 0);
+     * p3.maxresourceMap.put("C", 2);
+     * p3.allocateresourceMap = new HashMap<>();
+     * p3.allocateresourceMap.put("A", 3);
+     * p3.allocateresourceMap.put("B", 0);
+     * p3.allocateresourceMap.put("C", 2);
+     * pcblist.add(p3);
+     * 
+     * PCB p4 = new PCB();
+     * p4.maxresourceMap = new HashMap<>();
+     * p4.maxresourceMap.put("A", 2);
+     * p4.maxresourceMap.put("B", 2);
+     * p4.maxresourceMap.put("C", 2);
+     * p4.allocateresourceMap = new HashMap<>();
+     * p4.allocateresourceMap.put("A", 2);
+     * p4.allocateresourceMap.put("B", 1);
+     * p4.allocateresourceMap.put("C", 1);
+     * pcblist.add(p4);
+     * 
+     * PCB p5 = new PCB();
+     * p5.maxresourceMap = new HashMap<>();
+     * p5.maxresourceMap.put("A", 4);
+     * p5.maxresourceMap.put("B", 3);
+     * p5.maxresourceMap.put("C", 3);
+     * p5.allocateresourceMap = new HashMap<>();
+     * p5.allocateresourceMap.put("A", 0);
+     * p5.allocateresourceMap.put("B", 0);
+     * p5.allocateresourceMap.put("C", 2);
+     * pcblist.add(p5);
+     * 
+     * Banker banker = new Banker(pcblist, available);
+     * System.out.println(banker.isSafe());
+     * }
+     */
 
     @SuppressWarnings("unchecked")
-    Banker(List<PCB> pcblList, Map<String, Integer> available) {
+    public Banker(List<PCB> pcblList, Map<String, Integer> available) {
         this.available = available;
         this.pcblList = pcblList;
         this.safeList = new ArrayList<PCB>();
@@ -98,7 +100,7 @@ public class Banker {
     }
 
     // 银行家算法,检测是否存在一个安全队列
-    boolean isSafe() {
+    public boolean isSafe() {
         boolean flag = true;
         while (flag == true && safeList.size() != pcblList.size()) {
             boolean lessFlag = false;
@@ -130,7 +132,7 @@ public class Banker {
         return flag;
     }
 
-    Map<String, Integer> CalNeed(Map<String, Integer> max, Map<String, Integer> allocate) {
+    public static Map<String, Integer> CalNeed(Map<String, Integer> max, Map<String, Integer> allocate) {
         Map<String, Integer> need = new HashMap<String, Integer>();
         for (String i : max.keySet()) {
             need.put(i, max.get(i) - allocate.get(i));
