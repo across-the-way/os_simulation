@@ -9,6 +9,26 @@ public class myFile {
         this.kernel = kernel;
     }
 
+    public FileSystem fileSystem;
+
+    public class FileTableItem {
+        public int pid;
+        public String path;
+        int fileOpenCounter;
+        public FileTableItem(int pid, String path) {
+            this.pid = pid;
+            this.path = path;
+            this.fileOpenCounter = 1;
+        }
+    }
+
+    public List<FileTableItem> globalFileTable;
+    public List<int> readList; //读队列中保存文件的fd
+    public List<int> writeList; //写队列中保存文件的fd
+
+    public boolean[] diskBlock = new boolean[4096];
+    //private int curHeadPos = 0;//当前磁头位置
+
     private int move_need = 1;// 假设移动一格磁盘块需要一个操作数
     private int rw_need = 2; // 假设读写一格磁盘块需要两个操作数
 
@@ -39,48 +59,66 @@ public class myFile {
                         // 磁盘块对应的任务的剩余磁盘块减一
     }
 
-    public void touch(String parent_name, String file_name) {
-        // 寻找父目录
-
-        // 创建文件
-    }
-
-    public void rm(String parent_name, String file_name) {
-        // 寻找父目录
-
-        // 删除文件
-    }
-
-    public void mkdir(String parent_name, String dir_name) {
-        // 寻找父目录
-
-        // 创建目录
-    }
-
-    public void rmdir(String parent_name, String dir_name) {
-        // 寻找父目录
-
-        // 删除目录
-            // 删除所有
-    }
+    //直接使用FileSystem中的相关函数
+//    public void touch(String parent_name, String file_name) {
+//        // 寻找父目录
+//
+//        // 创建文件
+//    }
+//
+//    public void rm(String parent_name, String file_name) {
+//        // 寻找父目录
+//
+//        // 删除文件
+//    }
+//
+//    public void mkdir(String parent_name, String dir_name) {
+//        // 寻找父目录
+//
+//        // 创建目录
+//    }
+//
+//    public void rmdir(String parent_name, String dir_name) {
+//        // 寻找父目录
+//
+//        // 删除目录
+//            // 删除所有
+//    }
 
     public int open(int pid, String path) {
         int fd = -1;
         // 检查path对应的文件，确定文件号
             // 不在全局的打开文件表中，新建，将文件路径和pid添加到全局的打开文件表
             // 从全局的打开文件表中获得文件号
+        for (int i = 0; i < globalFileTable.size(); i++) {
+            if (globalFileTable.get(i).path.equals(path)) {
+                fd = i;
+                globalFileTable.get(i).fileOpenCounter++;
+                break;
+            }
+        }
+        if (fd = -1) {
+            fd = globalFileTable.size();
+            FileTableItem newfti = new FileTableItem(pid, path);
+            globalFileTable.add(newfti);
+        }
         return fd;
     }
 
-    public void close(int pid, int fd) {
+    public boolean close(int pid, int fd) {
         // 将pid从全局打开文件表中文件号条目移除
         // 检查是否还有进程打开该文件
             // 若无从全局打开文件表移除文件号
+        globalFileTable.get(fd).fileOpenCounter--;
+        if (globalFileTable.get(fd).fileOpenCounter == 0) {
+            globalFileTable.remove(fd);
+        }
+        return true;
     }
 
-    public void write(int pid, int fd, int usage_size) {
+    public boolean write(int pid, int fd, int usage_size) {
         // 加入文件读写待完成表
-
+        writeList.add(fd);
         // 为文件分配空闲磁盘块
 
         // 将所有用到的空闲磁盘块，加入磁盘块读写队列
@@ -88,7 +126,7 @@ public class myFile {
 
     public void read(int pid, int fd, int usage_size) {
         // 加入文件读写待完成表
-
+        readList.add(fd);
         // 将文件对应的所有磁盘块，加入磁盘块读写队列
     }
 
