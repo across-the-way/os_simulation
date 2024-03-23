@@ -8,8 +8,10 @@ public enum SystemCallType {
     FileDelete,
     FileRead,
     FileWrite,
+
     DirNew,
     DirDelete,
+    
     FileOpen,
     FileClose,
     FileFinish,

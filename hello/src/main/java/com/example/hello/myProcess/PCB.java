@@ -2,7 +2,7 @@ package com.example.hello.myProcess;
 
 import java.util.*;
 
-import com.example.hello.myInstrunction.Instruction;
+import com.example.hello.myInstrunction.*;
 
 public class PCB {
     public enum P_STATE {
@@ -42,39 +42,59 @@ public class PCB {
     public int memory_allocate;
     public int memory_start;
 
-    // public PCB(List<Instruction> instructions) {
-    //     state = P_STATE.READY;
-    //     pc = 0;
-    //     waiting_time = 0;
+    // 进程等待的设备队列索引
+    public int waiting_for;
 
-    //     maxresourceMap = new HashMap<>();
-    //     allocateresourceMap = new HashMap<>();
-    //     bursts = new ArrayList<Instruction>();
-    //     c_id = new ArrayList<Integer>();
+    // 文件打开表
+    public List<Integer> FileTable;
 
-    //     for (Instruction instruction : instructions) {
-    //         switch (instruction.type) {
-    //             case Instruction.Type.M: {
-    //                 memory_allocate = instruction.args.process_size;
-    //                 break;
-    //             }
-    //             case Instruction.Type.Y: {
-    //                 priority = instruction.args.priority_number;
-    //                 break;
-    //             }
-    //             case Instruction.Type.S: {
-    //                 maxresourceMap.put(instruction.args.resource_name, instruction.args.resource_number);
-    //                 allocateresourceMap.put(instruction.args.resource_name, 0);
-    //                 break;
-    //             }
-    //             default: {
-    //                 bursts.add(instruction);
-    //                 break;
-    //             }
+    // 创建init进程
+    public PCB() {
+        state = P_STATE.NEW;
+        pc = 0;
+        pp_id = -1;
+        c_id = new ArrayList<>();
+    }
 
-    //         }
-    //     }
-    // }
+    public PCB(Object[] oinstructions) {
+        Instruction[] instructions = (Instruction[]) oinstructions;
+        state = P_STATE.NEW;
+        pc = 0;
+        waiting_time = 0;
+
+        // -1表示没有等待的设备
+        waiting_for = -1;
+
+        maxresourceMap = new HashMap<>();
+        allocateresourceMap = new HashMap<>();
+        bursts = new ArrayList<Instruction>();
+        c_id = new ArrayList<Integer>();
+        FileTable = new ArrayList<Integer>();
+
+        for (Instruction instruction : instructions) {
+            switch (instruction.getType()) {
+                case InstructionType.Memory: {
+                    memory_allocate = (int) instruction.getArguments()[0];
+                    break;
+                }
+                case InstructionType.Priority: {
+                    priority = (int) instruction.getArguments()[0];
+                    break;
+                }
+                // case Instruction.Type.S: {
+                // maxresourceMap.put(instruction.args.resource_name,
+                // instruction.args.resource_number);
+                // allocateresourceMap.put(instruction.args.resource_name, 0);
+                // break;
+                // }
+                default: {
+                    bursts.add(instruction);
+                    break;
+                }
+
+            }
+        }
+    }
 
     public int getPp_id() {
         return pp_id;

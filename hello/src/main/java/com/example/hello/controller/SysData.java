@@ -7,19 +7,15 @@ import java.util.*;
 import java.util.concurrent.Semaphore;
 
 public class SysData {
+    //系统所处状态
     public enum OSState {
         kernel, user
     }
-
-    // public FileSystem fileSystem;
-    // public Process ProcessController;
     SysConfig sysConfig;
     OSState Osmode;
 
     public SysData() {
         sysConfig = new SysConfig();
-        // fileSystem = new FileSystem();
-        // ProcessController = new Process();
         Osmode = OSState.kernel;
     }
 }

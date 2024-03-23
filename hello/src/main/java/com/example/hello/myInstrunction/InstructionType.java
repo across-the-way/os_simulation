@@ -17,13 +17,13 @@ public enum InstructionType {
 
     // 文件系统
     CreateDir, // 参数：父目录路径，目录名
-    CreateFile, // 参数：目录路径，文件名
-    DeleteDir, // 参数：目录路径
-    DeleteFile, // 参数：文件路径
+    CreateFile, // 参数：文件路径，文件名
+    DeleteDir, // 参数：目录路径，目录名
+    DeleteFile, // 参数：文件路径, 文件名
     WriteFile, // 参数：文件号，写入时间
     ReadFile, // 参数：文件号，读取时间
-    OpenFile, // 参数：文件路径
-    CloseFile, // 参数：文件号
+    OpenFile, // 参数：文件路径, 文件名
+    CloseFile, // 参数：文件路径， 文件名
 
     // 设备管理
     Printer,  // 参数：使用时间
