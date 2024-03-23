@@ -1,12 +1,12 @@
-package com.example.hello.process;
+package com.example.hello.myProcess;
 
 import java.util.*;
 
-import com.example.hello.instrunction.Instruction;
+import com.example.hello.myInstrunction.Instruction;
 
 public class PCB {
     public enum P_STATE {
-        ready, running, waiting, terminated, swapped_ready
+        NEW, READY, RUNNING, WAITING, TERMINATED, SWAPPED_READY
     }
 
     // 进程状态
@@ -28,6 +28,7 @@ public class PCB {
 
     // program counter
     public int pc;
+    Instruction ir;
 
     /*
      * 等待时间,用于HRRN算法,不一定是int类型
@@ -41,39 +42,39 @@ public class PCB {
     public int memory_allocate;
     public int memory_start;
 
-    public PCB(List<Instruction> instructions) {
-        state = P_STATE.ready;
-        pc = 0;
-        waiting_time = 0;
+    // public PCB(List<Instruction> instructions) {
+    //     state = P_STATE.READY;
+    //     pc = 0;
+    //     waiting_time = 0;
 
-        maxresourceMap = new HashMap<>();
-        allocateresourceMap = new HashMap<>();
-        bursts = new ArrayList<Instruction>();
-        c_id = new ArrayList<Integer>();
+    //     maxresourceMap = new HashMap<>();
+    //     allocateresourceMap = new HashMap<>();
+    //     bursts = new ArrayList<Instruction>();
+    //     c_id = new ArrayList<Integer>();
 
-        for (Instruction instruction : instructions) {
-            switch (instruction.type) {
-                case Instruction.Type.M: {
-                    memory_allocate = instruction.args.process_size;
-                    break;
-                }
-                case Instruction.Type.Y: {
-                    priority = instruction.args.priority_number;
-                    break;
-                }
-                case Instruction.Type.S: {
-                    maxresourceMap.put(instruction.args.resource_name, instruction.args.resource_number);
-                    allocateresourceMap.put(instruction.args.resource_name, 0);
-                    break;
-                }
-                default: {
-                    bursts.add(instruction);
-                    break;
-                }
+    //     for (Instruction instruction : instructions) {
+    //         switch (instruction.type) {
+    //             case Instruction.Type.M: {
+    //                 memory_allocate = instruction.args.process_size;
+    //                 break;
+    //             }
+    //             case Instruction.Type.Y: {
+    //                 priority = instruction.args.priority_number;
+    //                 break;
+    //             }
+    //             case Instruction.Type.S: {
+    //                 maxresourceMap.put(instruction.args.resource_name, instruction.args.resource_number);
+    //                 allocateresourceMap.put(instruction.args.resource_name, 0);
+    //                 break;
+    //             }
+    //             default: {
+    //                 bursts.add(instruction);
+    //                 break;
+    //             }
 
-            }
-        }
-    }
+    //         }
+    //     }
+    // }
 
     public int getPp_id() {
         return pp_id;
