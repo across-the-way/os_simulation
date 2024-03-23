@@ -74,6 +74,7 @@ public class FileSystem {
 
     public void touch(String fileName) {
         FILE newfFile = new FILE(fileName);
+        newfFile.setParentFolder(this.currentFolder);
         this.currentFolder.childFiles.add(newfFile);
     }
 
