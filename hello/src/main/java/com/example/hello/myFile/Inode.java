@@ -6,7 +6,7 @@ public class Inode {
     private String name;
     private int type;//0为目录，1为文件
     private int imode;//读写权限，0为只读，1为读写
-    private Inode fatherdir;
+
 
     //目录结构
     private HashMap<String, Inode> directoryEntries;//子目录或子文件的指针表
@@ -15,11 +15,10 @@ public class Inode {
     private int startBlock;
     private int blocksize;
 
-    public Inode(String name, int type, int imode,Inode fatherdir) {
+    public Inode(String name, int type, int imode) {
         this.name = name;
         this.type = type;
         this.imode = imode;
-        this.fatherdir=fatherdir;
         if (type == 0) {
             directoryEntries = new HashMap<String, Inode>();
         } else {
@@ -28,8 +27,8 @@ public class Inode {
         }
     }
 
-    public Inode getFatherdir() {
-        return fatherdir;
+    public HashMap<String, Inode> getDirectoryEntries() {
+        return directoryEntries;
     }
 }
 class Ext4{

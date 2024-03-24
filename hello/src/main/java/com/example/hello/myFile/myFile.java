@@ -2,9 +2,9 @@ package com.example.hello.myFile;
 
 import com.example.hello.controller.myKernel;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Queue;
 
 
 public class myFile {
@@ -12,20 +12,19 @@ public class myFile {
 
 
     private boolean[] bitmap;//false代表空闲
-    private HashMap<Integer,OpenFile> filetable;
-    private Inode root;//根目录
+    private OpenFileTable ftable;
+    private final Inode root;//根目录
 
 
     public myFile(myKernel kernel) {
         this.kernel = kernel;
-        for(int i=0;i<bitmap.length;i++)
-        {
-            bitmap[i]=false;
-        }
-        filetable=new HashMap<Integer, OpenFile>();
-        root=new Inode("root",0,1,null);
+        ftable = new OpenFileTable();
+        bitmap = new boolean[1024];
+        Arrays.fill(bitmap, false);
+        root = new Inode("root", 0, 1);
     }
 
+    private Queue<String> rwqueue;
     private int move_need = 1;// 假设移动一格磁盘块需要一个操作数
     private int rw_need = 2; // 假设读写一格磁盘块需要两个操作数
 
@@ -55,45 +54,58 @@ public class myFile {
         // 若能读写
         // 磁盘块对应的任务的剩余磁盘块减一
     }
+
     //以下parent_name是文件绝对地址
     public void touch(String parent_name, String file_name) {
         // 寻找父目录
-
+        Inode fatherDir = findPath(parent_name);
         // 创建文件
+        if (fatherDir != null) {
+            fatherDir.getDirectoryEntries().put(file_name, new Inode(file_name, 1, 1));
+        }
     }
 
     public void rm(String parent_name, String file_name) {
         // 寻找父目录
-
+        Inode fatherDir = findPath(parent_name);
         // 删除文件
 
+        //找打开文件表中是否有该文件的记录
+        //若没有，则
+        if (fatherDir != null) {
+            if (fatherDir.getDirectoryEntries().containsKey(file_name)) {
+                fatherDir.getDirectoryEntries().remove(file_name);
+                System.out.println("删除文件: " + file_name);
+                //删除磁盘中的记录
+            } else {
+                System.out.println("文件未找到: " + file_name);
+            }
+        }
     }
 
     public void mkdir(String parent_name, String dir_name) {
         // 寻找父目录
-
+        Inode fatherDir = findPath(parent_name);
         // 创建目录
+        if (fatherDir != null) {
+            fatherDir.getDirectoryEntries().put(dir_name, new Inode(dir_name, 1, 1));
+        }
     }
 
     public void rmdir(String parent_name, String dir_name) {
         // 寻找父目录
-
+        Inode fatherDir = findPath(parent_name);
         // 删除目录
         // 删除所有
     }
 
     public int open(int pid, String path) {
-        int fd = -1;
-        // 检查path对应的文件，确定文件号
-        // 不在全局的打开文件表中，新建，将文件路径和pid添加到全局的打开文件表
-        // 从全局的打开文件表中获得文件号
-        return fd;
+        //先默认都是读写模式打开
+        return ftable.open(pid, path, 2);
     }
 
     public void close(int pid, int fd) {
-        // 将pid从全局打开文件表中文件号条目移除
-        // 检查是否还有进程打开该文件
-        // 若无从全局打开文件表移除文件号
+        ftable.close(pid, fd);
     }
 
     public void write(int pid, int fd, int usage_size) {
@@ -110,13 +122,31 @@ public class myFile {
         // 将文件对应的所有磁盘块，加入磁盘块读写队列
     }
 
-}
-class OpenFile
-{
-    private String filename;
-    private int opencount;
-    private int start;
-    private int size;
-    private int mode;//0只读，1读写，2创建，3添加
+    public Inode findPath(String path) {
+        if (path == null || path.isEmpty()) {
+            System.out.println("输入路径为空");
+            return null;
+        }
+
+        String[] paths = path.split("/");
+        Inode currentptr;
+
+        if (!paths[0].equals("root")) {
+            System.out.println("输入路径错误");
+            return null;
+        } else {
+            currentptr = root;
+            for (int i = 1; i < paths.length; i++) {
+                Inode nextInode = currentptr.getDirectoryEntries().get(paths[i]);
+//                if (nextInode == null) {
+//                    // 创建该名字的目录
+//                    nextInode = new Inode(paths[i], 0, 1);
+//                    currentptr.getDirectoryEntries().put(paths[i], nextInode);
+//                }
+                currentptr = nextInode;
+            }
+        }
+        return currentptr;
+    }
 
 }
