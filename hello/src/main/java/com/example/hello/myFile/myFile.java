@@ -59,8 +59,16 @@ public class myFile {
     private Inode findInode(String path) {
         String[] fileName = path.split("/");
         Inode curInode = root;
-        for (int i = 0; i < fileName.length; i++) {
+        if (!fileName[0].equals("root")) {
+            //路径错误
+            return null;
+        }
+        for (int i = 1; i < fileName.length; i++) {
             curInode = curInode.findChild(fileName[i]);
+            if (curInode == null) {
+                //路径错误
+                return null;
+            }
         }
         return curInode;
     }
@@ -79,62 +87,73 @@ public class myFile {
             }
         }
     }
+
     //以下parent_name是文件绝对地址
     public void touch(String parent_name, String file_name) {
-        // 寻找父目录
-        Inode fatherDir = findPath(parent_name);
-        Inode curInode = findInode(parent_name);
-        // 创建文件
-        if (fatherDir != null) {
-            fatherDir.getDirectoryEntries().put(file_name, new Inode(file_name, 1, 1));
+        if (parent_name.isEmpty()) {
+            //路径为空触发中断
+            return;
         }
-        Inode newInode = new Inode(file_name, 1, 1, curInode);
-        curInode.insertFileInDir(file_name, newInode);
+        // 寻找父目录
+        Inode pInode = findInode(parent_name);
+        // 创建文件
+        if (pInode == null) {
+            //路径错误触发中断
+            return;
+        }
+        Inode newInode = new Inode(file_name, 1, 1);
+        pInode.insertFileInDir(file_name, newInode);
     }
 
     public void rm(String parent_name, String file_name) {
+        if (parent_name.isEmpty()) {
+            //路径为空触发中断
+            return;
+        }
         // 寻找父目录
         Inode pInode = findInode(parent_name);
-        Inode fatherDir = findPath(parent_name);
         // 删除文件
+        if (pInode == null) {
+            //路径错误触发中断
+            return;
+        }
         pInode.deleteFileInDir(file_name);
         // 释放文件磁盘空间
         freeUp(pInode.findChild(file_name));
-
-        //找打开文件表中是否有该文件的记录
-        //若没有，则
-        if (fatherDir != null) {
-            if (fatherDir.getDirectoryEntries().containsKey(file_name)) {
-                fatherDir.getDirectoryEntries().remove(file_name);
-                System.out.println("删除文件: " + file_name);
-                //删除磁盘中的记录
-            } else {
-                System.out.println("文件未找到: " + file_name);
-            }
-        }
     }
 
     public void mkdir(String parent_name, String dir_name) {
-        // 寻找父目录
-        Inode curInode = findInode(parent_name);
-        Inode fatherDir = findPath(parent_name);
-        // 创建目录
-        Inode newInode = new Inode(dir_name, 0, 0, curInode);
-        curInode.insertFileInDir(dir_name, newInode);
-
-        if (fatherDir != null) {
-            fatherDir.getDirectoryEntries().put(dir_name, new Inode(dir_name, 1, 1));
+        if (parent_name.isEmpty()) {
+            //路径为空触发中断
+            return;
         }
+        // 寻找父目录
+        Inode pInode = findInode(parent_name);
+        // 创建目录
+        if (pInode == null) {
+            //路径错误触发中断
+            return;
+        }
+        Inode newInode = new Inode(dir_name, 0, 0);
+        pInode.insertFileInDir(dir_name, newInode);
     }
 
     public void rmdir(String parent_name, String dir_name) {
+        if (parent_name.isEmpty()) {
+            //路径为空触发中断
+            return;
+        }
         // 寻找父目录
         Inode pInode = findInode(parent_name);
 
 
-        // 归释放文件夹中所有文件的磁盘空间
+
+        if (pInode == null) {
+            //路径错误触发中断
+            return;
+        }
+        // 递归释放文件夹中所有文件的磁盘空间
         freeUp(pInode.findChild(dir_name));
-        Inode fatherDir = findPath(parent_name);
         // 删除目录
         pInode.deleteFileInDir(dir_name);
         // 删除所有
@@ -162,32 +181,4 @@ public class myFile {
 
         // 将文件对应的所有磁盘块，加入磁盘块读写队列
     }
-
-    public Inode findPath(String path) {
-        if (path == null || path.isEmpty()) {
-            System.out.println("输入路径为空");
-            return null;
-        }
-
-        String[] paths = path.split("/");
-        Inode currentptr;
-
-        if (!paths[0].equals("root")) {
-            System.out.println("输入路径错误");
-            return null;
-        } else {
-            currentptr = root;
-            for (int i = 1; i < paths.length; i++) {
-                Inode nextInode = currentptr.getDirectoryEntries().get(paths[i]);
-//                if (nextInode == null) {
-//                    // 创建该名字的目录
-//                    nextInode = new Inode(paths[i], 0, 1);
-//                    currentptr.getDirectoryEntries().put(paths[i], nextInode);
-//                }
-                currentptr = nextInode;
-            }
-        }
-        return currentptr;
-    }
-
 }

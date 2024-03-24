@@ -28,10 +28,6 @@ public class Inode {
         }
     }
 
-    public HashMap<String, Inode> getDirectoryEntries() {
-        return directoryEntries;
-    }
-
     public Inode findChild(String name) {
         return directoryEntries.get(name);
     }
