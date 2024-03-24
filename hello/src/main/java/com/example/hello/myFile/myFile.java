@@ -5,6 +5,7 @@ import com.example.hello.controller.myKernel;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.SplittableRandom;
 
 
 public class myFile {
@@ -18,12 +19,11 @@ public class myFile {
 
     public myFile(myKernel kernel) {
         this.kernel = kernel;
-        for(int i=0;i<bitmap.length;i++)
-        {
+        for(int i = 0; i < bitmap.length; i++) {
             bitmap[i]=false;
         }
-        filetable=new HashMap<Integer, OpenFile>();
-        root=new Inode("root",0,1,null);
+        filetable = new HashMap<Integer, OpenFile>();
+        root = new Inode("root",0,1,null);
     }
 
     private int move_need = 1;// 假设移动一格磁盘块需要一个操作数
@@ -55,30 +55,66 @@ public class myFile {
         // 若能读写
         // 磁盘块对应的任务的剩余磁盘块减一
     }
+
+    private Inode findInode(String path) {
+        String[] fileName = path.split("/");
+        Inode curInode = root;
+        for (int i = 0; i < fileName.length; i++) {
+            curInode = curInode.findChild(fileName[i]);
+        }
+        return curInode;
+    }
+
+    public void freeUp(Inode curInode) {
+        if (curInode.getImode() == 1) {
+            if (curInode.getStartBlock() == -1)
+                return;
+            for (int i = curInode.getStartBlock(); i < curInode.getBlockSize(); i++) {
+                bitmap[i] = false;
+            }
+        } else if (curInode.getImode() == 0) {
+            HashMap<String, Inode> curDir = curInode.getDirectoryEntries();
+            for (Inode i : curDir.values()) {
+                freeUp(i);
+            }
+        }
+    }
     //以下parent_name是文件绝对地址
     public void touch(String parent_name, String file_name) {
         // 寻找父目录
-
+        Inode curInode = findInode(parent_name);
         // 创建文件
+        Inode newInode = new Inode(file_name, 1, 1, curInode);
+        curInode.insertFileInDir(file_name, newInode);
     }
 
     public void rm(String parent_name, String file_name) {
         // 寻找父目录
-
+        Inode pInode = findInode(parent_name);
         // 删除文件
-
+        pInode.deleteFileInDir(file_name);
+        // 释放文件磁盘空间
+        freeUp(pInode.findChild(file_name));
     }
 
     public void mkdir(String parent_name, String dir_name) {
         // 寻找父目录
-
+        Inode curInode = findInode(parent_name);
         // 创建目录
+        Inode newInode = new Inode(dir_name, 0, 0, curInode);
+        curInode.insertFileInDir(dir_name, newInode);
+
     }
 
     public void rmdir(String parent_name, String dir_name) {
         // 寻找父目录
+        Inode pInode = findInode(parent_name);
 
+
+        // 归释放文件夹中所有文件的磁盘空间
+        freeUp(pInode.findChild(dir_name));
         // 删除目录
+        pInode.deleteFileInDir(dir_name);
         // 删除所有
     }
 
