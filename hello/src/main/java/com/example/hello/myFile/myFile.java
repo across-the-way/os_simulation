@@ -1,5 +1,6 @@
 package com.example.hello.myFile;
 
+import com.example.hello.controller.InterruptType;
 import com.example.hello.controller.myKernel;
 
 import java.util.Arrays;
@@ -10,21 +11,30 @@ import java.util.Queue;
 public class myFile {
     private myKernel kernel;
 
-
     private boolean[] bitmap;//false代表空闲
+    private HashMap<Integer, Integer> spaceTable;//空闲块的【起始位置，长度】
     private OpenFileTable ftable;
     private Inode root;//根目录
 
+    public class queueItem {
+        Inode file;
+        int type;  //0为读，1为写
+        int startBlock;
+        int blockSize;
+    }
+
+    private Queue<queueItem> rwqueue;
 
     public myFile(myKernel kernel) {
         this.kernel = kernel;
         ftable = new OpenFileTable();
         bitmap = new boolean[1024];
+        spaceTable = new HashMap<Integer, Integer>();
+        spaceTable.put(0,1024);
         Arrays.fill(bitmap, false);
         root = new Inode("root", 0, 1);
     }
 
-    private Queue<String> rwqueue;
     private int move_need = 1;// 假设移动一格磁盘块需要一个操作数
     private int rw_need = 2; // 假设读写一格磁盘块需要两个操作数
 
@@ -145,8 +155,6 @@ public class myFile {
         }
         // 寻找父目录
         Inode pInode = findInode(parent_name);
-
-
 
         if (pInode == null) {
             //路径错误触发中断
