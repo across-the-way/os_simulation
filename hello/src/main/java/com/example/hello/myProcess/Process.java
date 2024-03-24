@@ -1,10 +1,10 @@
-package com.example.hello.process;
+package com.example.hello.myProcess;
 
 import java.util.List;
 import java.util.Map;
 
-import com.example.hello.instrunction.Instruction;
 import com.example.hello.deadlock.*;
+import com.example.hello.myInstrunction.Instruction;
 
 public class Process {
     // 用pid对应唯一的PCB
@@ -17,28 +17,28 @@ public class Process {
 
     // 创建进程
     public boolean createProcess(List<Instruction> instructions) {
-        // 1.创建PCB,根据指令填入PCB的对应字段(state,pid,priority,memory_allocate,resource_map,bursts)
-        PCB p = new PCB(instructions);
+        // // 1.创建PCB,根据指令填入PCB的对应字段(state,pid,priority,memory_allocate,resource_map,bursts)
+        // PCB p = new PCB(instructions);
 
-        // 2.根据进程占用内存大小采用memory manager分配内存,填充memory_start字段
-        // 2.1根据调用分配内存api的结果,如果分配失败,则进程创建失败,函数返回false
+        // // 2.根据进程占用内存大小采用memory manager分配内存,填充memory_start字段
+        // // 2.1根据调用分配内存api的结果,如果分配失败,则进程创建失败,函数返回false
 
-        // 3.根据进程need资源和当前资源情况判断分配资源给该进程是否会导致死锁
-        // 3.1 如果无法找出一个安全队列,则进程创建失败,函数返回false
-        Map<String, Integer> need = Banker.CalNeed(p.maxresourceMap, p.allocateresourceMap);
-        Map<String, Integer> newavailable = Banker.CalNeed(available, need);
-        Banker banker = new Banker(ProcessList, available);
-        if (banker.isSafe() == false)
-            return false;
-        else
-            available = newavailable;
+        // // 3.根据进程need资源和当前资源情况判断分配资源给该进程是否会导致死锁
+        // // 3.1 如果无法找出一个安全队列,则进程创建失败,函数返回false
+        // Map<String, Integer> need = Banker.CalNeed(p.maxresourceMap, p.allocateresourceMap);
+        // Map<String, Integer> newavailable = Banker.CalNeed(available, need);
+        // Banker banker = new Banker(ProcessList, available);
+        // if (banker.isSafe() == false)
+        //     return false;
+        // else
+        //     available = newavailable;
 
-        // 4.将创建的PCB加入ready队列,更新当前运行的PCB的c_pid，创建的PCB 的pp_id
-        p.p_id = id++;
-        p.pp_id = Selected_Process.p_id;
-        Selected_Process.c_id.add(p.p_id);
-        ProcessMap.put(p.p_id, p);
-        queue.Ready_Queue.add(p);
+        // // 4.将创建的PCB加入ready队列,更新当前运行的PCB的c_pid，创建的PCB 的pp_id
+        // p.p_id = id++;
+        // p.pp_id = Selected_Process.p_id;
+        // Selected_Process.c_id.add(p.p_id);
+        // ProcessMap.put(p.p_id, p);
+        // queue.Ready_Queue.add(p);
 
         return true;
     }

@@ -1,0 +1,28 @@
+package com.example.hello.myInstrunction;
+
+public class Instruction {
+    private InstructionType type;
+    private Object[] arguments;
+
+    public Instruction(InstructionType type, Object... arguments) {
+        this.type = type;
+        this.arguments = arguments;
+    }
+
+    public InstructionType getType() {
+        return type;
+    }
+
+    public Object[] getArguments() {
+        return arguments;
+    }
+
+    public String toString() {
+        StringBuilder args = new StringBuilder();
+        args.append(type.toString());
+        for (Object arg : arguments) {
+            args.append(" ").append(arg.toString());
+        }
+        return args.toString();
+    }
+}

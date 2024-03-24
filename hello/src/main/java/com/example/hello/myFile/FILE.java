@@ -1,4 +1,4 @@
-package com.example.hello.filesystem;
+package com.example.hello.myFile;
 
 public class FILE {
     String name = new String();
