@@ -13,7 +13,7 @@ public class myFile {
 
     private boolean[] bitmap;//false代表空闲
     private OpenFileTable ftable;
-    private final Inode root;//根目录
+    private Inode root;//根目录
 
 
     public myFile(myKernel kernel) {
@@ -55,20 +55,51 @@ public class myFile {
         // 磁盘块对应的任务的剩余磁盘块减一
     }
 
+
+    private Inode findInode(String path) {
+        String[] fileName = path.split("/");
+        Inode curInode = root;
+        for (int i = 0; i < fileName.length; i++) {
+            curInode = curInode.findChild(fileName[i]);
+        }
+        return curInode;
+    }
+
+    public void freeUp(Inode curInode) {
+        if (curInode.getImode() == 1) {
+            if (curInode.getStartBlock() == -1)
+                return;
+            for (int i = curInode.getStartBlock(); i < curInode.getBlockSize(); i++) {
+                bitmap[i] = false;
+            }
+        } else if (curInode.getImode() == 0) {
+            HashMap<String, Inode> curDir = curInode.getDirectoryEntries();
+            for (Inode i : curDir.values()) {
+                freeUp(i);
+            }
+        }
+    }
     //以下parent_name是文件绝对地址
     public void touch(String parent_name, String file_name) {
         // 寻找父目录
         Inode fatherDir = findPath(parent_name);
+        Inode curInode = findInode(parent_name);
         // 创建文件
         if (fatherDir != null) {
             fatherDir.getDirectoryEntries().put(file_name, new Inode(file_name, 1, 1));
         }
+        Inode newInode = new Inode(file_name, 1, 1, curInode);
+        curInode.insertFileInDir(file_name, newInode);
     }
 
     public void rm(String parent_name, String file_name) {
         // 寻找父目录
+        Inode pInode = findInode(parent_name);
         Inode fatherDir = findPath(parent_name);
         // 删除文件
+        pInode.deleteFileInDir(file_name);
+        // 释放文件磁盘空间
+        freeUp(pInode.findChild(file_name));
 
         //找打开文件表中是否有该文件的记录
         //若没有，则
@@ -85,8 +116,12 @@ public class myFile {
 
     public void mkdir(String parent_name, String dir_name) {
         // 寻找父目录
+        Inode curInode = findInode(parent_name);
         Inode fatherDir = findPath(parent_name);
         // 创建目录
+        Inode newInode = new Inode(dir_name, 0, 0, curInode);
+        curInode.insertFileInDir(dir_name, newInode);
+
         if (fatherDir != null) {
             fatherDir.getDirectoryEntries().put(dir_name, new Inode(dir_name, 1, 1));
         }
@@ -94,8 +129,14 @@ public class myFile {
 
     public void rmdir(String parent_name, String dir_name) {
         // 寻找父目录
+        Inode pInode = findInode(parent_name);
+
+
+        // 归释放文件夹中所有文件的磁盘空间
+        freeUp(pInode.findChild(dir_name));
         Inode fatherDir = findPath(parent_name);
         // 删除目录
+        pInode.deleteFileInDir(dir_name);
         // 删除所有
     }
 

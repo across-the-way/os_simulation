@@ -1,5 +1,6 @@
 package com.example.hello.myFile;
 
+import javax.swing.*;
 import java.util.HashMap;
 
 public class Inode {
@@ -13,7 +14,7 @@ public class Inode {
 
     //文件结构
     private int startBlock;
-    private int blocksize;
+    private int blockSize;
 
     public Inode(String name, int type, int imode) {
         this.name = name;
@@ -23,12 +24,40 @@ public class Inode {
             directoryEntries = new HashMap<String, Inode>();
         } else {
             startBlock = -1;//未初始化
-            blocksize = 0;
+            blockSize = 0;
         }
     }
 
     public HashMap<String, Inode> getDirectoryEntries() {
         return directoryEntries;
+    }
+
+    public Inode findChild(String name) {
+        return directoryEntries.get(name);
+    }
+
+    public HashMap<String, Inode> getDirectoryEntries() {
+        return directoryEntries;
+    }
+
+    public void insertFileInDir(String name, Inode child) {
+        directoryEntries.put(name, child);
+    }
+
+    public void deleteFileInDir(String name) {
+        directoryEntries.remove(name);
+    }
+
+    public int getStartBlock() {
+        return startBlock;
+    }
+
+    public int getBlockSize() {
+        return blockSize;
+    }
+
+    public int getImode() {
+        return imode;
     }
 }
 class Ext4{
