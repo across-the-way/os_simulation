@@ -9,8 +9,16 @@ import com.example.hello.myProcess.myProcess;
 
 public class myKernel implements Runnable {
     private static myKernel instance;
+
+    private myClock timer;
+    private myProcess pm;
+    private myMemory mm;
+    private myFile fs;
+    private myDevice io;
+
     private myKernel() {
     }
+
     public static myKernel getInstance() {
         if (instance == null) {
             instance = new myKernel();
@@ -19,26 +27,24 @@ public class myKernel implements Runnable {
     }
 
     private SysData sysData;
+
     public void setConfig(SysData sysData2) {
         this.sysData = sysData2;
     }
-    
+
     ConcurrentLinkedQueue<myInterrupt> queue = new ConcurrentLinkedQueue<>();
+
     public void receiveInterrupt(myInterrupt interrupt) {
         queue.offer(interrupt);
     }
 
-    private myClock timer = new myClock(instance);
-    private myProcess pm = new myProcess(instance);
-    private myMemory mm = new myMemory(instance);
-    private myFile fs = new myFile(instance);
-    private myDevice io = new myDevice(instance);
     /*
      * 中断处理
      */
     private void interruptHandle() {
         while (true) {
-            while (queue.isEmpty());
+            while (queue.isEmpty())
+                ;
             while (!queue.isEmpty()) {
                 myInterrupt interrupt = queue.poll();
                 switch (interrupt.getType()) {
@@ -82,7 +88,7 @@ public class myKernel implements Runnable {
     private void timeout(Object[] objects) {
         pm.schedule();
     }
-        
+
     private void finish(Object[] objects) {
         pm.waitToReady((int) objects[0]);
     }
@@ -145,7 +151,7 @@ public class myKernel implements Runnable {
     private void mkdir(Object[] objects) {
         fs.mkdir(null, null);
     }
-    
+
     private void rmdir(Object[] objects) {
         fs.rmdir(null, null);
     }
@@ -159,6 +165,7 @@ public class myKernel implements Runnable {
             pm.addOpenFile(pid, fd);
         }
     }
+
     private void close(Object[] objects) {
         int pid = 0;
         int fd = -1;
@@ -167,21 +174,24 @@ public class myKernel implements Runnable {
         // 更新系统打开文件表
         fs.close(0, fd);
     }
+
     private void write(Object[] objects) {
         int pid = 0;
         int fd = -1;
         int usage_size = 0;
         fs.write(pid, fd, usage_size);
     }
+
     private void read(Object[] objects) {
         int pid = 0;
         int fd = -1;
         int usage_time = 0;
         fs.read(pid, fd, usage_time);
     }
+
     private void create(Object[] objs) {
 
-        int pid = pm.createPCB();
+        int pid = pm.createPCB(objs);
         if (mm.allocate(pid, 0)) {
             pm.addToLongTermQueue(pid);
         } else {
@@ -210,6 +220,11 @@ public class myKernel implements Runnable {
 
     @Override
     public void run() {
+        timer = new myClock(instance);
+        pm = new myProcess(instance);
+        mm = new myMemory(instance);
+        fs = new myFile(instance);
+        io = new myDevice(instance);
         Thread timerThread = new Thread(timer);
         timerThread.start();
 
