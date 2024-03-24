@@ -1,9 +1,9 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
+import HelloWorld from '@/components/HelloWorld.vue'
+import TheWelcome from '@/components/TheWelcome.vue'
 import axios from 'axios'
-import { serverURL } from './components/ServerURL'
-import routes from './router/routes'
+import { serverURL } from '@/components/ServerURL'
+
 </script>
 
 <script>
@@ -32,17 +32,7 @@ export default {
 </script>
 
 <template>
-  <header>
-    <router-link to="/filesystem">filesystem</router-link>
-    <router-link to="/cpu">index</router-link>
-    <router-link to="/device">index</router-link>
-    
-  </header>
-    
-  <main>
-    <router-view></router-view>
-    <TheWelcome />
-  </main>
+   <div>测试</div>
 </template>
 
 <style scoped>

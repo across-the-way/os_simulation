@@ -48,7 +48,7 @@ public class hellocontroller {
         return this.sysData.fileSystem.workingPath;
     }
 
-    @PostMapping("testls")
+    @GetMapping("testls")
     public List<String> testFolderls() {
 
         return this.sysData.fileSystem.ls();
