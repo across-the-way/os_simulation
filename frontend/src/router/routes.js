@@ -23,5 +23,11 @@ const routes = [
         title: '首页',
         component: () => import('@/components/device.vue'),
     },
+    {
+        path: '/process',
+        name: 'process',
+        title: '进程',
+        component: () => import('@/components/process.vue'),
+    },
 ]
 export default routes

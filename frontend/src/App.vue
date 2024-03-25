@@ -36,6 +36,7 @@ export default {
     <router-link to="/filesystem">filesystem</router-link>
     <router-link to="/cpu">index</router-link>
     <router-link to="/device">index</router-link>
+    <router-link to="/process">process</router-link>
     
   </header>
     
