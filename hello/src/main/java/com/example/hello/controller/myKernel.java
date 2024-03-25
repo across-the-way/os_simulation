@@ -22,6 +22,7 @@ public class myKernel implements Runnable {
         return instance;
     }
 
+    
     private SysData sysData;    //用于进程安全判断，银行家算法
 
     //设置系统配置数据
