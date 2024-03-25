@@ -2,6 +2,9 @@ package com.example.hello.myFile;
 
 import javax.swing.*;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Queue;
 
 public class Inode {
     private String name;
@@ -13,8 +16,9 @@ public class Inode {
     private HashMap<String, Inode> directoryEntries;//子目录或子文件的指针表
 
     //文件结构
-    private int startBlock;
-    private int blockSize;
+//    private int startBlock;
+//    private int blockSize;
+    private LinkedHashMap<Integer, Integer> storage;  //<startBlock, blockSize>
 
     public Inode(String name, int type, int imode) {
         this.name = name;
@@ -23,8 +27,9 @@ public class Inode {
         if (type == 0) {
             directoryEntries = new HashMap<String, Inode>();
         } else {
-            startBlock = -1;//未初始化
-            blockSize = 0;
+//            startBlock = -1;//未初始化
+//            blockSize = 0;
+            storage = new LinkedHashMap<Integer, Integer>();
         }
     }
 
@@ -44,16 +49,27 @@ public class Inode {
         directoryEntries.remove(name);
     }
 
-    public int getStartBlock() {
-        return startBlock;
+//    public int getStartBlock() {
+//        return startBlock;
+//    }
+//
+//    public int getBlockSize() {
+//        return blockSize;
+//    }
+    public void putStorage(int startBlock, int blockSize) {
+        storage.put(startBlock, blockSize);
     }
-
-    public int getBlockSize() {
-        return blockSize;
+    public boolean isStorageEmpty() {
+        return storage.isEmpty();
     }
-
+    public LinkedHashMap<Integer, Integer> getStorage() {
+        return storage;
+    }
     public int getImode() {
         return imode;
+    }
+    public int getType() {
+        return type;
     }
 }
 class Ext4{

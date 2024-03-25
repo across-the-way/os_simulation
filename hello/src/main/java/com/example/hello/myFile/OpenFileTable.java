@@ -76,4 +76,7 @@ public class OpenFileTable {
         return fd;
     }
 
+    public String findInodeByFd(int fd) {
+        return filetable.get(fd).path;
+    }
 }

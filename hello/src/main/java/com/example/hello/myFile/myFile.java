@@ -3,34 +3,62 @@ package com.example.hello.myFile;
 import com.example.hello.controller.InterruptType;
 import com.example.hello.controller.myKernel;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Queue;
+import javax.swing.text.html.parser.Entity;
+import java.util.*;
 
 
 public class myFile {
     private myKernel kernel;
 
     private boolean[] bitmap;//false代表空闲
-    private HashMap<Integer, Integer> spaceTable;//空闲块的【起始位置，长度】
+    private TreeMap<Integer, Integer> spaceTable;//空闲块的【长度,起始位置】
     private OpenFileTable ftable;
     private Inode root;//根目录
 
-    public class queueItem {
+    public class queueEntry {
         Inode file;
         int type;  //0为读，1为写
         int startBlock;
         int blockSize;
+
+        public queueEntry (Inode file, int type, int startBlock, int blockSize) {
+            this.file = file;
+            this.type = type;
+            this.startBlock = startBlock;
+            this.blockSize = blockSize;
+        }
     }
 
-    private Queue<queueItem> rwqueue;
+    private Queue<queueEntry> rwqueue;
+
+    public boolean allocate(Inode file, int fileSize) {
+        if (spaceTable.higherKey(fileSize) == null) {
+            //磁盘空间不足，触发中断
+            return false;
+        } else {
+            Map.Entry<Integer, Integer> entry = spaceTable.higherEntry(fileSize);
+            int newSize = entry.getKey() - fileSize;
+            int newSt = entry.getValue() + fileSize;
+            //更新空闲空间队列
+            spaceTable.remove(entry.getKey());
+            spaceTable.put(newSize, newSt);
+            //更新bitmap
+            Arrays.fill(bitmap, entry.getValue(), entry.getValue() + fileSize, true);
+            //更新Inode的storage
+            file.putStorage(entry.getKey(), fileSize);
+            //加入读写队列
+            rwqueue.offer(new queueEntry(file, 1, entry.getValue(), fileSize));
+            return true;
+        }
+    }
 
     public myFile(myKernel kernel) {
         this.kernel = kernel;
         ftable = new OpenFileTable();
         bitmap = new boolean[1024];
-        spaceTable = new HashMap<Integer, Integer>();
-        spaceTable.put(0,1024);
+        spaceTable = new TreeMap<>();
+        spaceTable.put(1024, 0);
+        rwqueue = new LinkedList<queueEntry>();
         Arrays.fill(bitmap, false);
         root = new Inode("root", 0, 1);
     }
@@ -83,14 +111,43 @@ public class myFile {
         return curInode;
     }
 
-    public void freeUp(Inode curInode) {
-        if (curInode.getImode() == 1) {
-            if (curInode.getStartBlock() == -1)
-                return;
-            for (int i = curInode.getStartBlock(); i < curInode.getBlockSize(); i++) {
-                bitmap[i] = false;
+    // 更新空闲空间表，如果能合并则合并空闲空间
+    public void updateSpaceTable(int start, int size) {
+        int end = start + size;
+        int mergeStart = -1, mergeEnd = -1;
+        int newStart = start, newSize = size;
+        if (start != 0 && !bitmap[start - 1]) {
+            mergeEnd = start;
+        }
+        if (end != 1024 && !bitmap[end]) {
+            mergeStart = end;
+        }
+        if (mergeStart == -1 && mergeEnd == -1) {
+            return;
+        }
+        for (int freeSize : spaceTable.keySet()) {
+            if (spaceTable.get(freeSize) == mergeStart) {
+                newSize += freeSize;
             }
-        } else if (curInode.getImode() == 0) {
+            if (spaceTable.get(freeSize) + freeSize == mergeEnd) {
+                newSize += freeSize;
+                newStart -= freeSize;
+            }
+        }
+    }
+
+    public void freeUp(Inode curInode) {
+        if (curInode.getType() == 1) {
+            if (curInode.isStorageEmpty())
+                return;
+            Iterator<Map.Entry<Integer, Integer>> it = curInode.getStorage().entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry<Integer, Integer> curSpace = it.next();
+                Arrays.fill(bitmap, curSpace.getKey(), curSpace.getKey() + curSpace.getValue(), false);
+                //更新spaceTable
+                updateSpaceTable(curSpace.getKey(), curSpace.getValue());
+            }
+        } else if (curInode.getType() == 0) {
             HashMap<String, Inode> curDir = curInode.getDirectoryEntries();
             for (Inode i : curDir.values()) {
                 freeUp(i);
@@ -177,6 +234,12 @@ public class myFile {
     }
 
     public void write(int pid, int fd, int usage_size) {
+        String path = ftable.findInodeByFd(fd);
+        Inode file = findInode(path);
+        if (file != null) {
+            allocate(file, usage_size);
+        }
+
         // 加入文件读写待完成表
 
         // 为文件分配空闲磁盘块
@@ -185,8 +248,23 @@ public class myFile {
     }
 
     public void read(int pid, int fd, int usage_size) {
+        String path = ftable.findInodeByFd(fd);
+        Inode file = findInode(path);
+        if (file == null)
+            return;
+        // 默认从头读
         // 加入文件读写待完成表
-
         // 将文件对应的所有磁盘块，加入磁盘块读写队列
+        Iterator<Map.Entry<Integer, Integer>> it = file.getStorage().entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<Integer, Integer> curSpace = it.next();
+            if (usage_size <= curSpace.getValue()) {
+                rwqueue.offer(new queueEntry(file, 0, curSpace.getKey(), curSpace.getKey() + usage_size));
+                break;
+            } else {
+                usage_size -= curSpace.getValue();
+                rwqueue.offer(new queueEntry(file, 0, curSpace.getKey(), curSpace.getKey() + curSpace.getValue()));
+            }
+        }
     }
 }
