@@ -1,6 +1,7 @@
 package com.example.hello.myProcess;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,19 +25,29 @@ public class myProcess {
     List<Integer> LongTermQueue;
     private int LongTermCounter;
     private int ShortTermCounter;
+    private int Second_Queue_Threshold;
 
     // ProcessManager模块初始化
     public myProcess(myKernel kernel) {
         this.kernel = kernel;
         next_pid = 0;
         ProcessMap = new HashMap<>();
+        queue = new ProcessQueue();
+        LongTermQueue = new ArrayList<>();
+
         LongTermCounter = 0;
         ShortTermCounter = 0;
+        Second_Queue_Threshold = 1000;
 
         // 创建初始进程
         PCB init = new PCB();
         init.p_id = next_pid++;
         ProcessMap.put(0, init);
+
+        // -1表示一开始没有进程在执行
+        current_pid = -1;
+        // 用于调试
+        strategy = scheduleStrategy.FCFS;
     }
 
     // 向kernel中央模块发送中断请求
@@ -49,12 +60,17 @@ public class myProcess {
         // 模拟长期调度,100个系统时间片执行1次长期调度
         this.LongTermCounter = this.LongTermCounter % 100 + 1;
 
-        if (this.LongTermCounter == 100) {
+        // 到了长期调度时间片或者当前没有进程运行(短期调度端空闲状态)
+        if (this.LongTermCounter == 100 || this.current_pid == -1) {
             int pid = this.getFromLongTermQueue();
             if (pid != -1) {
                 this.newToReady(pid);
             }
         }
+
+        // 动态调整多级队列
+        MLFQ_DynamicAdjust();
+
         // 检查当前是否有进程在运行
         if (this.current_pid == -1) {
             // 若可，从就绪队列中调度出一个进程，尝试切换为运行态
@@ -71,7 +87,7 @@ public class myProcess {
         // 检查当前进程是否已经完成
         if (CheckFinish()) {
             // 若完成,发送中断系统调用ProcessExit
-            this.sendInterrupt(InterruptType.SystemCall, SystemCallType.ProcessExit);
+            this.sendInterrupt(InterruptType.SystemCall, SystemCallType.ProcessExit, this.current_pid);
             // 启动进程调度（短期和长期）,切换进程
             this.current_pid = -1;
             return;
@@ -106,6 +122,7 @@ public class myProcess {
                     p.pc++;
                 }
                 p.ir.ModifyArgument(0, remain_burst);
+                System.out.println("Process" + p.p_id + "is running !CPU burst: remain" + remain_burst + "ms");
                 break;
             // 若指令为文件读写或IO读写
             // 转换当前进程状态从running为waiting，移入等待队列
@@ -189,6 +206,10 @@ public class myProcess {
             case InstructionType.Wait:
                 break;
 
+            case InstructionType.Exit:
+                System.out.println("Process" + p.p_id + " is Exiting safely");
+                p.pc++;
+                break;
             // 若指令非法
             // 发送中断系统调用ProcessExit
             default:
@@ -254,7 +275,9 @@ public class myProcess {
             PCB child = this.ProcessMap.get(p.c_id.get(i));
             child.pp_id = p.pp_id;
         }
-        parent.c_id.remove((Object) pid);
+        if (parent.c_id.contains(pid)) {
+            parent.c_id.remove((Object) pid);
+        }
 
         // 若父进程调用过wait，移入就绪队列(fork 进程间通信)
 
@@ -480,9 +503,26 @@ public class myProcess {
         if (size1 > 0) {
             Priority_NonPreemptive();
         } else if (size2 > 0) {
-            int pid = this.queue.Second_Queue.removeFirst();
+            int pid = this.queue.Second_Queue.removeFirst().getPid();
             this.readyToRunning(pid);
         }
 
+    }
+
+    // 多级队列动态调整
+    void MLFQ_DynamicAdjust() {
+        if (this.strategy != scheduleStrategy.MLFQ) {
+            return;
+        }
+        int size = this.queue.Second_Queue.size();
+        if (size > 0) {
+            for (SecondItem item : this.queue.Second_Queue) {
+                item.setTTL(item.getTTL() + 100);
+                if (item.getTTL() > this.Second_Queue_Threshold) {
+                    this.queue.Ready_Queue.add(item.getPid());
+                    this.queue.Second_Queue.remove(item);
+                }
+            }
+        }
     }
 }

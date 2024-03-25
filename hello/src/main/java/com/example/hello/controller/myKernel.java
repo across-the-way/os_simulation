@@ -1,5 +1,6 @@
 package com.example.hello.controller;
 
+import java.util.Arrays;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.example.hello.myDevice.myDevice;
@@ -46,6 +47,7 @@ public class myKernel implements Runnable {
             while (queue.isEmpty())
                 ;
             while (!queue.isEmpty()) {
+                // System.out.println(queue.size());
                 myInterrupt interrupt = queue.poll();
                 switch (interrupt.getType()) {
                     // 需要对objects具体化，待完善
@@ -100,6 +102,7 @@ public class myKernel implements Runnable {
     private void systemCall(Object[] objects) {
         // 需要对objects具体化，待完善
         SystemCallType type = (SystemCallType) objects[0];
+        objects = Arrays.copyOfRange(objects, 1, objects.length);
         switch (type) {
             case ProcessNew:
                 create(objects);
@@ -192,11 +195,12 @@ public class myKernel implements Runnable {
     private void create(Object[] objs) {
 
         int pid = pm.createPCB(objs);
-        if (mm.allocate(pid, 0)) {
-            pm.addToLongTermQueue(pid);
-        } else {
-            pm.deletePCB(pid);
-        }
+        pm.addToLongTermQueue(pid);
+        // if (mm.allocate(pid, 0)) {
+        // pm.addToLongTermQueue(pid);
+        // } else {
+        // pm.deletePCB(pid);
+        // }
 
     }
 

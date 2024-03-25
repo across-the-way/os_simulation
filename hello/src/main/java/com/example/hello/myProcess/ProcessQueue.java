@@ -8,7 +8,7 @@ public class ProcessQueue {
     // 具体做法是在设备管理器中加入一个Map,key可以是一个设备对象,或者标识一台设备的id;value是设备对应队列的index
     // 例如 deviceMap[Device1] = 2 表示Device1设备对应的waiting队列为 waiting_queues[2]
 
-    /* 
+    /*
      * 映射表：
      * 0 --> Printer
      * 1 --> Keyboard
@@ -18,11 +18,11 @@ public class ProcessQueue {
     public List<List<Integer>> Waiting_Queues;
 
     public List<Integer> Ready_Queue;
-    public List<Integer> Second_Queue;
+    public List<SecondItem> Second_Queue;
     // public List<PCB> Job_Pool;
 
-    public ProcessQueue(int DeviceNumber) {
-        this.Waiting_Queues = new ArrayList<>(DeviceNumber);
+    public ProcessQueue() {
+        this.Waiting_Queues = new ArrayList<>(4);
         this.Ready_Queue = new ArrayList<>();
         this.Second_Queue = new ArrayList<>();
     }
@@ -45,10 +45,36 @@ public class ProcessQueue {
         }
 
         for (int i = 0; i < Second_Queue.size(); i++) {
-            if (Second_Queue.get(i) == pid) {
+            if (Second_Queue.get(i).getPid() == pid) {
                 Second_Queue.remove(i);
                 return;
             }
         }
+    }
+}
+
+class SecondItem {
+    private int pid;
+    private int TTL;
+
+    public SecondItem(int pid) {
+        this.pid = pid;
+        this.TTL = 0;
+    }
+
+    public int getPid() {
+        return pid;
+    }
+
+    public void setPid(int pid) {
+        this.pid = pid;
+    }
+
+    public int getTTL() {
+        return TTL;
+    }
+
+    public void setTTL(int ttl) {
+        this.TTL = ttl;
     }
 }

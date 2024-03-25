@@ -28,7 +28,7 @@ public class myClock implements Runnable {
         try {
             while (true) {
                 Thread.sleep(100); // 模拟时钟脉冲间隔
-                System.out.println("时钟发出第 " + pulseCount + " 次脉冲中断信号。");
+                // System.out.println("时钟发出第 " + pulseCount + " 次脉冲中断信号。");
                 pulseCount++;
 
                 //System.out.println("时钟暂停");
