@@ -8,11 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-<<<<<<< HEAD
-=======
-import com.example.hello.controller.filecommand;
 import com.example.hello.myInstrunction.Instruction;
->>>>>>> 2b99e3b76972ff66f9117e0d18cfb28d9718104c
 import com.example.hello.myProcess.PCB;
 import com.example.hello.myProcess.PCB.P_STATE;
 
