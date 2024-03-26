@@ -57,6 +57,9 @@ class Pages extends Memory {
     public void removePage(int page_num) {
         pages.remove(Integer.valueOf(page_num));
     }
+    public Set<Integer> getPages() {
+        return pages;
+    }
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

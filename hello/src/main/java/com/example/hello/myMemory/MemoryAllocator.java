@@ -1,6 +1,7 @@
 package com.example.hello.myMemory;
 
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,35 +56,6 @@ class ContiguousAllocator extends MemoryAllocator {
 
     @Override
     void release(int pid) {
-        /*Block block = used_memory.get(pid);
-        // 这个实现不好
-        for (int i = 0; i < free_blocks.size(); i++) {
-            Block free_block = free_blocks.get(i);
-            if (free_block.getStart() == block.getEnd() + 1) {
-                free_blocks.get(i).reset(block.getStart(), block.getSize() + free_block.getSize());
-                int last = i - 1;
-                if (last >= 0 && free_blocks.get(last).getEnd() + 1 == free_blocks.get(i).getStart()) {
-                    free_blocks.get(i).reset(free_blocks.get(last).getStart(), free_blocks.get(last).getSize() + free_blocks.get(i).getSize());
-                    free_blocks.remove(last);
-                }
-                break;
-            } else if (free_block.getEnd() + 1 == block.getStart()) {
-                free_blocks.get(i).reset(free_block.getStart(), free_block.getSize() + block.getSize());
-                int next = i + 1;
-                if (next < free_blocks.size() && free_blocks.get(next).getStart() == free_blocks.get(i).getEnd() + 1) {
-                    free_blocks.get(i).reset(free_blocks.get(i).getStart(), free_blocks.get(i).getSize() + free_blocks.get(next).getSize());
-                    free_blocks.remove(next);
-                }
-                break;
-            } else if (free_block.getEnd() < block.getStart()) {
-                free_blocks.add(i, block);
-                break;
-            } else if (free_block.getStart() > block.getEnd()) {
-                free_blocks.add(i, block);
-                break;
-            }
-        }
-        used_memory.remove(pid);*/
         List<Block> new_free_blocks = new ArrayList<>();
         Block block = used_memory.get(pid);
         int start = block.getStart();
@@ -228,6 +200,90 @@ class ContiguousAllocator extends MemoryAllocator {
         allocator.release(1);
         allocator.show();
         allocator.release(2);
+        allocator.show();
+    }
+}
+
+class PageAllocator extends MemoryAllocator{
+    class PageTable {
+        Map<Integer, Pages> used_pages;
+        BitSet free_pages;
+        public PageTable(int page_count) {
+            used_pages = new HashMap<>();
+            free_pages = new BitSet(page_count);
+            free_pages.set(0, page_count, true);
+        }
+        public Pages findFreePages(int page_num) {
+            Pages pages = new Pages(page_num * page_size);
+            int cnt = 0;
+            for (int i = 0; i < free_pages.size(); i++) {
+                if (free_pages.get(i)) {
+                    pages.addPage(i);
+                    cnt++;
+                    if (cnt == page_num) {
+                        return pages;
+                    }
+                }
+            }
+            return null;
+        }
+        public void allocate(int pid, Pages pages) {
+            used_pages.put(pid, pages);
+            for (int page : pages.getPages()) {
+                free_pages.clear(page);
+            }
+        }
+        public void release(int pid) {
+            Pages pages = used_pages.remove(pid);
+            if (pages != null) {
+                for (int page : pages.getPages()) {
+                    free_pages.set(page);
+                }
+            }
+        }
+        @Override
+        public String toString() {
+            return "PageTable: " + used_pages.toString()
+                    + "\nFree pages: " + free_pages.toString();
+        }
+    }
+    private int page_size;
+    private int page_count;
+    private PageTable page_table;
+    public PageAllocator(int total_memory_size, int page_size) {
+        super(total_memory_size);
+        this.page_size = page_size;
+        this.page_count = total_memory_size / page_size;
+        this.page_table = new PageTable(this.page_count);
+    }
+    @Override
+    Pages findFreeSpace(int size) {
+        int page_num = (int) Math.ceil((double) size / page_size);
+        return page_table.findFreePages(page_num);
+    }
+    @Override
+    void allocate(int pid, Memory memory) {
+        page_table.allocate(pid, (Pages)memory);
+    }
+    @Override
+    void release(int pid) {
+        page_table.release(pid);
+    }
+    void show() {
+        System.out.println(page_table);
+    }
+    public static void main(String[] args) {
+        PageAllocator allocator = new PageAllocator(1024, 64);
+        Pages pages1 = allocator.findFreeSpace(64);
+        allocator.allocate(1, pages1);
+        allocator.show();
+        Pages pages2 = allocator.findFreeSpace(164);
+        allocator.allocate(2, pages2);
+        allocator.show();
+        allocator.release(1);
+        allocator.show();
+        Pages pages3 = allocator.findFreeSpace(256);
+        allocator.allocate(3, pages3);
         allocator.show();
     }
 }
