@@ -33,6 +33,10 @@ public class myKernel implements Runnable {
         this.sysData = sysData2;
     }
 
+    public SysData getSysData() {
+        return this.sysData;
+    }
+
     ConcurrentLinkedQueue<myInterrupt> queue = new ConcurrentLinkedQueue<>();
 
     public void receiveInterrupt(myInterrupt interrupt) {
@@ -208,6 +212,8 @@ public class myKernel implements Runnable {
         int pid = (int) objects[0];
         pm.deletePCB(pid);
         mm.release(pid);
+        pm.schedule();
+        System.out.println("Process" + pid + " is Exiting By SystemCall ProcessExit");
     }
 
     private void request(Object[] objects) {

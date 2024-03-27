@@ -14,34 +14,34 @@ export default {
     }
   },
   created() {
-    axios.post(serverURL + '/process', 
+    // axios.post(serverURL + '/process', 
       
-        [{
-        type : 'Memory',
-        arguments: [111],
-        },
-        {
-        type : 'Priority',
-        arguments: [2],
-        },{
-        type : 'Calculate',
-        arguments: [300],
-        },{
-        type : 'Exit',
-        arguments: [],
-        },]
+    //     [{
+    //     type : 'Memory',
+    //     arguments: [111],
+    //     },
+    //     {
+    //     type : 'Priority',
+    //     arguments: [2],
+    //     },{
+    //     type : 'Calculate',
+    //     arguments: [300],
+    //     },{
+    //     type : 'Exit',
+    //     arguments: [],
+    //     },]
       
       
-    )
-      .then(response => {
-        // 处理响应结果
-        console.log(response.data);
-        this.responseData = response.data
-      })
-      .catch(error => {
-        // 处理错误
-        console.error(error);
-      });
+    // )
+    //   .then(response => {
+    //     // 处理响应结果
+    //     console.log(response.data);
+    //     this.responseData = response.data
+    //   })
+    //   .catch(error => {
+    //     // 处理错误
+    //     console.error(error);
+    //   });
   }
 }
 
