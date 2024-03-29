@@ -4,7 +4,8 @@ import com.example.hello.controller.myKernel;
 
 public class myMemory {
     private myKernel kernel;
-    private allocateStrategy strategy;
+    private allocateStrategy strategy = allocateStrategy.FirstFit;
+    private int memory_size = 4096; // 假设内存大小为4096字节，一条指令为4字节
 
     public myMemory(myKernel kernel) {
         this.kernel = kernel;
@@ -13,7 +14,13 @@ public class myMemory {
     public boolean allocate(int pid, int size) {
         // 按照分配方法尝试分配
 
-        // 分配成功，将pid和对应内存区域绑定，按需调页方法默认分配成功
+        // 寻找内存中满足要求空闲空间
+
+        // 若能找到，
+        
+        // 将空闲空间标记为占用，并将pid和对应内存区域绑定
+        
+        // 按需调页方法默认分配成功
 
         return false;
     }
