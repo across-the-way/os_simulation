@@ -17,6 +17,11 @@ public class Instruction {
         return arguments;
     }
 
+    public void ModifyArgument(InstructionType type, Object... arguments){
+        this.type = type;
+        this.arguments = arguments;
+    }
+    
     public void ModifyArgument(int index, Object newArgument) {
         this.arguments[index] = newArgument;
     }

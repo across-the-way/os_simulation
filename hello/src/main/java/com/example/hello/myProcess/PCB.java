@@ -57,6 +57,7 @@ public class PCB {
     }
 
     public PCB(Object[] oinstructions) {
+        Instruction[] instructions = (Instruction[]) oinstructions;
         Instruction[] instructions = (Instruction[]) oinstructions[0];
         state = P_STATE.NEW;
         pc = 0;
