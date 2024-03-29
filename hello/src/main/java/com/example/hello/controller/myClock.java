@@ -2,22 +2,22 @@ package com.example.hello.controller;
 
 public class myClock implements Runnable {
     private myKernel kernel;
-    private int pulseCount;     //记录时钟脉冲次数
-    private boolean paused = false;     //时钟所处状态
+    private int pulseCount;
+    private boolean paused = false;
 
     public myClock(myKernel kernel) {
         this.kernel = kernel;
         this.pulseCount = 0;
     }
-    //发送中断到内核
+
     private void sendInterrupt(InterruptType interrupt) {
         kernel.receiveInterrupt(new myInterrupt(interrupt));
     }
-    //时钟暂停
+
     public synchronized void pause() {
         paused = true;
     }
-    //恢复时钟
+
     public synchronized void resume() {
         paused = false;
         notify();
