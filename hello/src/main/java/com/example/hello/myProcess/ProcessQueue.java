@@ -14,6 +14,8 @@ public class ProcessQueue {
      * 1 --> Keyboard
      * 2 --> FileRead
      * 3 --> FileWrite
+     * 
+     * 5 --> Semaphore
      */
     public List<List<Integer>> Waiting_Queues;
 
@@ -22,7 +24,12 @@ public class ProcessQueue {
     // public List<PCB> Job_Pool;
 
     public ProcessQueue() {
-        this.Waiting_Queues = new ArrayList<>(4);
+        this.Waiting_Queues = new ArrayList<List<Integer>>();
+        for (int i = 0; i < 10; i++) {
+            List<Integer> p = new ArrayList<Integer>();
+            this.Waiting_Queues.add(p);
+        }
+        
         this.Ready_Queue = new ArrayList<>();
         this.Second_Queue = new ArrayList<>();
     }
