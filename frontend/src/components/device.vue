@@ -32,7 +32,7 @@ export default {
 </script>
 
 <template>
-   <div v-bind:title="responseData">{{ responseData }}</div>
+   <div>设备测试</div>
 </template>
 
 <style scoped>

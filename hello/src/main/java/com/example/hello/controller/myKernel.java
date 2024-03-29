@@ -1,5 +1,6 @@
 package com.example.hello.controller;
 
+import java.util.Arrays;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.example.hello.myDevice.myDevice;
@@ -9,6 +10,7 @@ import com.example.hello.myProcess.myProcess;
 
 public class myKernel implements Runnable {
 
+
     private static myKernel instance;   //'myKernel'类的唯一实例
 
     //确保其他类无法直接通过'new'关键字实例化'myKernel'对象
@@ -16,11 +18,25 @@ public class myKernel implements Runnable {
     }
     //用于获取'myKernel'类的唯一实例
     public static myKernel getInstance() {  
+
+    private static myKernel instance;
+
+    private myClock timer;
+    private myProcess pm;
+    private myMemory mm;
+    private myFile fs;
+    private myDevice io;
+
+    private myKernel() {
+    }
+
+    public static myKernel getInstance() {
         if (instance == null) {
             instance = new myKernel();
         }
         return instance;
     }
+
 
     
     private SysData sysData;    //用于进程安全判断，银行家算法
@@ -32,6 +48,18 @@ public class myKernel implements Runnable {
     
     ConcurrentLinkedQueue<myInterrupt> queue = new ConcurrentLinkedQueue<>();   //线程安全，可以被多个线程同时访问
     //将中断添加到中断队列
+    private SysData sysData;
+
+    public void setConfig(SysData sysData2) {
+        this.sysData = sysData2;
+    }
+
+    public SysData getSysData() {
+        return this.sysData;
+    }
+
+    ConcurrentLinkedQueue<myInterrupt> queue = new ConcurrentLinkedQueue<>();
+
     public void receiveInterrupt(myInterrupt interrupt) {
         queue.offer(interrupt);
     }
@@ -43,10 +71,15 @@ public class myKernel implements Runnable {
     private myDevice io;
 
     //中断处理
+    /*
+     * 中断处理
+     */
     private void interruptHandle() {
         while (true) {
-            while (queue.isEmpty());
+            while (queue.isEmpty())
+                ;
             while (!queue.isEmpty()) {
+                // System.out.println(queue.size());
                 myInterrupt interrupt = queue.poll();
                 switch (interrupt.getType()) {
                     // 需要对objects具体化，待完善
@@ -91,7 +124,10 @@ public class myKernel implements Runnable {
     private void timeout(Object[] objects) {
         pm.schedule();
     }
+
     //IO操作完成，重新进入就绪队列
+
+
     private void finish(Object[] objects) {
         pm.waitToReady((int) objects[0]);
     }
@@ -103,6 +139,7 @@ public class myKernel implements Runnable {
     private void systemCall(Object[] objects) {
         // 需要对objects具体化，待完善
         SystemCallType type = (SystemCallType) objects[0];
+        objects = Arrays.copyOfRange(objects, 1, objects.length);
         switch (type) {
             case ProcessNew:
                 create(objects);
@@ -159,6 +196,7 @@ public class myKernel implements Runnable {
     }
     
     //DirDelete     参数1：DirDelete, 参数2：进程pid, 参数3：目录路径， 参数4：目录名
+
     private void rmdir(Object[] objects) {
         fs.rmdir(null, null);
     }
@@ -199,7 +237,6 @@ public class myKernel implements Runnable {
         int usage_time = 0;
         fs.read(pid, fd, usage_time);
     }
-
     //ProcessNew,根据中断发出方与接收方进行调整参数
     private void create(Object[] objs) {
         int pid = pm.createPCB(objs);
@@ -208,6 +245,17 @@ public class myKernel implements Runnable {
         } else {
             pm.deletePCB(pid);
         }
+
+    private void create(Object[] objs) {
+
+        int pid = pm.createPCB(objs);
+        pm.addToLongTermQueue(pid);
+        // if (mm.allocate(pid, 0)) {
+        // pm.addToLongTermQueue(pid);
+        // } else {
+        // pm.deletePCB(pid);
+        // }
+
     }
 
     //ProcessExit     参数1：ProcessExit，参数2：进程pid
@@ -215,6 +263,8 @@ public class myKernel implements Runnable {
         int pid = (int) objects[1];
         pm.deletePCB(pid);
         mm.release(pid);
+        pm.schedule();
+        System.out.println("Process" + pid + " is Exiting By SystemCall ProcessExit");
     }
 
     //IORequest     参数1：IORequest, 参数2：进程pid, 参数3：使用时间
@@ -233,11 +283,11 @@ public class myKernel implements Runnable {
 
     @Override
     public void run() {
-        timer = new myClock(getInstance());
-        pm = new myProcess(getInstance());
-        mm = new myMemory(getInstance());
-        fs = new myFile(getInstance());
-        io = new myDevice(getInstance());
+        timer = new myClock(instance);
+        pm = new myProcess(instance);
+        mm = new myMemory(instance);
+        fs = new myFile(instance);
+        io = new myDevice(instance);
         Thread timerThread = new Thread(timer);
         timerThread.start();
 

@@ -1,6 +1,7 @@
 package com.example.hello.myProcess;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,6 +25,9 @@ public class myProcess {
     List<Integer> LongTermQueue;
     private int LongTermCounter;
     private int ShortTermCounter;
+    private int Second_Queue_Threshold;
+
+    Map<String, mySemaphore> SemaphoreMap;
 
     // ProcessManager模块初始化
     public myProcess(myKernel kernel) {
@@ -32,11 +36,23 @@ public class myProcess {
         ProcessMap = new HashMap<>();
         LongTermCounter = 0;
         ShortTermCounter = 0;
+        queue = new ProcessQueue();
+        LongTermQueue = new ArrayList<>();
+        SemaphoreMap = new HashMap<>();
+
+        LongTermCounter = 0;
+        ShortTermCounter = 0;
+        Second_Queue_Threshold = this.kernel.getSysData().Second_Queue_Threshold;
 
         // 创建初始进程
         PCB init = new PCB();
         init.p_id = next_pid++;
         ProcessMap.put(0, init);
+
+        // -1表示一开始没有进程在执行
+        current_pid = -1;
+        // 用于调试
+        strategy = this.kernel.getSysData().CPUstrategy;
     }
 
     // 向kernel中央模块发送中断请求
@@ -63,11 +79,39 @@ public class myProcess {
         else if (this.current_pid == -1) {
             // 若可，从就绪队列中调度出一个进程，尝试切换为运行态
             this.schedule();
+        // 模拟长期调度,100个系统时间片执行1次长期调度
+        this.LongTermCounter = this.LongTermCounter % this.kernel.getSysData().LongTermScale + 1;
+
+        // 到了长期调度时间片或者当前系统负载没有达到设定阈值下限
+        if (this.LongTermCounter == this.kernel.getSysData().LongTermScale
+                || this.getLoad() < this.kernel.getSysData().LongTerm_FloorThreshold) {
+            // 直到长期队列为空或者系统负载到达阈值上限之前增加负载
+            while (this.LongTermQueue.size() > 0 && this.getLoad() < this.kernel.getSysData().LongTerm_CeilThreshold) {
+                int pid = this.getFromLongTermQueue();
+                if (pid != -1) {
+                    this.newToReady(pid);
+                }
+            }
+        }
+
+        System.out.println("Loading Process Number:" + this.getLoad());
+
+        // 信号量表的定期更新
+        Semaphore_update();
+
+        // 从就绪队列中调度出一个进程，尝试切换为运行态
+        this.schedule();
+        // 若无或无法，返回
+        if (this.current_pid == -1) {
+            return;
         }
 
         // 模拟当前进程运行
         processRunning();
-    
+
+        // 动态调整多级队列
+        MLFQ_DynamicAdjust();
+
         // 检查当前进程是否已经完成
         if (CheckFinish()) {
             // 若完成,发送中断系统调用ProcessExit
@@ -89,11 +133,14 @@ public class myProcess {
         // 若PC值超限，发送中断PageFault
         if (kernel.isPageFault(this.current_pid, p.pc)) {
             this.sendInterrupt(InterruptType.PageFault, this.current_pid, p.pc);
+            this.sendInterrupt(InterruptType.PageFault);
             return;
         }
 
         // 读取PC更新IR，并更新PC
         p.ir = p.bursts.get(p.pc);
+        int instruction_index = (p.pc - p.memory_start) / this.kernel.getSysData().InstructionLength;
+        p.ir = p.bursts.get(instruction_index);
 
         // 根据IR当前指令，推进当前进程
 
@@ -106,6 +153,13 @@ public class myProcess {
                     p.pc++;
                 }
                 p.ir.ModifyArgument(InstructionType.Calculate, remain_burst);
+                int remain_burst = (int) p.ir.getArguments()[0] - this.kernel.getSysData().SystemPulse;
+                if (remain_burst <= 0) {
+                    remain_burst = 0;
+                    p.pc += this.kernel.getSysData().InstructionLength;
+                }
+                p.ir.ModifyArgument(0, remain_burst);
+                System.out.println("Process" + p.p_id + "is running !CPU burst: remain" + remain_burst + "ms");
                 break;
             // 若指令为文件读写或IO读写
             // 转换当前进程状态从running为waiting，移入等待队列
@@ -125,12 +179,14 @@ public class myProcess {
                 this.RunningtoWaiting(2);
                 int fd1 = this.ProcessMap.get(p.p_id).FileTable.get(0);
                 this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileRead, p.p_id, fd1,  p.ir.getArguments()[0]);
+                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileRead, p.p_id, p.ir.getArguments()[0]);
                 this.schedule();
                 break;
             case InstructionType.WriteFile:
                 this.RunningtoWaiting(3);
                 int fd2 = this.ProcessMap.get(p.p_id).FileTable.get(0);
                 this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileWrite, p.p_id, fd2,  p.ir.getArguments()[0]);
+                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileWrite, p.p_id, p.ir.getArguments()[0]);
                 this.schedule();
                 break;
 
@@ -163,12 +219,14 @@ public class myProcess {
             case InstructionType.OpenFile:
                 this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileOpen, p.p_id, p.ir.getArguments()[0], 
                         p.ir.getArguments()[1]);
+                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileOpen, p.p_id, p.ir.getArguments()[0]);
                 this.RunningtoReady();
                 this.schedule();
                 break;
             case InstructionType.CloseFile:
                 this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileClose, p.p_id, p.ir.getArguments()[0],
                         p.ir.getArguments()[1]);
+                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileClose, p.p_id, p.ir.getArguments()[0]);
                 this.RunningtoReady();
                 this.schedule();
                 break;
@@ -180,6 +238,15 @@ public class myProcess {
             case InstructionType.CondWait:
                 break;
             case InstructionType.CondSignal:
+                mySemaphore semaphore = new mySemaphore((String) p.ir.getArguments()[0], (int) p.ir.getArguments()[1]);
+                this.SemaphoreMap.put(semaphore.name, semaphore);
+                p.pc += this.kernel.getSysData().InstructionLength;
+                break;
+            case InstructionType.CondWait:
+                Semaphore_Wait(p.p_id);
+                break;
+            case InstructionType.CondSignal:
+                Semaphore_Signal(p.p_id);
                 break;
 
             // 若指令为fork
@@ -197,6 +264,14 @@ public class myProcess {
             // 发送中断系统调用ProcessExit
             default:
                 this.sendInterrupt(InterruptType.SystemCall, SystemCallType.ProcessExit, this.current_pid);
+            case InstructionType.Exit:
+                System.out.println("Process" + p.p_id + " is Exiting safely");
+                p.pc += this.kernel.getSysData().InstructionLength;
+                break;
+            // 若指令非法
+            // 发送中断系统调用ProcessExit
+            default:
+                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.ProcessExit);
         }
 
     }
@@ -205,6 +280,11 @@ public class myProcess {
     private boolean CheckFinish() {
         PCB p = this.ProcessMap.get(this.current_pid);
         if (p.pc >= p.bursts.size()) {
+        // 由于进程终止中断导致当前current_pid=-1
+        if (p == null) {
+            return false;
+        }
+        if ((p.pc - p.memory_start) / this.kernel.getSysData().InstructionLength >= p.bursts.size()) {
             return true;
         } else
             return false;
@@ -259,6 +339,9 @@ public class myProcess {
             child.pp_id = p.pp_id;
         }
         parent.c_id.remove((Object) pid);
+        if (parent.c_id.contains(pid)) {
+            parent.c_id.remove((Object) pid);
+        }
 
         // 若父进程调用过wait，移入就绪队列(fork 进程间通信)
 
@@ -285,6 +368,7 @@ public class myProcess {
         } else {
             int pid = this.LongTermQueue.get(0);
             this.LongTermQueue.remove(0);
+            int pid = this.LongTermQueue.removeFirst();
             return pid;
         }
     }
@@ -294,6 +378,30 @@ public class myProcess {
         switch (this.strategy) {
             case scheduleStrategy.RR:
                 RR();
+    // 获得当前CPU短期调度负载数
+    int getLoad() {
+        int load = 0;
+        if (this.current_pid != -1)
+            load++;
+        load += this.queue.Ready_Queue.size();
+        for (List<Integer> waiting_queue : this.queue.Waiting_Queues) {
+            load += waiting_queue.size();
+        }
+        if (this.strategy == scheduleStrategy.MLFQ) {
+            load += this.queue.Second_Queue.size();
+        }
+        return load;
+    }
+
+    // 模拟CPU调度
+    public void schedule() {
+        // 当前有进程在执行,保存现场
+        if (this.current_pid != -1) {
+            this.RunningtoReady();
+        }
+        switch (this.strategy) {
+            case scheduleStrategy.RR:
+                FCFS();
                 break;
             case scheduleStrategy.FCFS:
                 FCFS();
@@ -380,6 +488,37 @@ public class myProcess {
         this.current_pid = -1;
     }
 
+    // 将运行的进程转换到WAIT状态，并加入相应的Waiting队列
+    public void RunningtoWaiting(int waiting_for) {
+        PCB p = this.ProcessMap.get(this.current_pid);
+        if (p != null) {
+            p.state = P_STATE.WAITING;
+            p.waiting_for = waiting_for;
+            this.queue.Waiting_Queues.get(waiting_for).add(p.p_id);
+            this.current_pid = -1;
+        }
+    }
+
+    // 将运行的进程转换为READY状态，并加入相应的Ready队列
+    public void RunningtoReady() {
+        PCB p = this.ProcessMap.get(this.current_pid);
+        if (p != null) {
+            p.state = P_STATE.READY;
+            this.queue.Ready_Queue.add(p.p_id);
+            this.current_pid = -1;
+        }
+    }
+
+    // 将运行的进程转换为READY状态.并加入二级Ready队列
+    public void RunningtoSecondReady() {
+        PCB p = this.ProcessMap.get(this.current_pid);
+        if (p != null) {
+            p.state = P_STATE.READY;
+            this.queue.Second_Queue.add(new SecondItem(this.current_pid));
+            this.current_pid = -1;
+        }
+    }
+
     /*
      * 文件打开表模块
      */
@@ -436,6 +575,8 @@ public class myProcess {
         if (size > 0) {
             int pid = this.queue.Ready_Queue.get(0);
             this.queue.Ready_Queue.remove(0);
+            int pid = this.queue.Ready_Queue.getFirst();
+            this.queue.Ready_Queue.removeFirst();
             this.readyToRunning(pid);
         }
     }
@@ -449,6 +590,9 @@ public class myProcess {
             Integer[] remain_CPUburst = new Integer[this.current_pid];
             for (int i : remain_CPUburst) {
                 i = 10000;
+            Integer[] remain_CPUburst = new Integer[this.next_pid];
+            for (int i = 0; i < this.next_pid; i++) {
+                remain_CPUburst[i] = 10000;
             }
             for (PCB p : ProcessMap.values()) {
                 if (p.p_id == 0)
@@ -481,6 +625,12 @@ public class myProcess {
             }
             for (PCB p : ProcessMap.values()) {
                 if (p.p_id != 0)
+            Integer[] processpriority = new Integer[this.next_pid];
+            for (int i = 0; i < this.next_pid; i++) {
+                processpriority[i] = 10000;
+            }
+            for (PCB p : ProcessMap.values()) {
+                if (p.p_id != 0 && this.queue.Ready_Queue.contains(p.p_id))
                     processpriority[p.p_id] = p.priority;
             }
 
@@ -500,6 +650,106 @@ public class myProcess {
         } else if (size2 > 0) {
             int pid = this.queue.Second_Queue.remove(0);
             this.readyToRunning(pid);
+        }
+
+            int pid = this.queue.Second_Queue.removeFirst().getPid();
+            this.readyToRunning(pid);
+        }
+
+    }
+
+    // 多级队列动态调整
+    void MLFQ_DynamicAdjust() {
+        if (this.strategy != scheduleStrategy.MLFQ) {
+            return;
+        }
+
+        int size = this.queue.Second_Queue.size();
+        if (size > 0) {
+            // 防止二级队列的进程饿死
+            for (SecondItem item : this.queue.Second_Queue) {
+                item.setTTL(item.getTTL() + 100);
+                if (item.getTTL() > this.Second_Queue_Threshold) {
+                    this.queue.Ready_Queue.add(item.getPid());
+                    this.queue.Second_Queue.remove(item);
+                }
+            }
+        }
+
+        if (this.current_pid != -1) {
+            PCB p = this.ProcessMap.get(this.current_pid);
+            int index = (p.pc - p.memory_start) / this.kernel.getSysData().InstructionLength;
+            // 如果时间片用完后该进程只剩下Exit命令或者没有命令,则不会调整到二级队列
+            if (index < p.bursts.size() - 1) {
+                // 将当前进程调整到二级队列
+                this.RunningtoSecondReady();
+            }
+        }
+
+    }
+
+    /*
+     * 信号量wait和signal命令封装
+     */
+
+    void Semaphore_Wait(int pid) {
+        PCB p = this.ProcessMap.get(pid);
+        Instruction ir = p.ir;
+
+        if (!this.SemaphoreMap.containsKey((String) ir.getArguments()[0])) {
+            // 该进程wait一个不存在的信号量
+            this.sendInterrupt(InterruptType.SystemCall, SystemCallType.ProcessExit, pid);
+            this.current_pid = -1;
+            return;
+        }
+
+        if (this.SemaphoreMap.get((String) ir.getArguments()[0]).wait(pid)) {
+            p.pc += this.kernel.getSysData().InstructionLength;
+        } else {
+            // wait 返回false 说明该信号量资源<0,无法分配,所以该进程进入等待状态
+            this.RunningtoWaiting(5);
+            this.schedule();
+        }
+    }
+
+    void Semaphore_Signal(int pid) {
+        PCB p = this.ProcessMap.get(pid);
+        Instruction ir = p.ir;
+
+        if (!this.SemaphoreMap.containsKey((String) ir.getArguments()[0])) {
+            // 该进程wait一个不存在的信号量
+            this.sendInterrupt(InterruptType.SystemCall, SystemCallType.ProcessExit, pid);
+            this.current_pid = -1;
+            return;
+        }
+
+        if (this.SemaphoreMap.get((String) ir.getArguments()[0]).signal(pid)) {
+            p.pc += this.kernel.getSysData().InstructionLength;
+        } else {
+            // signal 返回false 说明该进程之前没有wait该信号量,处理方式为非法访问,直接结束该进程
+            this.sendInterrupt(InterruptType.SystemCall, SystemCallType.ProcessExit, pid);
+            this.current_pid = -1;
+        }
+    }
+
+    void Semaphore_update() {
+
+        for (mySemaphore semaphore : this.SemaphoreMap.values()) {
+            // 清空没有引用的semaphore
+            if (semaphore.isClear()) {
+                this.SemaphoreMap.remove(semaphore.name);
+                continue;
+            }
+
+            // 对于有资源的semaphore,唤醒wait的进程
+            if (semaphore.resource >= 0) {
+                int pid = semaphore.WakeProcess();
+                if (pid != -1)
+                    this.waitToReady(pid);
+            }
+
+            semaphore.ttl--;
+
         }
 
     }

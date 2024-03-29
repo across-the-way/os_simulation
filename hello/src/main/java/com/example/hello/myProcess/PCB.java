@@ -58,6 +58,7 @@ public class PCB {
 
     public PCB(Object[] oinstructions) {
         Instruction[] instructions = (Instruction[]) oinstructions;
+        Instruction[] instructions = (Instruction[]) oinstructions[0];
         state = P_STATE.NEW;
         pc = 0;
         waiting_time = 0;
@@ -103,7 +104,7 @@ public class PCB {
     public void setPp_id(int pp_id) {
         this.pp_id = pp_id;
     }
-    
+
     public Map<String, Integer> getAllocateresourceMap() {
         return allocateresourceMap;
     }

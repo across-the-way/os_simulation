@@ -22,6 +22,10 @@ public class Instruction {
         this.arguments = arguments;
     }
     
+    public void ModifyArgument(int index, Object newArgument) {
+        this.arguments[index] = newArgument;
+    }
+
     public String toString() {
         StringBuilder args = new StringBuilder();
         args.append(type.toString());

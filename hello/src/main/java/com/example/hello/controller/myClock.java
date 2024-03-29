@@ -27,11 +27,11 @@ public class myClock implements Runnable {
     public void run() {
         try {
             while (true) {
-                Thread.sleep(100); // 模拟时钟脉冲间隔
-                System.out.println("时钟发出第 " + pulseCount + " 次脉冲中断信号。");
+                Thread.sleep(this.kernel.getSysData().SystemPulse); // 模拟时钟脉冲间隔
+                // System.out.println("时钟发出第 " + pulseCount + " 次脉冲中断信号。");
                 pulseCount++;
 
-                //System.out.println("时钟暂停");
+                // System.out.println("时钟暂停");
                 pause();
 
                 sendInterrupt(InterruptType.TimerInterrupt);
@@ -40,7 +40,7 @@ public class myClock implements Runnable {
                         wait();
                     }
                 }
-                //System.out.println("时钟恢复");
+                // System.out.println("时钟恢复");
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
