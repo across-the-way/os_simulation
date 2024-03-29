@@ -20,12 +20,14 @@ public class myFile {
         int type;  //0为读，1为写
         int startBlock;
         int blockSize;
+        int isFinished;
 
-        public queueEntry (Inode file, int type, int startBlock, int blockSize) {
+        public queueEntry (Inode file, int type, int startBlock, int blockSize, int isFinished) {
             this.file = file;
             this.type = type;
             this.startBlock = startBlock;
             this.blockSize = blockSize;
+            this.isFinished = isFinished;
         }
     }
 
@@ -47,7 +49,7 @@ public class myFile {
             //更新Inode的storage
             file.putStorage(entry.getKey(), fileSize);
             //加入读写队列
-            rwqueue.offer(new queueEntry(file, 1, entry.getValue(), fileSize));
+            rwqueue.offer(new queueEntry(file, 1, entry.getValue(), fileSize, 1));
             return true;
         }
     }
@@ -259,11 +261,11 @@ public class myFile {
         while (it.hasNext()) {
             Map.Entry<Integer, Integer> curSpace = it.next();
             if (usage_size <= curSpace.getValue()) {
-                rwqueue.offer(new queueEntry(file, 0, curSpace.getKey(), curSpace.getKey() + usage_size));
+                rwqueue.offer(new queueEntry(file, 0, curSpace.getKey(), curSpace.getKey() + usage_size, 1));
                 break;
             } else {
                 usage_size -= curSpace.getValue();
-                rwqueue.offer(new queueEntry(file, 0, curSpace.getKey(), curSpace.getKey() + curSpace.getValue()));
+                rwqueue.offer(new queueEntry(file, 0, curSpace.getKey(), curSpace.getKey() + curSpace.getValue(), 0));
             }
         }
     }
