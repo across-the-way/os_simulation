@@ -15,23 +15,7 @@ export default {
   },
   created() {
     axios.post(serverURL + '/process', 
-      
-        [{
-        type : 'Memory',
-        arguments: [111],
-        },
-        {
-        type : 'Priority',
-        arguments: [2],
-        },{
-        type : 'Calculate',
-        arguments: [300],
-        },{
-        type : 'Exit',
-        arguments: [],
-        },]
-      
-      
+       {} 
     )
       .then(response => {
         // 处理响应结果

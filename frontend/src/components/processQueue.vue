@@ -10,9 +10,11 @@ export default {
     data() {
         return {
             instructions: [],//指令队列
-            FormData: ''//待处理的指令队列
+            FormData: '',//待处理的指令队列
+            responseData: [],
         };
     },
+
     methods: {
         handleSubmit() {
             this.formData.split('\n').forEach((item) => {
@@ -44,8 +46,20 @@ export default {
                     console.error(error);
                 });
             this.instructions = []
+        },
+        fetchData() {
+            axios.get(serverURL + '/process/status')
+                .then(response => {
+                    this.response = response.data; // 更新响应数据
+                })
+                .catch(error => {
+                    console.error(error);
+                });
         }
 
+    },
+    mounted() {
+        setInterval(this.fetchData, 1000); // 每秒发送请求
     }
     // updated() {
     //     axios.post(serverURL + '/process/instructions',this.formData)
@@ -66,10 +80,12 @@ export default {
         <form @submit.prevent="handleSubmit">
             <label for="name">Name:</label>
             <br>
-            <!-- <input  required> -->
-            <el-input v-model="formData" style="width: 240px" :rows="2" type="textarea" placeholder="Please input" />
-            <!-- <textarea type="text" id="name" v-model="formData" required></textarea> -->
-            <div class="md4"><el-button type="primary" round>submit</el-button></div>
+            <el-text class="mx-1">Default</el-text>
+            <el-text class="mx-1" type="primary">Primary</el-text>
+            <el-text class="mx-1" type="success">Success</el-text>
+            <el-text class="mx-1" type="info">Info</el-text>
+            <el-text class="mx-1" type="warning">Warning</el-text>
+            <el-text class="mx-1" type="danger">Danger</el-text>
 
             <br>
         </form>

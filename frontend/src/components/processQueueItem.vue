@@ -66,10 +66,7 @@ export default {
         <form @submit.prevent="handleSubmit">
             <label for="name">Name:</label>
             <br>
-            <!-- <input  required> -->
-            <el-input v-model="formData" style="width: 240px" :rows="2" type="textarea" placeholder="Please input" />
-            <!-- <textarea type="text" id="name" v-model="formData" required></textarea> -->
-            <div class="md4"><el-button type="primary" round>submit</el-button></div>
+            
 
             <br>
         </form>
