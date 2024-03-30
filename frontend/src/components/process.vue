@@ -3,6 +3,7 @@ import HelloWorld from '@/components/HelloWorld.vue'
 import TheWelcome from '@/components/TheWelcome.vue'
 import axios from 'axios'
 import { serverURL } from '@/components/ServerURL'
+import { ref } from 'vue'
 
 </script>
 <script>
@@ -10,11 +11,12 @@ export default {
     data() {
         return {
             instructions: [],//指令队列
-            FormData: ''//待处理的指令队列
+            formData: ''//待处理的指令队列
         };
     },
     methods: {
         handleSubmit() {
+            console.log(this.formData)
             this.formData.split('\n').forEach((item) => {
                 let tempdir = { type: '', arguments: [] }
                 let temp = item.split(' ')
@@ -66,10 +68,8 @@ export default {
         <form @submit.prevent="handleSubmit">
             <label for="name">Name:</label>
             <br>
-            <!-- <input  required> -->
             <el-input v-model="formData" style="width: 240px" :rows="2" type="textarea" placeholder="Please input" />
-            <!-- <textarea type="text" id="name" v-model="formData" required></textarea> -->
-            <div class="md4"><el-button type="primary" round>submit</el-button></div>
+            <div class="md4"><el-button type="primary" round @click = handleSubmit>submit</el-button></div>
 
             <br>
         </form>

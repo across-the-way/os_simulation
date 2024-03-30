@@ -58,9 +58,9 @@ export default {
         }
 
     },
-    mounted() {
-        setInterval(this.fetchData, 1000); // 每秒发送请求
-    }
+    // mounted() {
+    //     setInterval(this.fetchData, 1000); // 每秒发送请求
+    // }
     // updated() {
     //     axios.post(serverURL + '/process/instructions',this.formData)
     //         .then(response => {
