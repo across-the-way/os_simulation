@@ -3,73 +3,95 @@ import HelloWorld from '@/components/HelloWorld.vue'
 import TheWelcome from '@/components/TheWelcome.vue'
 import axios from 'axios'
 import { serverURL } from '@/components/ServerURL'
-
+defineProps({
+    processitem: {
+        state: {
+            type: String
+        },
+        p_id: {
+            type: Number
+        },
+        pp_id: {
+            type: Number
+        },
+        c_id: {
+            type: Object
+        },
+        priority: {
+            type: Number
+        },
+        maxresourceMap: {
+            type: Object
+        },
+        allocateresourseMap: {
+            type: Object
+        },
+        bursts: {
+            type: Object
+        },
+        pc: {
+            type: Number
+        },
+        waiting_time: {
+            type: Number
+        },
+        lastready_time: {
+            type: Number
+        },
+        memory_allocate: {
+            type: Number
+        },
+        memory_start: {
+            type: Number
+        },
+        waiting_for: {
+            type: Number
+        },
+        FileTable: {
+            type: Object
+        },
+        holdresourceMap: {
+            type: Object
+        },
+    }
+})
 </script>
 <script>
 export default {
     data() {
         return {
-            instructions: [],//指令队列
+            instructions: [],//
             FormData: ''//待处理的指令队列
         };
     },
-    methods: {
-        handleSubmit() {
-            this.formData.split('\n').forEach((item) => {
-                let tempdir = { type: '', arguments: [] }
-                let temp = item.split(' ')
-                let temp2 = temp.shift()
-                let temp1 = []
-                temp.forEach(str => {
-                    const num = parseInt(str); // 转换为整数
-                    if (!isNaN(num)) {
-                        temp1.push(num); // 如果转换成功，则添加到args数组中
-                    }
-                    else
-                        temp1.push(str) // 否则就直接添加
-                })
-                tempdir.type = temp2
-                tempdir.arguments = temp1
-                this.instructions.push(tempdir) //将处理好的指令加入数组中
-            })
-            console.log(this.instructions)
-            axios.post(serverURL + '/process', this.instructions)//发送指令队列
-                .then(response => {
-                    // 处理响应结果
-                    console.log(response.data);
-                    this.responseData = response.data
-                })
-                .catch(error => {
-                    // 处理错误
-                    console.error(error);
-                });
-            this.instructions = []
-        }
-
-    }
-    // updated() {
-    //     axios.post(serverURL + '/process/instructions',this.formData)
-    //         .then(response => {
-    //             // 处理响应结果
-    //             console.log(response.data);
-    //             this.responseData = response.data
-    //         })
-    //         .catch(error => {
-    //             // 处理错误
-    //             console.error(error);
-    //         });
-    // }
 }
 </script>
 <template>
     <div>
-        <form @submit.prevent="handleSubmit">
-            <label for="name">Name:</label>
-            <br>
+        <el-text class="mx-1">{{ state }}</el-text>&nbsp;
+            <el-text class="mx-1" type="primary">{{ p_id }}</el-text>&nbsp;
+            <el-text class="mx-1" type="success">{{ pp_id }}</el-text>&nbsp;
+            <el-text class="mx-1" type="info">{{ priority }}</el-text>&nbsp;
+            <el-text class="mx-1" type="warning">{{ maxresourceMap }}</el-text>&nbsp;
+            <el-text class="mx-1" type="danger">{{ allocateresourceMap }}</el-text>&nbsp;
+            <el-text class="mx-1" type="danger">{{ bursts }}</el-text>&nbsp;
+            <el-text class="mx-1" type="danger">{{ pc }}</el-text>&nbsp;
+            <el-text class="mx-1" type="danger">{{ waiting_time }}</el-text>&nbsp;
+            <el-text class="mx-1" type="danger">{{ lastready_time }}</el-text>&nbsp;
+            <el-text class="mx-1" type="danger">{{ memory_allocate }}</el-text>&nbsp;
+            <el-text class="mx-1" type="danger">{{ memory_start }}</el-text>&nbsp;
+            <el-text class="mx-1" type="danger">{{ waiting_for }}</el-text>&nbsp;
+            <el-text class="mx-1" type="danger">{{ FileTable }}</el-text>&nbsp;
+            <el-text class="mx-1" type="danger">{{ holdresourceMap }}</el-text>&nbsp;
             
-
-            <br>
-        </form>
     </div>
+    
 </template>
-<style></style>
+<style scoped>
+:deep(.my-label) {
+  background: var(--el-color-success-light-9) !important;
+}
+:deep(.my-content) {
+  background: var(--el-color-danger-light-9);
+}
+</style>
