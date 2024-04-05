@@ -1,9 +1,6 @@
 package com.example.hello.myFile;
 
-import com.example.hello.controller.InterruptType;
 import com.example.hello.controller.myKernel;
-
-import javax.swing.text.html.parser.Entity;
 import java.util.*;
 
 
@@ -68,31 +65,76 @@ public class myFile {
     private int move_need = 1;// 假设移动一格磁盘块需要一个操作数
     private int rw_need = 2; // 假设读写一格磁盘块需要两个操作数
 
-    private int ops_max; // 一个时钟中断周期内能进行进行的最多操作数
+    private int ops_max=100; // 一个时钟中断周期内能进行进行的最多操作数
     private int ops_cur; // 当前已经使用的操作数
+
+    private int curMhead;//当前的磁头位置
 
     public void update() {
         ops_cur = 0;
-
         // 检查当前是否有进程进行文件读写任务，若无，返回
-
         // 模拟磁盘进行读写操作
-        disk_read_write();
-
-        // 若有文件读写任务完成，即有任务的剩余磁盘块归零
-        // 发送中断系统调用FileFinish
-        // 启动磁盘调度，进行下一个文件读写操作
+        while(ops_cur<ops_max) {
+            if (rwqueue.isEmpty()) {
+                System.out.println("读写队列中无文件读写任务");
+                break;
+            }
+            boolean isfinished=disk_read_write();
+            // 若有文件读写任务完成，即有任务的剩余磁盘块归零
+            if(isfinished)
+            {
+                // 发送中断系统调用FileFinish
+                // 启动磁盘调度，进行下一个文件读写操作
+            }
+        }
     }
 
-    private void disk_read_write() {
+    private boolean disk_read_write() {
         // 获得当前磁头位置
-
         // 磁头移向磁盘块读写队列中离磁头最近的磁盘块移动
+//        queueEntry nextEntry = findNearEntry(curMhead);//找最近
+        queueEntry nextEntry=rwqueue.peek();//FCFS
+        if(nextEntry == null)
+            return false;
+        int ops_move = Math.abs(curMhead - nextEntry.startBlock) * move_need;
+        int ops_rw = nextEntry.blockSize * rw_need;
+        int ops_need = ops_move + ops_rw;
+        int ops_remain=ops_max-ops_cur;
         // 移动过程更新操作数
         // 如果磁头能移动到磁盘块
         // 尝试读写操作
         // 若能读写
         // 磁盘块对应的任务的剩余磁盘块减一
+        if(ops_remain>=ops_need)
+        {
+            ops_cur+=ops_need;
+            curMhead=nextEntry.startBlock+nextEntry.blockSize;
+            queueEntry out=rwqueue.poll();
+            return out.isFinished == 1;
+        }
+        else if(ops_remain>ops_move)
+        {
+            int rw=(ops_remain-ops_move)/2;
+            curMhead=nextEntry.startBlock+rw;
+            nextEntry.startBlock+=rw;
+            nextEntry.blockSize-=rw;
+            ops_cur=ops_max;
+            return false;
+        }
+        else
+        {
+            //最大操作数不满足移动
+            //磁头改变位置
+            ops_cur=ops_max;
+            if(nextEntry.startBlock>curMhead){
+                curMhead+=ops_remain;
+            }
+            else {
+                curMhead-=ops_remain;
+            }
+
+            return false;
+        }
     }
 
 
