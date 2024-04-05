@@ -4,6 +4,7 @@ public enum allocateStrategy {
     FirstFit,
     BestFit,
     WorstFit,
+    NextFit,
     Page,
     DemandPage
 }

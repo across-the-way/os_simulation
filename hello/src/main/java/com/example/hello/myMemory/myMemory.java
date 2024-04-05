@@ -1,28 +1,60 @@
 package com.example.hello.myMemory;
 
 import com.example.hello.controller.myKernel;
+import com.fasterxml.jackson.databind.ser.std.StdKeySerializers.Default;
 
 public class myMemory {
     private myKernel kernel;
     private allocateStrategy strategy;
+    private int memory_size;
+    private int page_size;
+    private MemoryAllocator allocator;
 
     public myMemory(myKernel kernel) {
         this.kernel = kernel;
+        this.strategy = kernel.getSysData().strategy;
+        this.memory_size = kernel.getSysData().memory_size;
+        this.page_size = kernel.getSysData().page_size;
+
+        switch(strategy){
+            case Page:
+                allocator = new PageAllocator(memory_size, page_size);
+            case DemandPage:
+                break;
+            default:
+                allocator = new ContiguousAllocator(memory_size);
+        }
+        allocator.GetStrategy(strategy);
     }
 
+    public allocateStrategy backStrategy(){
+        return strategy;
+    }
+
+
     public boolean allocate(int pid, int size) {
+
+        allocator.allocate(pid, allocator.findFreeSpace(size));
+        allocator.show();
+
         // 按照分配方法尝试分配
 
-        // 分配成功，将pid和对应内存区域绑定，按需调页方法默认分配成功
+        // 寻找内存中满足要求空闲空间
 
-        return false;
+        // 若能找到，
+        
+        // 将空闲空间标记为占用，并将pid和对应内存区域绑定
+        
+        // 按需调页方法默认分配成功
+
+        return true;
     }
 
     public void release(int pid) {
-        // 将pid和对应内存区域解绑
 
-        // 将对应内存区域置为空闲
-            // 按分配方法不同对整个内存进行不同调整
+        allocator.release(pid);
+        allocator.show();
+        // 将pid和对应内存区域解绑
     }
 
     public boolean isPageFault(int pid, int pc) {

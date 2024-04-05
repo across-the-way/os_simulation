@@ -2,15 +2,17 @@ package com.example.hello.controller;
 
 import com.example.hello.myFile.*;
 import com.example.hello.myProcess.*;
-
+import com.example.hello.myMemory.*;
 import java.util.*;
 import java.util.concurrent.Semaphore;
 
 public class SysData {
-    //系统所处状态
     public enum OSState {
         kernel, user
     }
+
+    // public FileSystem fileSystem;
+    // public Process ProcessController;
     SysConfig sysConfig;
     OSState Osmode;
 
@@ -33,8 +35,19 @@ public class SysData {
     // 调度算法
     public scheduleStrategy CPUstrategy;
 
+    // 内存大小
+    public int memory_size;
+
+    // 页大小
+    public int page_size;
+
+    // 分配策略
+    public allocateStrategy strategy;
+
     public SysData() {
         sysConfig = new SysConfig();
+        // fileSystem = new FileSystem();
+        // ProcessController = new Process();
         Osmode = OSState.kernel;
 
         // 单位毫秒
@@ -50,5 +63,9 @@ public class SysData {
 
         LongTerm_CeilThreshold = 20;
         LongTerm_FloorThreshold = 3;
+
+        memory_size = 100;
+        strategy = allocateStrategy.FirstFit;
+        page_size = 64;
     }
 }
