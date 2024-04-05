@@ -155,14 +155,16 @@ public class myProcess {
                 break;
             case InstructionType.ReadFile:
                 this.RunningtoWaiting(2);
-                int fd1 = this.ProcessMap.get(p.p_id).FileTable.remove(0);
-                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileRead, p.p_id, fd1, p.ir.getArguments()[0]);
+                int fd1 = this.ProcessMap.get(p.p_id).FileTable.get(0);
+                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileRead, p.p_id, fd1,  p.ir.getArguments()[0]);
+                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileRead, p.p_id, p.ir.getArguments()[0]);
                 this.schedule();
                 break;
             case InstructionType.WriteFile:
                 this.RunningtoWaiting(3);
-                int fd2 = this.ProcessMap.get(p.p_id).FileTable.remove(0);
-                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileWrite, p.p_id, fd2, p.ir.getArguments()[0]);
+                int fd2 = this.ProcessMap.get(p.p_id).FileTable.get(0);
+                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileWrite, p.p_id, fd2,  p.ir.getArguments()[0]);
+                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileWrite, p.p_id, p.ir.getArguments()[0]);
                 this.schedule();
                 break;
 

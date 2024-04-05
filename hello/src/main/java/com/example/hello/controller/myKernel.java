@@ -226,9 +226,9 @@ public class myKernel implements Runnable {
         } else {
             pm.deletePCB(pid);
         }
+    }   
 
-    }
-
+    //ProcessExit     参数1：ProcessExit，参数2：进程pid
     private void release(Object[] objects) {
         int pid = (int) objects[0];
         pm.deletePCB(pid);
