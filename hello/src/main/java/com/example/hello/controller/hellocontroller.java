@@ -59,7 +59,7 @@ public class hellocontroller {
 
     @PostMapping("/process")
     public Instruction[] CreateProcess(@RequestBody Instruction[] instructions) {
-        // System.out.println(instructions);
+        System.out.println(instructions);
         this.kernel
                 .receiveInterrupt(new myInterrupt(InterruptType.SystemCall, SystemCallType.ProcessNew, instructions));
         return instructions;

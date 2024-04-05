@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import com.example.hello.myDevice.myDevice;
 import com.example.hello.myFile.myFile;
 import com.example.hello.myMemory.myMemory;
+import com.example.hello.myProcess.PCB;
 import com.example.hello.myProcess.myProcess;
 
 public class myKernel implements Runnable {
@@ -182,30 +183,44 @@ public class myKernel implements Runnable {
     
     //FileNew   参数1：FileNew, 参数2：进程pid, 参数3：文件路径，参数4：文件名
     private void touch(Object[] objects) {
-        fs.touch(null, null);
+        String parent_name = (String) objects[1];
+        String file_name = (String) objects[2];
+
+        fs.touch(parent_name, file_name);
     }
 
     //FileDelete    参数1：FileDelete,  参数2：进程pid, 参数3：文件路径， 参数4：文件名
     private void rm(Object[] objects) {
-        fs.rm(null, null);
+        String parent_name = (String) objects[1];
+        String file_name = (String) objects[2];
+
+        fs.rm(parent_name, file_name);
     }
 
     //DirNew    参数1：DirNew, 参数2：进程pid, 参数3：父目录路径，参数4：目录名
     private void mkdir(Object[] objects) {
-        fs.mkdir(null, null);
+        String parent_name = (String) objects[1];
+        String dir_name = (String) objects[2];
+
+        fs.mkdir(parent_name, dir_name);
     }
     
     //DirDelete     参数1：DirDelete, 参数2：进程pid, 参数3：目录路径， 参数4：目录名
 
     private void rmdir(Object[] objects) {
-        fs.rmdir(null, null);
+        String parent_name = (String) objects[1];
+        String dir_name = (String) objects[2];
+
+        fs.rmdir(parent_name, dir_name);
     }
 
     //FileOpen  参数1：FileOpen, 参数2：进程pid, 参数3：文件路径，参数4：文件名
     private void open(Object[] objects) {
-        int pid = 0;
+        int pid = (int) objects[0];
+        String path = (String) objects[1];
+
         // 获得文件号
-        int fd = fs.open(pid, null);
+        int fd = fs.open(pid, path);
         // 将文件号添加到pid进程的打开文件表
         if (fd != -1) {
             pm.addOpenFile(pid, fd);
@@ -214,28 +229,31 @@ public class myKernel implements Runnable {
 
     //FileClose  参数1：FileClose, 参数2：进程pid, 参数3：文件路径，参数4：文件名
     private void close(Object[] objects) {
-        int pid = 0;
-        int fd = -1;
+        int pid = (int) objects[0];
+        int fd = (int) objects[1];
+
         // 将文件号从pid进程的打开文件表中移除
         pm.removeOpenFile(pid, fd);
         // 更新系统打开文件表
-        fs.close(0, fd);
+        fs.close(pid, fd);
     }
 
     //FileRead, 参数1：FileRead, 参数2：进程pid, 参数3：文件号， 参数4：读取时间
     private void write(Object[] objects) {
-        int pid = 0;
-        int fd = -1;
-        int usage_size = 0;
+        int pid = (int) objects[0];
+        int fd = (int) objects[1];
+        int usage_size =  (int) objects[2];
+
         fs.write(pid, fd, usage_size);
     }
 
     //FileWrite, 参数1：FileWrite, 参数2：进程pid, 参数3：文件号， 参数4：读取时间
     private void read(Object[] objects) {
-        int pid = 0;
-        int fd = -1;
-        int usage_time = 0;
-        fs.read(pid, fd, usage_time);
+        int pid = (int) objects[0];
+        int fd = (int) objects[1];
+        int usage_size =  (int) objects[2];
+        
+        fs.read(pid, fd, usage_size);
     }
     //ProcessNew,根据中断发出方与接收方进行调整参数
     private void create(Object[] objs) {
@@ -249,12 +267,15 @@ public class myKernel implements Runnable {
     private void create(Object[] objs) {
 
         int pid = pm.createPCB(objs);
-        pm.addToLongTermQueue(pid);
-        // if (mm.allocate(pid, 0)) {
-        // pm.addToLongTermQueue(pid);
-        // } else {
-        // pm.deletePCB(pid);
-        // }
+        PCB p = pm.back_ProcessMap().get(pid);
+        int size = p.memory_allocate;
+        
+        // 进行内存空间的分配
+        if (mm.allocate(pid, size)) {
+            pm.addToLongTermQueue(pid);
+        } else {
+            pm.deletePCB(pid);
+        }
 
     }
 

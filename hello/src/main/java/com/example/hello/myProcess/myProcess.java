@@ -29,6 +29,11 @@ public class myProcess {
 
     Map<String, mySemaphore> SemaphoreMap;
 
+    // 返回进程映射表
+    public Map<Integer, PCB> back_ProcessMap(){
+        return ProcessMap;
+    }
+    
     // ProcessManager模块初始化
     public myProcess(myKernel kernel) {
         this.kernel = kernel;
@@ -177,16 +182,26 @@ public class myProcess {
                 break;
             case InstructionType.ReadFile:
                 this.RunningtoWaiting(2);
+<<<<<<< Updated upstream
                 int fd1 = this.ProcessMap.get(p.p_id).FileTable.get(0);
                 this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileRead, p.p_id, fd1,  p.ir.getArguments()[0]);
                 this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileRead, p.p_id, p.ir.getArguments()[0]);
+=======
+                int fd1 = this.ProcessMap.get(p.p_id).FileTable.remove(0);
+                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileRead, p.p_id, fd1, p.ir.getArguments()[0]);
+>>>>>>> Stashed changes
                 this.schedule();
                 break;
             case InstructionType.WriteFile:
                 this.RunningtoWaiting(3);
+<<<<<<< Updated upstream
                 int fd2 = this.ProcessMap.get(p.p_id).FileTable.get(0);
                 this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileWrite, p.p_id, fd2,  p.ir.getArguments()[0]);
                 this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileWrite, p.p_id, p.ir.getArguments()[0]);
+=======
+                int fd2 = this.ProcessMap.get(p.p_id).FileTable.remove(0);
+                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileWrite, p.p_id, fd2, p.ir.getArguments()[0]);
+>>>>>>> Stashed changes
                 this.schedule();
                 break;
 
