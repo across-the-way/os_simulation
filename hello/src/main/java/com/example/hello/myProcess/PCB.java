@@ -96,6 +96,26 @@ public class PCB {
         }
     }
 
+    public PCB(PCB p) {
+        state = P_STATE.NEW;
+        waiting_time = 0;
+
+        // -1表示没有等待的设备
+        waiting_for = -1;
+
+        maxresourceMap = new HashMap<>();
+        allocateresourceMap = new HashMap<>();
+        bursts = new ArrayList<>();
+        c_id = new ArrayList<Integer>();
+        FileTable = p.FileTable;
+        memory_allocate = p.memory_allocate;
+
+        for (Instruction instruction : p.bursts) {
+            Instruction newinstruction = new Instruction(instruction.getType(), instruction.getArguments());
+            bursts.add(newinstruction);
+        }
+    }
+
     public int getPp_id() {
         return pp_id;
     }
