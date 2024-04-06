@@ -157,7 +157,7 @@ public class myKernel implements Runnable {
     }
 
     private void touch(Object[] objects) {
-        fs.touch(null, null);
+        fs.touch((String) objects[1], (String) objects[2]);
     }
 
     private void rm(Object[] objects) {
@@ -192,16 +192,16 @@ public class myKernel implements Runnable {
     }
 
     private void write(Object[] objects) {
-        int pid = 0;
-        int fd = -1;
-        int usage_size = 0;
+        int pid = (int) objects[0];
+        int fd = fs.open(pid, (String) objects[1] + "/" + (String) objects[2]);
+        int usage_size = (int) objects[3];
         fs.write(pid, fd, usage_size);
     }
 
     private void read(Object[] objects) {
         int pid = 0;
-        int fd = -1;
-        int usage_time = 0;
+        int fd = fs.open(pid, null);
+        int usage_time = 100;
         fs.read(pid, fd, usage_time);
     }
 

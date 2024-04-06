@@ -145,7 +145,7 @@ public class myProcess {
                 break;
             case InstructionType.WriteFile:
                 this.RunningtoWaiting(3);
-                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileWrite, p.p_id, p.ir.getArguments()[0]);
+                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileWrite, p.p_id, p.ir.getArguments()[0],p.ir.getArguments()[1],p.ir.getArguments()[2]);
                 break;
 
             // 若指令为文件或目录操作
@@ -153,6 +153,7 @@ public class myProcess {
             case InstructionType.CreateFile:
                 this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileNew, p.p_id, p.ir.getArguments()[0],
                         p.ir.getArguments()[1]);
+                p.pc += this.kernel.getSysData().InstructionLength;
                 this.RunningtoReady();
                 break;
             case InstructionType.DeleteFile:
