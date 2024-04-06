@@ -8,6 +8,7 @@ import com.example.hello.myFile.myFile;
 import com.example.hello.myMemory.myMemory;
 import com.example.hello.myProcess.PCB;
 import com.example.hello.myProcess.myProcess;
+import com.example.hello.myProcess.scheduleStrategy;
 
 public class myKernel implements Runnable {
     private static myKernel instance;
@@ -17,6 +18,10 @@ public class myKernel implements Runnable {
     private myMemory mm;
     private myFile fs;
     private myDevice io;
+
+    public myProcess getPm() {
+        return this.pm;
+    }
 
     private myKernel() {
     }
@@ -115,6 +120,9 @@ public class myKernel implements Runnable {
             case ProcessExit:
                 release(objects);
                 break;
+            case Fork:
+                Fork(objects);
+                break;
             case IORequest:
                 request(objects);
                 break;
@@ -149,10 +157,7 @@ public class myKernel implements Runnable {
     }
 
     private void touch(Object[] objects) {
-        String parent_name = (String) objects[1];
-        String file_name = (String) objects[2];
-
-        fs.touch(parent_name, file_name);
+        fs.touch((String) objects[1], (String) objects[2]);
     }
 
     private void rm(Object[] objects) {
@@ -200,9 +205,8 @@ public class myKernel implements Runnable {
 
     private void write(Object[] objects) {
         int pid = (int) objects[0];
-        int fd = (int) objects[1];
-        int usage_size =  (int) objects[2];
-
+        int fd = fs.open(pid, (String) objects[1] + "/" + (String) objects[2]);
+        int usage_size = (int) objects[3];
         fs.write(pid, fd, usage_size);
     }
 
@@ -233,8 +237,57 @@ public class myKernel implements Runnable {
         int pid = (int) objects[0];
         pm.deletePCB(pid);
         mm.release(pid);
-        pm.schedule();
         System.out.println("Process" + pid + " is Exiting By SystemCall ProcessExit");
+    }
+
+    /*
+     * fork处理
+     */
+
+    public boolean Fork(Object[] objects) {
+        int pp_id = (int) objects[0];
+        int index = (int) objects[1];
+
+        PCB p = this.pm.getPCB(pp_id);
+        if (index <= (p.pc - p.memory_start) / this.getSysData().InstructionLength) {
+            return false;
+        }
+        if (index >= p.bursts.size()) {
+            return false;
+        }
+
+        int pid = this.pm.ForkPCB(pp_id, index);
+        // if (mm.allocate(pid, 0)) {
+        // pm.addToLongTermQueue(pid);
+        // } else {
+        // pm.deletePCB(pid);
+        // return false;
+        // }
+        pm.addToLongTermQueue(pid);
+
+        if (objects.length > 2) {
+            String option = (String) objects[2];
+            // 当前进程阻塞直至所有子进程执行完
+            if (option.equals("Wait")) {
+                this.pm.RunningtoWaiting(4);
+            } else {
+                this.pm.getPCB(pp_id).pc += this.getSysData().InstructionLength;
+                if (this.getSysData().CPUstrategy == scheduleStrategy.MLFQ) {
+                    this.pm.RunningtoSecondReady();
+                } else {
+                    this.pm.RunningtoReady();
+                }
+            }
+        } else {
+            this.pm.getPCB(pp_id).pc += this.getSysData().InstructionLength;
+            if (this.getSysData().CPUstrategy == scheduleStrategy.MLFQ) {
+                this.pm.RunningtoSecondReady();
+            } else {
+                this.pm.RunningtoReady();
+            }
+        }
+
+        return true;
     }
 
     private void request(Object[] objects) {

@@ -6,7 +6,10 @@ public class Instruction {
 
     public Instruction(InstructionType type, Object... arguments) {
         this.type = type;
-        this.arguments = arguments;
+        this.arguments = new Object[arguments.length];
+        for (int i = 0; i < arguments.length; i++) {
+            this.arguments[i] = arguments[i];
+        }
     }
 
     public InstructionType getType() {

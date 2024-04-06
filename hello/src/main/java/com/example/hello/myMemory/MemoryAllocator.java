@@ -6,21 +6,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.example.hello.myMemory.*;
+import com.example.hello.myMemory.Memory;
+import com.example.hello.myMemory.Block;
+import com.example.hello.myMemory.Pages;
 
 public abstract class MemoryAllocator {
     protected int total_memory_size;
     protected int free_memory_size;
-    protected allocateStrategy allocation_policy;
-    
     public MemoryAllocator(int total_memory_size) {
         this.total_memory_size = total_memory_size;
         this.free_memory_size = total_memory_size;
     }
-    public void GetStrategy(allocateStrategy policy){
-        allocation_policy = policy;
-    }
-
     abstract Memory findFreeSpace(int size);
     abstract void allocate(int pid, Memory memory);
     abstract void release(int pid);
@@ -30,8 +26,8 @@ public abstract class MemoryAllocator {
 class ContiguousAllocator extends MemoryAllocator {
     private List<Block> free_blocks;
     protected Map<Integer, Block> used_memory; // 进程-内存表
-    // enum AllocationPolicy { FIRST_FIT, NEXT_FIT, BEST_FIT, WORST_FIT }
-    // private AllocationPolicy allocation_policy = AllocationPolicy.FIRST_FIT;
+    enum AllocationPolicy { FIRST_FIT, NEXT_FIT, BEST_FIT, WORST_FIT }
+    private AllocationPolicy allocation_policy = AllocationPolicy.FIRST_FIT;
     private int last_index = 0;//用于NEXT_FIT,记录上一次在free_blocks中查找结束的位置
 
     public ContiguousAllocator(int total_memory_size) {
@@ -44,10 +40,10 @@ class ContiguousAllocator extends MemoryAllocator {
     @Override
     Block findFreeSpace(int size) {
         switch (allocation_policy) {
-            case FirstFit: return firstFit(size);
-            case NextFit: return nextFit(size);
-            case BestFit: return bestFit(size);
-            case WorstFit: return worstFit(size);
+            case FIRST_FIT: return firstFit(size);
+            case NEXT_FIT: return nextFit(size);
+            case BEST_FIT: return bestFit(size);
+            case WORST_FIT: return worstFit(size);
             default: break;
         }
         return null;
@@ -182,8 +178,7 @@ class ContiguousAllocator extends MemoryAllocator {
         }
         return free_block;
     }
-    @Override
-    void show() {
+    private void show() {
         System.out.println("Free Blocks:");
         for (Block block : free_blocks) {
             System.out.print(block + " ");
@@ -274,7 +269,6 @@ class PageAllocator extends MemoryAllocator{
     void release(int pid) {
         page_table.release(pid);
     }
-    @Override
     void show() {
         System.out.println(page_table);
     }

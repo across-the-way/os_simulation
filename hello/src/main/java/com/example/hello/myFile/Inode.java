@@ -72,6 +72,3 @@ public class Inode {
         return type;
     }
 }
-class Ext4{
-    //如果不用连续分区就用Ext4的存储结构
-}

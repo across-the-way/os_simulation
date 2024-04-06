@@ -5,10 +5,10 @@ import com.fasterxml.jackson.databind.ser.std.StdKeySerializers.Default;
 
 public class myMemory {
     private myKernel kernel;
-    private allocateStrategy strategy;
-    private int memory_size;
     private int page_size;
     private MemoryAllocator allocator;
+    private allocateStrategy strategy = allocateStrategy.FirstFit;
+    private int memory_size = 4096; // 假设内存大小为4096字节，一条指令为4字节
 
     public myMemory(myKernel kernel) {
         this.kernel = kernel;
@@ -24,7 +24,6 @@ public class myMemory {
             default:
                 allocator = new ContiguousAllocator(memory_size);
         }
-        allocator.GetStrategy(strategy);
     }
 
     public allocateStrategy backStrategy(){
@@ -40,6 +39,12 @@ public class myMemory {
         // 按照分配方法尝试分配
 
         // 寻找内存中满足要求空闲空间
+
+        // 若能找到，
+        
+        // 将空闲空间标记为占用，并将pid和对应内存区域绑定
+        
+        // 按需调页方法默认分配成功
 
         // 若能找到，
         
