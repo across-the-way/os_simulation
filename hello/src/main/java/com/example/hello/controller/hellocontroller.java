@@ -65,4 +65,9 @@ public class hellocontroller {
         return instructions;
     }
 
+    @GetMapping("/process/status")
+    public List<PCB> getProcessStatus() {
+        return this.kernel.getPm().getPCBs();
+    }
+
 }

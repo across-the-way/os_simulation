@@ -13,7 +13,7 @@ public class mySemaphore {
         this.name = name;
         this.resource = resource;
         this.Process = new ArrayList<Item>();
-        this.ttl = 100;
+        this.ttl = 120;
     }
 
     // 模拟对pid的进程对该信号量的wait操作

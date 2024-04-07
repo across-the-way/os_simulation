@@ -5,6 +5,7 @@ public enum InterruptType {
     PageFault,
     TimeSilceRunOut,
     IOFinish,
+    FileFinish,
     GUICall,
     SystemCall,
     Exit,

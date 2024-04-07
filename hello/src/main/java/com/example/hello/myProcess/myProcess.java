@@ -80,6 +80,9 @@ public class myProcess {
         // 信号量表的定期更新
         Semaphore_update();
 
+        // Fork的wait队列更新
+        ForkWaitUpdate();
+
         // 从就绪队列中调度出一个进程，尝试切换为运行态
         this.schedule();
         // 若无或无法，返回
@@ -92,16 +95,6 @@ public class myProcess {
 
         // 动态调整多级队列
         MLFQ_DynamicAdjust();
-
-        // 检查当前进程是否已经完成
-        if (CheckFinish()) {
-            // 若完成,发送中断系统调用ProcessExit
-            this.sendInterrupt(InterruptType.SystemCall, SystemCallType.ProcessExit, this.current_pid);
-            // 启动进程调度（短期和长期）,切换进程
-            this.current_pid = -1;
-            return;
-            // 返回
-        }
 
         // 指定短期调度时间片和系统时间片单独处理,即调用update函数模拟处理TimeoutSlice中断
     }
@@ -141,22 +134,18 @@ public class myProcess {
             case InstructionType.Printer:
                 this.RunningtoWaiting(0);
                 this.sendInterrupt(InterruptType.SystemCall, SystemCallType.IORequest, p.p_id, p.ir.getArguments()[0]);
-                this.schedule();
                 break;
             case InstructionType.Keyboard:
                 this.RunningtoWaiting(1);
                 this.sendInterrupt(InterruptType.SystemCall, SystemCallType.IORequest, p.p_id, p.ir.getArguments()[0]);
-                this.schedule();
                 break;
             case InstructionType.ReadFile:
                 this.RunningtoWaiting(2);
                 this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileRead, p.p_id, p.ir.getArguments()[0]);
-                this.schedule();
                 break;
             case InstructionType.WriteFile:
                 this.RunningtoWaiting(3);
-                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileWrite, p.p_id, p.ir.getArguments()[0]);
-                this.schedule();
+                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileWrite, p.p_id, p.ir.getArguments()[0],p.ir.getArguments()[1],p.ir.getArguments()[2]);
                 break;
 
             // 若指令为文件或目录操作
@@ -164,36 +153,31 @@ public class myProcess {
             case InstructionType.CreateFile:
                 this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileNew, p.p_id, p.ir.getArguments()[0],
                         p.ir.getArguments()[1]);
+                p.pc += this.kernel.getSysData().InstructionLength;
                 this.RunningtoReady();
-                this.schedule();
                 break;
             case InstructionType.DeleteFile:
                 this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileDelete, p.p_id, p.ir.getArguments()[0],
                         p.ir.getArguments()[1]);
                 this.RunningtoReady();
-                this.schedule();
                 break;
             case InstructionType.CreateDir:
                 this.sendInterrupt(InterruptType.SystemCall, SystemCallType.DirNew, p.p_id, p.ir.getArguments()[0],
                         p.ir.getArguments()[1]);
                 this.RunningtoReady();
-                this.schedule();
                 break;
             case InstructionType.DeleteDir:
                 this.sendInterrupt(InterruptType.SystemCall, SystemCallType.DirDelete, p.p_id, p.ir.getArguments()[0],
                         p.ir.getArguments()[1]);
                 this.RunningtoReady();
-                this.schedule();
                 break;
             case InstructionType.OpenFile:
                 this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileOpen, p.p_id, p.ir.getArguments()[0]);
                 this.RunningtoReady();
-                this.schedule();
                 break;
             case InstructionType.CloseFile:
                 this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileClose, p.p_id, p.ir.getArguments()[0]);
                 this.RunningtoReady();
-                this.schedule();
                 break;
 
             // 若指令为cond系列操作
@@ -213,6 +197,12 @@ public class myProcess {
             // 若指令为fork
             // 发送中断系统调用ProcessNew，或者。。。
             case InstructionType.Fork:
+                if (p.ir.getArguments().length > 1) {
+                    this.sendInterrupt(InterruptType.SystemCall, SystemCallType.Fork, p.p_id, p.ir.getArguments()[0],
+                            p.ir.getArguments()[1]);
+                } else {
+                    this.sendInterrupt(InterruptType.SystemCall, SystemCallType.Fork, p.p_id, p.ir.getArguments()[0]);
+                }
                 break;
 
             // 若指令为wait，且合法（有子进程）
@@ -224,6 +214,10 @@ public class myProcess {
             case InstructionType.Exit:
                 System.out.println("Process" + p.p_id + " is Exiting safely");
                 p.pc += this.kernel.getSysData().InstructionLength;
+                // 若完成,发送中断系统调用ProcessExit
+                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.ProcessExit, this.current_pid);
+                // 启动进程调度（短期和长期）,切换进程
+                this.current_pid = -1;
                 break;
             // 若指令非法
             // 发送中断系统调用ProcessExit
@@ -231,19 +225,6 @@ public class myProcess {
                 this.sendInterrupt(InterruptType.SystemCall, SystemCallType.ProcessExit);
         }
 
-    }
-
-    // 检查当前进程是否已经完成
-    private boolean CheckFinish() {
-        PCB p = this.ProcessMap.get(this.current_pid);
-        // 由于进程终止中断导致当前current_pid=-1
-        if (p == null) {
-            return false;
-        }
-        if ((p.pc - p.memory_start) / this.kernel.getSysData().InstructionLength >= p.bursts.size()) {
-            return true;
-        } else
-            return false;
     }
 
     /*
@@ -263,6 +244,31 @@ public class myProcess {
             p.pp_id = this.current_pid;
             PCB currentProcess = this.ProcessMap.get(this.current_pid);
             currentProcess.c_id.add(p.p_id);
+        } else {
+            p.pp_id = -1;
+        }
+
+        // 加入pid-PCB映射表
+        this.ProcessMap.put(p.p_id, p);
+
+        return next_pid++;
+    }
+
+    public int ForkPCB(int pp_id, int index) {
+        // 新建一个PCB
+        PCB p = new PCB(this.getPCB(pp_id));
+
+        // 分配PID为next_pid
+        p.p_id = this.next_pid;
+
+        // 分配该进程的pc
+        p.pc = p.memory_start + index * this.kernel.getSysData().InstructionLength;
+
+        // 存在当前执行进程,构建父子进程关系
+        if (pp_id != -1) {
+            p.pp_id = pp_id;
+            PCB parent = this.ProcessMap.get(pp_id);
+            parent.c_id.add(p.p_id);
         } else {
             p.pp_id = -1;
         }
@@ -339,6 +345,13 @@ public class myProcess {
             load += this.queue.Second_Queue.size();
         }
         return load;
+    }
+
+    public PCB getPCB(int pid) {
+        if (this.ProcessMap.containsKey(pid))
+            return this.ProcessMap.get(pid);
+        else
+            return null;
     }
 
     // 模拟CPU调度
@@ -579,11 +592,25 @@ public class myProcess {
             }
         }
 
+        /*
+         * current_pid = -1的情况:
+         * 1.当前CPU负载为0
+         * 2.Processrunning 函数执行的指令
+         * 2.1 调用 runningtowaiting函数
+         * 2.2 调用 runningtoready函数
+         * 2.3 产生 ProcessExit 的 systemcall
+         * (目前系统只保留 process manager update 函数的 schedule,即不会在上述情况后调用schedule使current pid
+         * 发生变化)
+         * 
+         * current_pid != -1 的情况:
+         * 当前存在负载并且当前进程执行的指令并没有触发中断(在下一个时钟周期片可能发生变化)
+         */
         if (this.current_pid != -1) {
             PCB p = this.ProcessMap.get(this.current_pid);
             int index = (p.pc - p.memory_start) / this.kernel.getSysData().InstructionLength;
             // 如果时间片用完后该进程只剩下Exit命令或者没有命令,则不会调整到二级队列
-            if (index < p.bursts.size() - 1) {
+            // 如果当前指令为Fork指令,时间片耗尽后不应该将该进程移到二级队列,如果有Wait则应该移到Waiting队列,如果没有则移到Ready队列
+            if (index < p.bursts.size() - 1 && !p.bursts.get(index).getType().equals(InstructionType.Fork)) {
                 // 将当前进程调整到二级队列
                 this.RunningtoSecondReady();
             }
@@ -611,7 +638,6 @@ public class myProcess {
         } else {
             // wait 返回false 说明该信号量资源<0,无法分配,所以该进程进入等待状态
             this.RunningtoWaiting(5);
-            this.schedule();
         }
     }
 
@@ -655,5 +681,33 @@ public class myProcess {
 
         }
 
+    }
+
+    /*
+     * fork update操作
+     */
+    public void ForkWaitUpdate() {
+        for (int i = 0; i < this.queue.Waiting_Queues.get(4).size(); i++) {
+            if (ProcessMap.get(this.queue.Waiting_Queues.get(4).get(i)).c_id.size() == 0) {
+                int pid = this.queue.Waiting_Queues.get(4).remove(i);
+                this.waitToReady(pid);
+                this.ProcessMap.get(pid).pc += this.kernel.getSysData().InstructionLength;
+            }
+        }
+    }
+
+    /*
+     * 向前端传数据的接口
+     */
+    public List<PCB> getPCBs() {
+        List<PCB> pcbList = new ArrayList<>();
+        for (PCB item : this.ProcessMap.values()) {
+            if (item.p_id == 0) {
+                continue;
+            } else {
+                pcbList.add(item);
+            }
+        }
+        return pcbList;
     }
 }
