@@ -35,7 +35,7 @@ export default {
 <template>
   <div style="padding: 10rem;padding-bottom: 0;">
   <el-breadcrumb separator="/">
-    <el-breadcrumb-item ><a href="/filesystem/root/page">promotion management</a></el-breadcrumb-item>
+    <el-breadcrumb-item ><a href="/filesystem/page">promotion management</a></el-breadcrumb-item>
     <el-breadcrumb-item
       ><a href="/filesystem/root/page">promotion management</a></el-breadcrumb-item
     >
