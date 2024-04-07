@@ -28,11 +28,11 @@ const routes = [
         component: () => import('@/components/processQueue.vue'),
     },
     {
-        path: '/device',
+        path: '/device/:id*',
         name: 'device',
-        title: '首页',
+        title: '设备管理',
         meta:{
-            title: '首页'
+            title: '设备管理'
         },
         component: () => import('@/components/device.vue'),
     },

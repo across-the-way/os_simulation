@@ -10,31 +10,50 @@ import { serverURL } from '@/components/ServerURL'
 export default {
   data() {
     return {
-      responseData: null,
-    }
+      breadcrumbItems: [] // 存储面包屑项的数组
+    };
   },
-  created() {
-    axios.get(serverURL + '/hello', {})
-      .then(response => {
-        // 处理响应结果
-        console.log(response.data);
-        this.responseData = response.data
-      })
-      .catch(error => {
-        // 处理错误
-        console.error(error);
+  mounted() {
+    this.generateBreadcrumb();
+    console.log(this.breadcrumbItems)
+  },
+  methods: {
+    generateBreadcrumb() {
+      const pathArray = window.location.pathname.split('/'); // 根据当前路径生成路径数组
+      pathArray.shift();
+      let currentPath = '/';
+      pathArray.forEach((path, index) => {
+        currentPath += path;
+        const breadcrumbItem = {
+          pathat: currentPath,
+          name: path
+        }
+        this.breadcrumbItems.push(breadcrumbItem);
+        currentPath += '/';
       });
-  }
-}
+    },
 
-
-
+  },
+  // watch: {
+  //   $route() {
+  //     this.breadcrumbItems = []; // 清空面包屑项数组
+  //     this.generateBreadcrumb(); // 重新生成面包屑
+  //   }
+  // }
+};
 </script>
 
 <template>
-   <div>设备测试</div>
-</template>
+  <div>
+    <el-breadcrumb separator-class="el-icon-arrow-right">
+      <!-- <el-breadcrumb-item :to="{ path: '/device' }">首页</el-breadcrumb-item> -->
+      <el-breadcrumb-item v-for="path in breadcrumbItems">
+      <a :href="path.pathat">{{ path.name }}</a>
+    </el-breadcrumb-item>
 
+    </el-breadcrumb>
+  </div>
+</template>
 <style scoped>
 header {
   line-height: 1.5;
