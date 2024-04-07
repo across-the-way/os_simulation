@@ -85,11 +85,15 @@ public class myFile {
             // 若有文件读写任务完成，即有任务的剩余磁盘块归零
             if (isfinished != -1) {
                 System.out.println("dada 正在上厕所");
-                kernel.receiveInterrupt(new myInterrupt(InterruptType.FileFinish, isfinished));
+                sendInterrupt(InterruptType.FileFinish, isfinished);               
                 // 发送中断系统调用FileFinish
                 // 启动磁盘调度，进行下一个文件读写操作
             }
         }
+    }
+
+    private void sendInterrupt(InterruptType interrupt, Object... objs) {
+        kernel.receiveInterrupt(new myInterrupt(interrupt, objs));
     }
 
     private int disk_read_write() {
@@ -133,7 +137,7 @@ public class myFile {
             return -1;
         }
     }
-
+    //public Inode getInode()
     private Inode findInode(String path) {
         String[] fileName = path.split("/");
         Inode curInode = root;
@@ -224,9 +228,10 @@ public class myFile {
             // 路径错误触发中断
             return;
         }
-        pInode.deleteFileInDir(file_name);
         // 释放文件磁盘空间
         freeUp(pInode.findChild(file_name));
+        pInode.deleteFileInDir(file_name);
+                
     }
 
     public void mkdir(String parent_name, String dir_name) {

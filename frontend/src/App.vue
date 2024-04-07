@@ -70,7 +70,7 @@ export default {
             </template>
             <el-menu-item-group title="分类">
               <el-menu-item><router-link to="/process/queue">queue</router-link></el-menu-item>
-              <el-menu-item index="/find"><router-link to="/device">index</router-link></el-menu-item>
+              <el-menu-item index="/find"><router-link to="/process">index</router-link></el-menu-item>
             </el-menu-item-group>
             <el-menu-item-group title="Group Two">
               <el-menu-item index="1-3">item three</el-menu-item>
