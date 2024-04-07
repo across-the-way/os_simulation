@@ -9,7 +9,7 @@ const routes = [
         component: () => import('@/components/cpu.vue'),
     },
     {
-        path: '/filesystem',
+        path: '/filesystem/:id*',
         name: 'filesystem',
         title: '文件系统',
         meta:{
@@ -17,6 +17,7 @@ const routes = [
         },
         component: () => import('@/components/filesystem.vue'),
     },
+
     {
         path: '/process/queue',
         name: 'processqueue',

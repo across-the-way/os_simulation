@@ -24,10 +24,11 @@ export default {
                 lastready_time: 5,
                 memory_allocate: 43,
                 memory_start: 0,
-                waiting_for : -1,
+                waiting_for: -1,
                 FileTable: [],
                 holdresourceMap: [],
             }],
+            form: []
         };
     },
 
@@ -37,21 +38,57 @@ export default {
                 .then(response => {
 
                     // console.log(_data[0].state)
-                    this.pcb = []
+                    // this.pcb = []
 
-                    this.pcb = response.data; // 更新响应数据
-
+                    // this.pcb = response.data; // 更新响应数据
+                    this.pcb.forEach(item => {
+                        for (const key in item) {
+                            if (item.hasOwnProperty(key)) {
+                                // 如果属性对应的数组不存在，则创建一个空数组
+                                if (!pcb[key]) {
+                                    pcb[key] = [];
+                                }
+                                // 将属性值添加到对应的数组中
+                                pcb[key].push(item[key]);
+                            }
+                        }
+                    });
+                    this.pcb = pcb
                     console.log(this.pcb)
                 })
                 .catch(error => {
                     console.error(error);
                 });
+        },
+        transformStructs() {
+            // 创建空对象来存储变化后的数组
+            const transformedArrays = {};
+
+            // 遍历结构体数组
+            this.pcb.forEach(item => {
+                for (const key in item) {
+                    if (item.hasOwnProperty(key)) {
+                        // 如果属性对应的数组不存在，则创建一个空数组
+                        if (!transformedArrays[key]) {
+                            transformedArrays[key] = [];
+                        }
+                        // 将属性值添加到对应的数组中
+                        transformedArrays[key].push(pcb[key]);
+                    }
+                }
+            });
+
+            // 更新数据
+            this.form = transformedArrays;
+            console.log(this.form)
         }
 
+
     },
-    // mounted() {
-    //     // setInterval(this.fetchData, 1000); // 每秒发送请求
-    // }
+    mounted() {
+        // setInterval(this.fetchData, 1000); // 每秒发送请求
+        this.transformStructs
+    },
     beforeMount() {
         clearInterval(this.fetchData)
     }
@@ -76,7 +113,7 @@ export default {
             <br>
             <el-text class="mx-1">{{ this.pcb[0].state }}</el-text>&nbsp;
             <el-text class="mx-1" type="primary">{{ this.pcb[0].p_id }}</el-text>&nbsp;
-            <el-text class="mx-1" type="success">{{ this.pcb[0].pp_id }}</el-text>&nbsp;
+            <el-text class="mx-1" type="success">{{ this.form.pp_id }}</el-text>&nbsp;
             <el-text class="mx-1" type="info">{{ this.pcb[0].priority }}</el-text>&nbsp;
             <el-text class="mx-1" type="warning">{{ this.pcb[0].maxresourceMap }}</el-text>&nbsp;
             <el-text class="mx-1" type="danger">{{ this.pcb[0].allocateresourceMap }}</el-text>&nbsp;
@@ -92,7 +129,7 @@ export default {
             <br>
         </form>
         <el-table :data="tableData" height="250" style="width: 100%">
-            <el-table-column prop="date" label="Date" width="180" />
+            <el-table-column prop="this.form.state" label="Date" width="180" />
             <el-table-column prop="name" label="Name" width="180" />
             <el-table-column prop="address" label="Address" />
         </el-table>
