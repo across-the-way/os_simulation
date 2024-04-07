@@ -141,11 +141,11 @@ public class myProcess {
                 break;
             case InstructionType.ReadFile:
                 this.RunningtoWaiting(2);
-                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileRead, p.p_id, p.ir.getArguments()[0]);
+                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileRead, p.p_id, p.ir.getArguments()[0],p.ir.getArguments()[1]);
                 break;
             case InstructionType.WriteFile:
                 this.RunningtoWaiting(3);
-                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileWrite, p.p_id, p.ir.getArguments()[0],p.ir.getArguments()[1],p.ir.getArguments()[2]);
+                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileWrite, p.p_id, p.ir.getArguments()[0],p.ir.getArguments()[1]);
                 break;
 
             // 若指令为文件或目录操作
@@ -157,18 +157,19 @@ public class myProcess {
                 this.RunningtoReady();
                 break;
             case InstructionType.DeleteFile:
-                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileDelete, p.p_id, p.ir.getArguments()[0],
-                        p.ir.getArguments()[1]);
+                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileDelete, p.p_id, p.ir.getArguments()[0]);
+                p.pc += this.kernel.getSysData().InstructionLength;
                 this.RunningtoReady();
                 break;
             case InstructionType.CreateDir:
                 this.sendInterrupt(InterruptType.SystemCall, SystemCallType.DirNew, p.p_id, p.ir.getArguments()[0],
                         p.ir.getArguments()[1]);
+                p.pc += this.kernel.getSysData().InstructionLength;
                 this.RunningtoReady();
                 break;
             case InstructionType.DeleteDir:
-                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.DirDelete, p.p_id, p.ir.getArguments()[0],
-                        p.ir.getArguments()[1]);
+                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.DirDelete, p.p_id, p.ir.getArguments()[0]);
+                p.pc += this.kernel.getSysData().InstructionLength;
                 this.RunningtoReady();
                 break;
             case InstructionType.OpenFile:
@@ -179,7 +180,6 @@ public class myProcess {
                 this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileClose, p.p_id, p.ir.getArguments()[0]);
                 this.RunningtoReady();
                 break;
-
             // 若指令为cond系列操作
             // CondNew为进程和子进程们添加信号量
             case InstructionType.CondNew:

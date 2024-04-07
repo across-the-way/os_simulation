@@ -76,6 +76,9 @@ public class myKernel implements Runnable {
                     case SystemCall:
                         systemCall(interrupt.getObjects());
                         break;
+                    case FileFinish:
+                        finish(interrupt.getObjects());
+                        break;
                     case GUICall:
                     case Exit:
                     default:
@@ -103,6 +106,7 @@ public class myKernel implements Runnable {
 
     private void finish(Object[] objects) {
         pm.waitToReady((int) objects[0]);
+        pm.getPCB((int)objects[0]).pc+=this.getSysData().InstructionLength;
     }
 
     /*
@@ -150,9 +154,6 @@ public class myKernel implements Runnable {
             case FileWrite:
                 write(objects);
                 break;
-            case FileFinish:
-                finish(objects);
-                break;
         }
     }
 
@@ -161,15 +162,17 @@ public class myKernel implements Runnable {
     }
 
     private void rm(Object[] objects) {
-        fs.rm(null, null);
+        int last=((String)objects[1]).lastIndexOf('/');
+        fs.rm(((String)objects[1]).substring(0,last),((String)objects[1]).substring(last+1));
     }
 
     private void mkdir(Object[] objects) {
-        fs.mkdir(null, null);
+        fs.mkdir((String)objects[1], (String)objects[2]);
     }
 
     private void rmdir(Object[] objects) {
-        fs.rmdir(null, null);
+        int last=((String)objects[1]).lastIndexOf('/');
+        fs.rmdir(((String)objects[1]).substring(0,last),((String)objects[1]).substring(last+1));
     }
 
     private void open(Object[] objects) {
@@ -193,15 +196,15 @@ public class myKernel implements Runnable {
 
     private void write(Object[] objects) {
         int pid = (int) objects[0];
-        int fd = fs.open(pid, (String) objects[1] + "/" + (String) objects[2]);
-        int usage_size = (int) objects[3];
+        int fd = fs.open(pid, (String) objects[1]);
+        int usage_size = (int) objects[2];
         fs.write(pid, fd, usage_size);
     }
 
     private void read(Object[] objects) {
-        int pid = 0;
-        int fd = fs.open(pid, null);
-        int usage_time = 100;
+        int pid = (int) objects[0];
+        int fd = fs.open(pid, (String) objects[1]);
+        int usage_time = (int)objects[2];
         fs.read(pid, fd, usage_time);
     }
 
