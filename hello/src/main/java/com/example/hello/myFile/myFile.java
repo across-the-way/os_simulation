@@ -224,8 +224,12 @@ public class myFile {
         // 寻找父目录
         Inode pInode = findInode(parent_name);
         // 删除文件
-        if (pInode == null) {
+        if (pInode == null || pInode.findChild(file_name) == null) {
             // 路径错误触发中断
+            return;
+        }
+        if (ftable.isExist(parent_name + "/" + file_name)) {
+            // 打开文件表中存在此文件，不能删除
             return;
         }
         // 释放文件磁盘空间

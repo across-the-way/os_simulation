@@ -79,4 +79,11 @@ public class OpenFileTable {
     public String findInodeByFd(int fd) {
         return filetable.get(fd).path;
     }
+    public boolean isExist(String path) {
+        if (filePidTable.get(path) == null) {
+            return false;
+        } else {
+            return true;
+        }
+    }
 }
