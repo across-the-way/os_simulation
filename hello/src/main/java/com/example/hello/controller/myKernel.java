@@ -44,6 +44,8 @@ public class myKernel implements Runnable {
     }
 
     ConcurrentLinkedQueue<myInterrupt> queue = new ConcurrentLinkedQueue<>();
+    public String terminal_message;
+    public Boolean terminal_update;
 
     public void receiveInterrupt(myInterrupt interrupt) {
         queue.offer(interrupt);
@@ -79,7 +81,9 @@ public class myKernel implements Runnable {
                     case FileFinish:
                         finish(interrupt.getObjects());
                         break;
-                    case GUICall:
+                    case TerminalCall:
+                        terminalCall(interrupt.getObjects());
+                        break;
                     case Exit:
                     default:
                         break;
@@ -106,7 +110,7 @@ public class myKernel implements Runnable {
 
     private void finish(Object[] objects) {
         pm.waitToReady((int) objects[0]);
-        pm.getPCB((int)objects[0]).pc+=this.getSysData().InstructionLength;
+        pm.getPCB((int) objects[0]).pc += this.getSysData().InstructionLength;
     }
 
     /*
@@ -162,17 +166,17 @@ public class myKernel implements Runnable {
     }
 
     private void rm(Object[] objects) {
-        int last=((String)objects[1]).lastIndexOf('/');
-        fs.rm(((String)objects[1]).substring(0,last),((String)objects[1]).substring(last+1));
+        int last = ((String) objects[1]).lastIndexOf('/');
+        fs.rm(((String) objects[1]).substring(0, last), ((String) objects[1]).substring(last + 1));
     }
 
     private void mkdir(Object[] objects) {
-        fs.mkdir((String)objects[1], (String)objects[2]);
+        fs.mkdir((String) objects[1], (String) objects[2]);
     }
 
     private void rmdir(Object[] objects) {
-        int last=((String)objects[1]).lastIndexOf('/');
-        fs.rmdir(((String)objects[1]).substring(0,last),((String)objects[1]).substring(last+1));
+        int last = ((String) objects[1]).lastIndexOf('/');
+        fs.rmdir(((String) objects[1]).substring(0, last), ((String) objects[1]).substring(last + 1));
     }
 
     private void open(Object[] objects) {
@@ -204,7 +208,7 @@ public class myKernel implements Runnable {
     private void read(Object[] objects) {
         int pid = (int) objects[0];
         int fd = fs.open(pid, (String) objects[1]);
-        int usage_time = (int)objects[2];
+        int usage_time = (int) objects[2];
         fs.read(pid, fd, usage_time);
     }
 
@@ -289,6 +293,61 @@ public class myKernel implements Runnable {
         return mm.isPageFault(pid, pc);
     }
 
+    /*
+     * 处理前端终端相应
+     */
+    private void terminalCall(Object[] objects) {
+        TerminalCallType type = (TerminalCallType) objects[0];
+        objects = Arrays.copyOfRange(objects, 1, objects.length);
+        switch (type) {
+            case TerminalCallType.pwd:
+                Terminalpwd();
+                break;
+            case TerminalCallType.cd:
+                Terminalcd(objects);
+                break;
+            case TerminalCallType.touch:
+                Terminaltouch(objects);
+                break;
+            case TerminalCallType.mkdir:
+                Terminalmkdir(objects);
+                break;
+            case TerminalCallType.rm:
+                Terminalrm(objects);
+                break;
+            case TerminalCallType.cat:
+                Terminalcat(objects);
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void Terminalpwd() {
+        this.terminal_message = "helloworld";
+        this.terminal_update = true;
+    }
+
+    private void Terminalcd(Object[] objects) {
+
+    }
+
+    private void Terminaltouch(Object[] objects) {
+
+    }
+
+    private void Terminalmkdir(Object[] objects) {
+
+    }
+
+    private void Terminalrm(Object[] objects) {
+
+    }
+
+    private void Terminalcat(Object[] objects) {
+
+    }
+
     @Override
     public void run() {
         timer = new myClock(instance);
@@ -297,6 +356,9 @@ public class myKernel implements Runnable {
         fs = new myFile(instance);
         io = new myDevice(instance);
         Thread timerThread = new Thread(timer);
+        terminal_message = new String();
+        terminal_update = false;
+
         timerThread.start();
 
         interruptHandle();
