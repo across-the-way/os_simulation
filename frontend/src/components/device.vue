@@ -1,84 +1,43 @@
-<script setup>
-import HelloWorld from '@/components/HelloWorld.vue'
-import TheWelcome from '@/components/TheWelcome.vue'
-import axios from 'axios'
-import { serverURL } from '@/components/ServerURL'
-
-</script>
-
-<script>
-export default {
-  data() {
-    return {
-      breadcrumbItems: [] // 存储面包屑项的数组
-    };
-  },
-  mounted() {
-    this.generateBreadcrumb();
-    console.log(this.breadcrumbItems)
-  },
-  methods: {
-    generateBreadcrumb() {
-      const pathArray = window.location.pathname.split('/'); // 根据当前路径生成路径数组
-      pathArray.shift();
-      let currentPath = '/';
-      pathArray.forEach((path, index) => {
-        currentPath += path;
-        const breadcrumbItem = {
-          pathat: currentPath,
-          name: path
-        }
-        this.breadcrumbItems.push(breadcrumbItem);
-        currentPath += '/';
-      });
-    },
-
-  },
-  // watch: {
-  //   $route() {
-  //     this.breadcrumbItems = []; // 清空面包屑项数组
-  //     this.generateBreadcrumb(); // 重新生成面包屑
-  //   }
-  // }
-};
-</script>
 
 <template>
-  <div>
-    <el-breadcrumb separator-class="el-icon-arrow-right">
-      <!-- <el-breadcrumb-item :to="{ path: '/device' }">首页</el-breadcrumb-item> -->
-      <el-breadcrumb-item v-for="path in breadcrumbItems">
-      <a :href="path.pathat">{{ path.name }}</a>
-    </el-breadcrumb-item>
-
-    </el-breadcrumb>
+  <div id="app">
+    <terminal name="my-terminal" @exec-cmd="onExecCmd" :show-header="false" ></terminal>
   </div>
 </template>
-<style scoped>
-header {
-  line-height: 1.5;
-}
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
+<script>
+  import Terminal from "vue-web-terminal"
+  //  3.2.0 及 2.1.13 以后版本需要引入此样式，之前版本无需引入主题样式
+  import 'vue-web-terminal/lib/theme/dark.css'
 
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
+  export default {
+    name: 'App',
+    components: {Terminal},
+    methods: {
+      onExecCmd(key, command, success, failed) {
+        if (key === 'fail') {
+          failed('Something wrong!!!')
+        } else {
+          let allClass = ['success', 'error', 'system', 'info', 'warning'];
+
+          let clazz = allClass[Math.floor(Math.random() * allClass.length)];
+          success({
+            type: 'normal',
+            class: clazz,
+            tag: '成功',
+            content: command
+          })
+        }
+      }
+    }
   }
+</script>
 
-  .logo {
-    margin: 0 2rem 0 0;
+<style>
+  body, html, #app {
+    margin: 0;
+    padding: 0;
+    width: 90%;
+    height: 90%;
   }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-}
 </style>

@@ -1,6 +1,4 @@
 <script setup>
-import HelloWorld from '@/components/HelloWorld.vue'
-import TheWelcome from '@/components/TheWelcome.vue'
 import axios from 'axios'
 import { serverURL } from '@/components/ServerURL'
 import { ref } from 'vue'
@@ -50,23 +48,13 @@ export default {
 
     }
     // updated() {
-    //     axios.post(serverURL + '/process/instructions',this.formData)
-    //         .then(response => {
-    //             // 处理响应结果
-    //             console.log(response.data);
-    //             this.responseData = response.data
-    //         })
-    //         .catch(error => {
-    //             // 处理错误
-    //             console.error(error);
-    //         });
     // }
 }
 </script>
 <template>
     <div>
         <form @submit.prevent="handleSubmit">
-            <label for="name">Name:</label>
+            <label for="name">instruction</label>
             <br>
             <el-input v-model="formData" style="width: 240px" :rows="2" type="textarea" placeholder="Please input" />
             <div class="md4"><el-button type="primary" round @click = handleSubmit>submit</el-button></div>

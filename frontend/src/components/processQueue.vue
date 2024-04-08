@@ -1,6 +1,4 @@
 <script setup>
-import HelloWorld from '@/components/HelloWorld.vue'
-import TheWelcome from '@/components/TheWelcome.vue'
 import axios from 'axios'
 import { serverURL } from '@/components/ServerURL'
 import ProcessQueueItem from './ProcessQueueItem.vue';
@@ -148,7 +146,7 @@ export default {
                 :key="column.props" 
                 :prop="column.props" 
                 :label="column.label"
-                :width="'auto'">
+                width="auto">
             </el-table-column>
             
         </el-table>
