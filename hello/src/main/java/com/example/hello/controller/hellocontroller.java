@@ -70,4 +70,18 @@ public class hellocontroller {
         return this.kernel.getPm().getPCBs();
     }
 
+    @PostMapping("/terminal")
+    public String CreateProcess(@RequestBody Object[] instruction) {
+        TerminalCallType type = TerminalCallType.valueOf((String) instruction[0]);
+        instruction = Arrays.copyOfRange(instruction, 1, instruction.length);
+        this.kernel
+                .receiveInterrupt(new myInterrupt(InterruptType.TerminalCall, type, instruction));
+        while (!this.kernel.terminal_update)
+            ;
+        this.kernel.terminal_update = false;
+        String msg = this.kernel.terminal_message;
+        this.kernel.terminal_message = null;
+        return msg;
+    }
+
 }

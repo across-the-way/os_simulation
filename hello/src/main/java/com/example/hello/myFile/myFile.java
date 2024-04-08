@@ -45,7 +45,7 @@ public class myFile {
             // 更新bitmap
             Arrays.fill(bitmap, entry.getValue(), entry.getValue() + fileSize, true);
             // 更新Inode的storage
-            file.putStorage(entry.getKey(), fileSize);
+            file.putStorage(entry.getValue(), fileSize);
             // 加入读写队列
             rwqueue.offer(new queueEntry(file, 1, entry.getValue(), fileSize, pid));
             return true;
@@ -224,8 +224,12 @@ public class myFile {
         // 寻找父目录
         Inode pInode = findInode(parent_name);
         // 删除文件
-        if (pInode == null) {
+        if (pInode == null || pInode.findChild(file_name) == null) {
             // 路径错误触发中断
+            return;
+        }
+        if (ftable.isExist(parent_name + "/" + file_name)) {
+            // 打开文件表中存在此文件，不能删除
             return;
         }
         // 释放文件磁盘空间
@@ -237,6 +241,7 @@ public class myFile {
     public void mkdir(String parent_name, String dir_name) {
         if (parent_name.isEmpty()) {
             // 路径为空触发中断
+            System.out.println("路径为空");
             return;
         }
         // 寻找父目录
@@ -244,6 +249,7 @@ public class myFile {
         // 创建目录
         if (pInode == null) {
             // 路径错误触发中断
+            System.out.println("路径错误");
             return;
         }
         Inode newInode = new Inode(dir_name, 0, 0);
@@ -284,12 +290,6 @@ public class myFile {
         if (file != null) {
             allocate(file, usage_size, pid);
         }
-
-        // 加入文件读写待完成表
-
-        // 为文件分配空闲磁盘块
-
-        // 将所有用到的空闲磁盘块，加入磁盘块读写队列
     }
 
     public void read(int pid, int fd, int usage_size) {
@@ -304,11 +304,11 @@ public class myFile {
         while (it.hasNext()) {
             Map.Entry<Integer, Integer> curSpace = it.next();
             if (usage_size <= curSpace.getValue()) {
-                rwqueue.offer(new queueEntry(file, 0, curSpace.getKey(), curSpace.getKey() + usage_size, pid));
+                rwqueue.offer(new queueEntry(file, 0, curSpace.getKey(), usage_size, pid));
                 break;
             } else {
                 usage_size -= curSpace.getValue();
-                rwqueue.offer(new queueEntry(file, 0, curSpace.getKey(), curSpace.getKey() + curSpace.getValue(), -1));
+                rwqueue.offer(new queueEntry(file, 0, curSpace.getKey(), curSpace.getValue(), -1));
             }
         }
     }
