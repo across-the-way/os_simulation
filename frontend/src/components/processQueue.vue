@@ -1,7 +1,7 @@
 <script setup>
 import axios from 'axios'
 import { serverURL } from '@/components/ServerURL'
-import ProcessQueueItem from './ProcessQueueItem.vue';
+import ProcessQueueItem from '@/components/processQueueItem.vue';
 </script>
 <script >
 export default {
@@ -69,57 +69,34 @@ export default {
         fetchData() {
             axios.get(serverURL + '/process/status')
                 .then(response => {
+                    this.pcb = []
 
-                    // console.log(_data[0].state)
-                    // this.pcb = []
-
-                    // this.pcb = response.data; // 更新响应数据
-                    this.pcb.forEach(item => {
-                        for (const key in item) {
-                            if (item.hasOwnProperty(key)) {
-                                // 如果属性对应的数组不存在，则创建一个空数组
-                                if (!pcb[key]) {
-                                    pcb[key] = [];
-                                }
-                                // 将属性值添加到对应的数组中
-                                pcb[key].push(item[key]);
-                            }
-                        }
-                    });
-                    this.pcb = pcb
+                    this.pcb = response.data; // 更新响应数据
+                    // this.pcb.forEach(item => {
+                    //     for (const key in item) {
+                    //         if (item.hasOwnProperty(key)) {
+                    //             // 如果属性对应的数组不存在，则创建一个空数组
+                    //             if (!pcb[key]) {
+                    //                 pcb[key] = [];
+                    //             }
+                    //             // 将属性值添加到对应的数组中
+                    //             pcb[key].push(item[key]);
+                    //         }
+                    //     }
+                    // });
+                    // this.pcb = pcb
                     console.log(this.pcb)
                 })
                 .catch(error => {
                     console.error(error);
                 });
         },
-        transformStructs() {
-            // 创建空对象来存储变化后的数组
-            const transformedArrays = {};
-
-            // 遍历结构体数组
-            this.pcb.forEach(item => {
-                for (const key in item) {
-                    if (item.hasOwnProperty(key)) {
-                        // 如果属性对应的数组不存在，则创建一个空数组
-                        if (!transformedArrays[key]) {
-                            transformedArrays[key] = [];
-                        }
-                        // 将属性值添加到对应的数组中
-                        transformedArrays[key].push(pcb[key]);
-                    }
-                }
-            });
-
-            // 更新数据
-            this.form = transformedArrays;
-            console.log(this.form)
-        }
+        
 
 
     },
     mounted() {
-        // setInterval(this.fetchData, 1000); // 每秒发送请求
+        setInterval(this.fetchData, 1000); // 每秒发送请求
         // this.transformStructs
     },
     beforeMount() {
@@ -141,7 +118,7 @@ export default {
 </script>
 <template>
     <div style="display:inline-block ;">
-        <el-table :data="this.pcb" height="250">
+        <el-table :data="pcb" height="250">
             <el-table-column v-for="column in columns" 
                 :key="column.props" 
                 :prop="column.props" 
