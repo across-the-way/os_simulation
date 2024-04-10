@@ -7,7 +7,6 @@ import java.util.*;
 
 public class myFile {
     private myKernel kernel;
-
     private boolean[] bitmap;// false代表空闲
     private TreeMap<Integer, Integer> spaceTable;// 空闲块的【长度,起始位置】
     private OpenFileTable ftable;
@@ -55,12 +54,17 @@ public class myFile {
     public myFile(myKernel kernel) {
         this.kernel = kernel;
         ftable = new OpenFileTable();
+
         bitmap = new boolean[1024];
         spaceTable = new TreeMap<>();
         spaceTable.put(1024, 0);
         rwqueue = new LinkedList<queueEntry>();
         Arrays.fill(bitmap, false);
         root = new Inode("root", 0, 1);
+        root.insertFileInDir("dev", new Inode("dev",0,1));
+        root.insertFileInDir("taotao", new Inode("taotao",0,0));
+        root.insertFileInDir("bupt", new Inode("bupt",0,1));
+        root.insertFileInDir("lib", new Inode("lib",0,1));
     }
 
     private int move_need = 1;// 假设移动一格磁盘块需要一个操作数
@@ -311,5 +315,15 @@ public class myFile {
                 rwqueue.offer(new queueEntry(file, 0, curSpace.getKey(), curSpace.getValue(), -1));
             }
         }
+    }
+    public List<Inode> filelist(String path)
+    {
+        List<Inode> fl=new LinkedList<>();
+        Inode curInode=findInode(path);
+        Collection<Inode> values = curInode.getDirectoryEntries().values();
+        for (Inode value : values) {
+            fl.add(value);
+        }
+        return fl;
     }
 }

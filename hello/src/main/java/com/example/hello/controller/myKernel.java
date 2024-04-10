@@ -23,6 +23,10 @@ public class myKernel implements Runnable {
         return this.pm;
     }
 
+    public myFile getFs()
+    {
+        return this.fs;
+    }
     private myKernel() {
     }
 
@@ -319,12 +323,13 @@ public class myKernel implements Runnable {
                 Terminalcat(objects);
                 break;
             default:
+                TerminalErr(objects);
                 break;
         }
     }
 
     private void Terminalpwd() {
-        this.terminal_message = "helloworld";
+        this.terminal_message = "helloworld\nhelloworld";
         this.terminal_update = true;
     }
 
@@ -346,6 +351,11 @@ public class myKernel implements Runnable {
 
     private void Terminalcat(Object[] objects) {
 
+    }
+
+    private void TerminalErr(Object[] objects){
+        this.terminal_message = "err";
+        this.terminal_update = true; 
     }
 
     @Override

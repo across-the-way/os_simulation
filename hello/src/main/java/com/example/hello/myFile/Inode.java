@@ -24,13 +24,16 @@ public class Inode {
         this.name = name;
         this.type = type;
         this.imode = imode;
-        if (type == 0) {
-            directoryEntries = new HashMap<String, Inode>();
-        } else {
-//            startBlock = -1;//未初始化
-//            blockSize = 0;
-            storage = new LinkedHashMap<Integer, Integer>();
-        }
+        directoryEntries = new HashMap<String, Inode>();
+        storage = new LinkedHashMap<Integer, Integer>();
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public Inode findChild(String name) {

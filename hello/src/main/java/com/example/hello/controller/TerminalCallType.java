@@ -18,5 +18,8 @@ public enum TerminalCallType {
     rm,
 
     // 输出当前文件内容
-    cat
+    cat,
+
+    // 其他消息
+    err
 }
