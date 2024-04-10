@@ -1,35 +1,106 @@
 <template>
-  <div>
-    <el-table :data="tableData">
-      <el-table-column label="Name">
-        <template #default="scope">
-          {{ scope.row.name }}
-        </template>
-      </el-table-column>
-      <el-table-column label="Age">
-        <template #default="scope">
-          {{ scope.row.age }}
-        </template>
-      </el-table-column>
-      <el-table-column label="Country">
-        <template #default="scope">
-          {{ scope.row.country }}
-        </template>
-      </el-table-column>
-    </el-table>
-  </div>
-</template>
+  <terminal :name="name" @exec-cmd="onExecCmd" :show-header="false" :enable-default-command="false"
+    :command-store="com">
 
+
+    <template #json="data">
+      {{ data.message }}
+    </template>
+
+    <template #helpBox="{ showHeader, item }">
+      {{ item }}
+    </template>
+
+    <template #textEditor="{ data }">
+      <textarea name="editor" class="t-text-editor" v-model="data.value" @focus="data.onFocus"
+        @blur="data.onBlur"></textarea>
+      <div class="t-text-editor-floor" align="center">
+        <button class="t-text-editor-floor-btn" @click="_textEditorClose(false)">Cancel</button>
+        <button class="t-text-editor-floor-btn" @click="_textEditorClose(true)">Save & Close(Ctrl + S)</button>
+      </div>
+    </template>
+  </terminal>
+</template>
 <script>
+import Terminal from "vue-web-terminal"
+//  3.2.0 及 2.1.13 以后版本需要引入此样式，之前版本无需引入主题样式
+import 'vue-web-terminal/lib/theme/dark.css'
+import  axios  from "axios"
+import { serverURL } from "./ServerURL"
 export default {
   data() {
     return {
-      tableData: [
-        { name: 'John', age: 25, country: 'USA' },
-        { name: 'Alice', age: 30, country: 'Canada' },
-        { name: 'Bob', age: 28, country: 'UK' }
-      ]
-    };
+      com: [
+        'cd',
+        'git',
+        'ls',
+        'cat',
+        'rf'
+      ],
+      responseData: [],
+    }
+  },
+  methods: {
+    onExecCmd(key, command, success, failed) {
+      // console.log(command)
+      let temp1 = []
+      let temp = command.split(' ')
+      temp.forEach(str => {
+        const num = parseInt(str); // 转换为整数
+        if (!isNaN(num)) {
+          temp1.push(num); // 如果转换成功，则添加到args数组中
+        }
+        else
+          temp1.push(str) // 否则就直接添加
+      })
+      console.log(temp1)
+      axios.post(serverURL + '/terminal', temp1).then(response =>{
+        console.log(response.data)
+        this.responseData = response.data.split('\n')
+        this.responseData.forEach(res => {
+          success({
+            type: 'normal',
+            content: res
+          })
+        })
+        
+        
+        console.log(this.responseData)
+      })
+      .catch(error => {
+        console.log(error)
+      })
+      console.log(this.responseData)
+      if (key === 'fail') {
+        failed('Something wrong!!!')
+      } else {
+        let allClass = ['success', 'error', 'system', 'info', 'warning'];
+
+        let clazz = allClass[2];
+
+          
+          // failed({
+          //   type: 'normal',
+          //   class: 'success',
+          //   tag: 'success',
+          //   content: command
+          // })
+      }
+    },
+    getres(temp1){
+      
+    }
   }
-};
+}
 </script>
+
+<style>
+body,
+html,
+#app {
+  margin: 0;
+  padding: 0;
+  width: 90%;
+  height: 90%;
+}
+</style>

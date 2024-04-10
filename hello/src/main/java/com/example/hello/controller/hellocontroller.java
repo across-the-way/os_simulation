@@ -69,7 +69,10 @@ public class hellocontroller {
     public List<PCB> getProcessStatus() {
         return this.kernel.getPm().getPCBs();
     }
-
+    @GetMapping("/filesystem")
+    public String getFilesystem(@RequestBody Location location) {
+        return location.getLocation();
+    }//把这里的string改成List<Inode>应该就可以用了
     @PostMapping("/terminal")
     public String CreateProcess(@RequestBody Object[] instruction) {
         TerminalCallType type = TerminalCallType.valueOf((String) instruction[0]);
