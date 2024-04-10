@@ -11,6 +11,15 @@ public class myFile {
     private TreeMap<Integer, Integer> spaceTable;// 空闲块的【长度,起始位置】
     private OpenFileTable ftable;
     private Inode root;// 根目录
+    private String curPath;
+
+    public String getCurPath() {
+        return curPath;
+    }
+
+    public void setCurPath(String curPath) {
+        this.curPath = curPath;
+    }
 
     public class queueEntry {
         Inode file;
@@ -53,6 +62,7 @@ public class myFile {
 
     public myFile(myKernel kernel) {
         this.kernel = kernel;
+        curPath = "filesystem";
         ftable = new OpenFileTable();
 
         bitmap = new boolean[1024];
@@ -60,11 +70,12 @@ public class myFile {
         spaceTable.put(1024, 0);
         rwqueue = new LinkedList<queueEntry>();
         Arrays.fill(bitmap, false);
-        root = new Inode("root", 0, 1);
-        root.insertFileInDir("dev", new Inode("dev",0,1));
-        root.insertFileInDir("taotao", new Inode("taotao",0,0));
-        root.insertFileInDir("bupt", new Inode("bupt",0,1));
-        root.insertFileInDir("lib", new Inode("lib",0,1));
+        root = new Inode("filesystem", 0, 1);
+        root.insertFileInDir("dev", new Inode("dev", 0, 1));
+        root.insertFileInDir("taotao", new Inode("taotao", 0, 0));
+        root.insertFileInDir("bupt", new Inode("bupt", 0, 1));
+        root.insertFileInDir("lib", new Inode("lib", 0, 1));
+        root.insertFileInDir("dada.txt", new Inode("dada.txt", 1, 1));
     }
 
     private int move_need = 1;// 假设移动一格磁盘块需要一个操作数
@@ -77,19 +88,16 @@ public class myFile {
 
     public void update() {
         ops_cur = 0;
-        System.out.println("文件状态更新");
         // 检查当前是否有进程进行文件读写任务，若无，返回
         // 模拟磁盘进行读写操作
         while (ops_cur < ops_max) {
             if (rwqueue.isEmpty()) {
-                System.out.println("读写队列中无文件读写任务");
                 break;
             }
             int isfinished = disk_read_write();
             // 若有文件读写任务完成，即有任务的剩余磁盘块归零
             if (isfinished != -1) {
-                System.out.println("dada 正在上厕所");
-                sendInterrupt(InterruptType.FileFinish, isfinished);               
+                sendInterrupt(InterruptType.FileFinish, isfinished);
                 // 发送中断系统调用FileFinish
                 // 启动磁盘调度，进行下一个文件读写操作
             }
@@ -141,11 +149,12 @@ public class myFile {
             return -1;
         }
     }
-    //public Inode getInode()
-    private Inode findInode(String path) {
+
+    // public Inode getInode()
+    public Inode findInode(String path) {
         String[] fileName = path.split("/");
         Inode curInode = root;
-        if (!fileName[0].equals("root")) {
+        if (!fileName[0].equals("filesystem")) {
             // 路径错误
             return null;
         }
@@ -204,20 +213,34 @@ public class myFile {
     }
 
     // 以下parent_name是文件绝对地址
-    public void touch(String parent_name, String file_name) {
+    public boolean touch(String parent_name, String file_name) {
         if (parent_name.isEmpty()) {
             // 路径为空触发中断
-            return;
+            return false;
         }
         // 寻找父目录
         Inode pInode = findInode(parent_name);
         // 创建文件
         if (pInode == null) {
             // 路径错误触发中断
-            return;
+            return false;
+        }
+        if (checkRenameError(parent_name, file_name, 1)) {
+            return false;
         }
         Inode newInode = new Inode(file_name, 1, 1);
         pInode.insertFileInDir(file_name, newInode);
+        return true;
+    }
+
+    public boolean checkRenameError(String parent_name, String file_name, int type) {
+        List<Inode> check = filelist(parent_name);
+        for (Inode i : check) {
+            if (i.getType() == type && i.getName().equals(file_name)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void rm(String parent_name, String file_name) {
@@ -239,25 +262,28 @@ public class myFile {
         // 释放文件磁盘空间
         freeUp(pInode.findChild(file_name));
         pInode.deleteFileInDir(file_name);
-                
+
     }
 
-    public void mkdir(String parent_name, String dir_name) {
+    public boolean mkdir(String parent_name, String dir_name) {
         if (parent_name.isEmpty()) {
             // 路径为空触发中断
             System.out.println("路径为空");
-            return;
+            return false;
         }
         // 寻找父目录
         Inode pInode = findInode(parent_name);
         // 创建目录
         if (pInode == null) {
             // 路径错误触发中断
-            System.out.println("路径错误");
-            return;
+            return false;
         }
-        Inode newInode = new Inode(dir_name, 0, 0);
+        if (checkRenameError(parent_name, dir_name, 0)) {
+            return false;
+        }
+        Inode newInode = new Inode(dir_name, 0, 1);
         pInode.insertFileInDir(dir_name, newInode);
+        return true;
     }
 
     public void rmdir(String parent_name, String dir_name) {
@@ -316,14 +342,63 @@ public class myFile {
             }
         }
     }
-    public List<Inode> filelist(String path)
-    {
-        List<Inode> fl=new LinkedList<>();
-        Inode curInode=findInode(path);
+
+    public List<Inode> filelist(String path) {
+        List<Inode> fl = new LinkedList<>();
+        Inode curInode = findInode(path);
         Collection<Inode> values = curInode.getDirectoryEntries().values();
         for (Inode value : values) {
             fl.add(value);
         }
         return fl;
+    }
+
+    public String ls(String path, String option) {
+        String res = "";
+        List<Inode> fList = filelist(path);
+        if (fList.size() == 0) {
+            return "该目录下没有任何文件和文件夹";
+        }
+        int blank_size1 = 15;
+        int blank_size2 = 13;
+        if (option == null || option.equals("-l")) {
+            int count = 0;
+            for (Inode node : fList) {
+                // 文件
+                if (node.getType() == 1) {
+                    res += "File-" + node.getName();
+                    if (option != null) {
+                        res += "-" + node.getImode();
+                        for (int i = 0; i < blank_size1 - node.getName().length() - 2; i++) {
+                            res += " ";
+                        }
+                    } else {
+                        for (int i = 0; i < blank_size1 - node.getName().length(); i++) {
+                            res += " ";
+                        }
+                    }
+
+                } else {
+                    res += "Folder-" + node.getName();
+                    if (option != null) {
+                        res += "-" + node.getImode();
+                        for (int i = 0; i < blank_size2 - node.getName().length() - 2; i++) {
+                            res += " ";
+                        }
+                    } else {
+                        for (int i = 0; i < blank_size2 - node.getName().length(); i++) {
+                            res += " ";
+                        }
+                    }
+                }
+                count++;
+                if (count % 3 == 0) {
+                    res += "\n";
+                }
+            }
+        } else {
+            return "未定义该选项,请检查该命令是否正确\n指令格式: ls (-l)";
+        }
+        return res;
     }
 }

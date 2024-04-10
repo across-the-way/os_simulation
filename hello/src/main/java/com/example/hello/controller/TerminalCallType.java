@@ -17,6 +17,9 @@ public enum TerminalCallType {
     // 删除一个文件
     rm,
 
+    // 列出当前文件夹下所有文件
+    ls,
+
     // 输出当前文件内容
     cat,
 

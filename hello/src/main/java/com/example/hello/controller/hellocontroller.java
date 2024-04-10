@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import com.example.hello.myInstrunction.Instruction;
 import com.example.hello.myProcess.PCB;
 import com.example.hello.myProcess.PCB.P_STATE;
-
+import com.example.hello.myFile.*;
 import java.util.*;
 
 @RestController
@@ -69,13 +69,22 @@ public class hellocontroller {
     public List<PCB> getProcessStatus() {
         return this.kernel.getPm().getPCBs();
     }
-    @GetMapping("/filesystem")
-    public String getFilesystem(@RequestBody Location location) {
-        return location.getLocation();
-    }//把这里的string改成List<Inode>应该就可以用了
+
+    @PostMapping("/filesystem")
+    public List<Inode> getFilesystem(@RequestBody Location location) {
+        location.setLocation(location.getLocation().substring(1));
+        return this.kernel.getFs().filelist(location.getLocation());
+    }// 把这里的string改成List<Inode>应该就可以用了
+
     @PostMapping("/terminal")
     public String CreateProcess(@RequestBody Object[] instruction) {
-        TerminalCallType type = TerminalCallType.valueOf((String) instruction[0]);
+        TerminalCallType type; 
+        try{
+            type =  TerminalCallType.valueOf((String) instruction[0]);
+        }
+        catch (java.lang.IllegalArgumentException e){
+            type = TerminalCallType.err;
+        }
         instruction = Arrays.copyOfRange(instruction, 1, instruction.length);
         this.kernel
                 .receiveInterrupt(new myInterrupt(InterruptType.TerminalCall, type, instruction));
