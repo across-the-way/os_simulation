@@ -1,5 +1,5 @@
 <template>
-  <terminal :name="name" @exec-cmd="onExecCmd" :show-header="false" "
+  <terminal :name="name" @exec-cmd="onExecCmd" :show-header="false" 
     :command-store="com">
 
 
