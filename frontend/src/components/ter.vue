@@ -1,30 +1,14 @@
 <template>
-  <terminal :name="name" @exec-cmd="onExecCmd" :show-header="false" 
-    :command-store="com">
+  
+    <terminal name="my-terminal" @exec-cmd="onExecCmd" :show-header="false":command-store="com"></terminal>
 
-
-    <template #json="data">
-      {{ data.message }}
-    </template>
-
-    <template #helpBox="{ showHeader, item }">
-      {{ item }}
-    </template>
-
-    <template #textEditor="{ data }">
-      <textarea name="editor" class="t-text-editor" v-model="data.value" @focus="data.onFocus"
-        @blur="data.onBlur"></textarea>
-      <div class="t-text-editor-floor" align="center">
-        <button class="t-text-editor-floor-btn" @click="_textEditorClose(false)">Cancel</button>
-        <button class="t-text-editor-floor-btn" @click="_textEditorClose(true)">Save & Close(Ctrl + S)</button>
-      </div>
-    </template>
-  </terminal>
 </template>
+
 <script>
 import Terminal from "vue-web-terminal"
 //  3.2.0 及 2.1.13 以后版本需要引入此样式，之前版本无需引入主题样式
 import 'vue-web-terminal/lib/theme/dark.css'
+
 import  axios  from "axios"
 import { serverURL } from "./ServerURL"
 export default {
@@ -40,9 +24,9 @@ export default {
       responseData: [],
     }
   },
+  components: { Terminal },
   methods: {
     onExecCmd(key, command, success, failed) {
-      // console.log(command)
       let temp1 = []
       let temp = command.split(' ')
       temp.forEach(str => {
@@ -54,7 +38,7 @@ export default {
           temp1.push(str) // 否则就直接添加
       })
       console.log(temp1)
-      axios.post(serverURL + '/terminal', temp1).then(response =>{
+      axios.post(serverURL + '/terminal', temp1).then(response => {
         console.log(response.data)
         this.responseData = response.data.split('\n')
         this.responseData.forEach(res => {
@@ -63,13 +47,13 @@ export default {
             content: res
           })
         })
-        
-        
+
+
         console.log(this.responseData)
       })
-      .catch(error => {
-        console.log(error)
-      })
+        .catch(error => {
+          console.log(error)
+        })
       console.log(this.responseData)
       if (key === 'fail') {
         failed('Something wrong!!!')
@@ -78,17 +62,14 @@ export default {
 
         let clazz = allClass[2];
 
-          
-          // failed({
-          //   type: 'normal',
-          //   class: 'success',
-          //   tag: 'success',
-          //   content: command
-          // })
+
+        // failed({
+        //   type: 'normal',
+        //   class: 'success',
+        //   tag: 'success',
+        //   content: command
+        // })
       }
-    },
-    getres(temp1){
-      
     }
   }
 }

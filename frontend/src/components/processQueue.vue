@@ -96,7 +96,8 @@ export default {
 
     },
     mounted() {
-        setInterval(this.fetchData, 1000); // 每秒发送请求
+        // setInterval(this.fetchData, 1000); // 每秒发送请求
+        // this.fetchData
         // this.transformStructs
     },
     beforeMount() {

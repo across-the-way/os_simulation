@@ -1,43 +1,63 @@
+<script setup>
+import axios from 'axios'
+import { serverURL } from '@/components/ServerURL'
 
-<template>
-  <div id="app">
-    <terminal name="my-terminal" @exec-cmd="onExecCmd" :show-header="false" ></terminal>
-  </div>
-</template>
-
-<script>
-  import Terminal from "vue-web-terminal"
-  //  3.2.0 及 2.1.13 以后版本需要引入此样式，之前版本无需引入主题样式
-  import 'vue-web-terminal/lib/theme/dark.css'
-
-  export default {
-    name: 'App',
-    components: {Terminal},
-    methods: {
-      onExecCmd(key, command, success, failed) {
-        if (key === 'fail') {
-          failed('Something wrong!!!')
-        } else {
-          let allClass = ['success', 'error', 'system', 'info', 'warning'];
-
-          let clazz = allClass[Math.floor(Math.random() * allClass.length)];
-          success({
-            type: 'normal',
-            class: clazz,
-            tag: '成功',
-            content: command
-          })
-        }
-      }
-    }
-  }
 </script>
 
-<style>
-  body, html, #app {
-    margin: 0;
-    padding: 0;
-    width: 90%;
-    height: 90%;
+<script>
+export default {
+  data() {
+    return {
+      responseData: null,
+    }
+  },
+  created() {
+    axios.get(serverURL + '/hello', {})
+      .then(response => {
+        // 处理响应结果
+        console.log(response.data);
+        this.responseData = response.data
+      })
+      .catch(error => {
+        // 处理错误
+        console.error(error);
+      });
   }
+}
+
+
+
+</script>
+
+<template>
+   <div>测试</div>
+</template>
+
+<style scoped>
+header {
+  line-height: 1.5;
+}
+
+.logo {
+  display: block;
+  margin: 0 auto 2rem;
+}
+
+@media (min-width: 1024px) {
+  header {
+    display: flex;
+    place-items: center;
+    padding-right: calc(var(--section-gap) / 2);
+  }
+
+  .logo {
+    margin: 0 2rem 0 0;
+  }
+
+  header .wrapper {
+    display: flex;
+    place-items: flex-start;
+    flex-wrap: wrap;
+  }
+}
 </style>

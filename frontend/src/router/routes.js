@@ -36,13 +36,22 @@ const routes = [
         component: () => import('@/components/processQueue.vue'),
     },
     {
-        path: '/device/:id*',
+        path: '/device',
         name: 'device',
         title: '设备管理',
         meta:{
             title: '设备管理'
         },
         component: () => import('@/components/device.vue'),
+    },
+    {
+        path: '/terminal',
+        name: 'ter',
+        title: '终端',
+        meta:{
+            title: '终端'
+        },
+        component: () => import('@/components/ter.vue'),
     },
     {
         path: '/process',
