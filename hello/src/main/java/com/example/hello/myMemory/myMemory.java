@@ -1,5 +1,8 @@
 package com.example.hello.myMemory;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.example.hello.controller.myKernel;
 
 public class myMemory {
@@ -14,15 +17,23 @@ public class myMemory {
         this.memory_size = 4096;
         this.allocator = new DemandPageAllocator(memory_size, 32);
     }
+
     public myMemory(myKernel kernel, allocateStrategy strategy, int memory_size) {
         this.kernel = kernel;
         this.strategy = strategy;
         this.memory_size = memory_size;
         switch (strategy) {
-            case FirstFit: 
-            case BestFit:
+            case FirstFit:  
+                this.allocator = new ContiguousAllocator(memory_size, allocateStrategy.FirstFit); 
+                break;
+            case NextFit: 
+                this.allocator = new ContiguousAllocator(memory_size, allocateStrategy.NextFit); 
+                break;
+            case BestFit: 
+                this.allocator = new ContiguousAllocator(memory_size, allocateStrategy.BestFit); 
+                break;
             case WorstFit: 
-                this.allocator = new ContiguousAllocator(memory_size); 
+                this.allocator = new ContiguousAllocator(memory_size, allocateStrategy.WorstFit); 
                 break;
             default:
                 System.out.println("Please use correct construction method");
@@ -79,4 +90,25 @@ public class myMemory {
         return;
     }
     
+    public List<Object> getMemoryStatus() {
+        List<Object> list = new ArrayList<>();
+        list.add(strategy.toString());
+        switch (strategy) {
+            case FirstFit:
+            case NextFit:
+            case BestFit:
+            case WorstFit:
+                list.add(((ContiguousAllocator)allocator).free_blocks);
+                list.add(((ContiguousAllocator)allocator).used_memory);
+                break;
+            case Page:
+                list.add(((PageAllocator)allocator).page_table);
+                break;
+            case LRU:
+            case FIFO:
+                list.add(((DemandPageAllocator)allocator).page_table);
+                break;
+        }
+        return list;
+    }
 }

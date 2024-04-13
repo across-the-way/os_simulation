@@ -27,6 +27,10 @@ public class myKernel implements Runnable {
         return this.fs;
     }
 
+    public myMemory getMm() {
+        return this.mm;
+    }
+
     private myKernel() {
     }
 
