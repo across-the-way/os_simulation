@@ -96,7 +96,7 @@ public class hellocontroller {
         return msg;
     }
 
-    @PostMapping("/memory")
+    @GetMapping("/memory")
     public List<Object> getMemoryStatus() {
         return this.kernel.getMm().getMemoryStatus();
     }
