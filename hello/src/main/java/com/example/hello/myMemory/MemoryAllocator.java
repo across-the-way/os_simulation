@@ -23,26 +23,38 @@ public abstract class MemoryAllocator {
 }
 
 class ContiguousAllocator extends MemoryAllocator {
-    private List<Block> free_blocks;
-    protected Map<Integer, Block> used_memory; // 进程-内存表
-    enum AllocationPolicy { FIRST_FIT, NEXT_FIT, BEST_FIT, WORST_FIT }
-    private AllocationPolicy allocation_policy = AllocationPolicy.FIRST_FIT;
+    public List<Block> free_blocks;
+    public Map<Integer, Block> used_memory; // 进程-内存表
+    private allocateStrategy allocation_policy = allocateStrategy.FirstFit;
     private int last_index = 0;//用于NEXT_FIT,记录上一次在free_blocks中查找结束的位置
 
-    public ContiguousAllocator(int total_memory_size) {
+    public ContiguousAllocator(int total_memory_size, allocateStrategy strategy) {
         super(total_memory_size);
         free_blocks = new ArrayList<>();
         free_blocks.add(new Block(0, total_memory_size));
         used_memory = new HashMap<Integer, Block>();
+        switch (strategy) {
+            case FirstFit:
+                allocation_policy = allocation_policy.FirstFit;
+            case NextFit:
+                allocation_policy = allocation_policy.NextFit;
+            case BestFit:
+                allocation_policy = allocation_policy.BestFit;
+            case WorstFit:
+                allocation_policy = allocation_policy.WorstFit;
+            default:
+                System.out.println("Unknown allocation strategy");
+                break;
+        }
     }
 
     @Override
     Block findFreeSpace(int size) {
         switch (allocation_policy) {
-            case FIRST_FIT: return firstFit(size);
-            case NEXT_FIT: return nextFit(size);
-            case BEST_FIT: return bestFit(size);
-            case WORST_FIT: return worstFit(size);
+            case FirstFit: return firstFit(size);
+            case NextFit: return nextFit(size);
+            case BestFit: return bestFit(size);
+            case WorstFit: return worstFit(size);
             default: break;
         }
         return null;
@@ -188,7 +200,7 @@ class ContiguousAllocator extends MemoryAllocator {
         }
     }
     public static void main(String[] args) {
-        ContiguousAllocator allocator = new ContiguousAllocator(100);
+        ContiguousAllocator allocator = new ContiguousAllocator(100, allocateStrategy.FirstFit);
         allocator.show();
         allocator.allocate(0, allocator.findFreeSpace(10));
         allocator.show();
@@ -248,7 +260,7 @@ class PageAllocator extends MemoryAllocator{
     }
     private int page_size;
     private int page_count;
-    private PageTable page_table;
+    public PageTable page_table;
     public PageAllocator(int total_memory_size, int page_size) {
         super(total_memory_size);
         this.page_size = page_size;
@@ -499,7 +511,7 @@ class DemandPageAllocator extends MemoryAllocator {
     
     private int page_size;
     private int page_capacity;
-    private PageTable page_table;
+    public PageTable page_table;
 
     public DemandPageAllocator(int total_memory_size, int page_size) {
         super(total_memory_size);
