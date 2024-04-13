@@ -5,5 +5,6 @@ public enum allocateStrategy {
     BestFit,
     WorstFit,
     Page,
-    DemandPage
+    LRU,
+    FIFO,
 }
