@@ -6,7 +6,7 @@ public enum InterruptType {
     TimeSilceRunOut,
     IOFinish,
     FileFinish,
-    GUICall,
+    TerminalCall,
     SystemCall,
     Exit,
 }

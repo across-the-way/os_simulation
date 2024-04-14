@@ -17,7 +17,15 @@ const routes = [
         },
         component: () => import('@/components/filesystem.vue'),
     },
-
+    {
+        path: '/test',
+        name: 'test',
+        title: '测试页',
+        meta:{
+            title: '测试页'
+        },
+        component: () => import('@/components/test.vue'),
+    },
     {
         path: '/process/queue',
         name: 'processqueue',

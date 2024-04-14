@@ -2,8 +2,10 @@ package com.example.hello.myMemory;
 
 public enum allocateStrategy {
     FirstFit,
+    NextFit,
     BestFit,
     WorstFit,
     Page,
-    DemandPage
+    LRU,
+    FIFO,
 }

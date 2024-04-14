@@ -11,26 +11,26 @@ public class Inode {
     private int type;//0为目录，1为文件
     private int imode;//读写权限，0为只读，1为读写
 
-
     //目录结构
     private HashMap<String, Inode> directoryEntries;//子目录或子文件的指针表
 
     //文件结构
-//    private int startBlock;
-//    private int blockSize;
     private LinkedHashMap<Integer, Integer> storage;  //<startBlock, blockSize>
 
     public Inode(String name, int type, int imode) {
         this.name = name;
         this.type = type;
         this.imode = imode;
-        if (type == 0) {
-            directoryEntries = new HashMap<String, Inode>();
-        } else {
-//            startBlock = -1;//未初始化
-//            blockSize = 0;
-            storage = new LinkedHashMap<Integer, Integer>();
-        }
+        directoryEntries = new HashMap<String, Inode>();
+        storage = new LinkedHashMap<Integer, Integer>();
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public Inode findChild(String name) {

@@ -1,6 +1,4 @@
 <script setup >
-import HelloWorld from '@/components/HelloWorld.vue'
-import TheWelcome from '@/components/TheWelcome.vue'
 import axios from 'axios'
 import { serverURL } from '@/components/ServerURL'
 import { Folder } from '@element-plus/icons-vue'
@@ -13,34 +11,40 @@ export default {
     return {
       fileLocation: '',
       breadcrumbItems: [],
-      fileLists: [{
-        date: '2016-05-03',
-        name: 'Tom',
-        address: 'No. 189, Grove St, Los Angeles',
-      },
-      {
-        date: '2016-05-02',
-        name: 'Tom1',
-        address: 'No. 189, Grove St, Los Angeles',
-      },
-      {
-        date: '2016-05-04',
-        name: 'Tom2',
-        address: 'No. 189, Grove St, Los Angeles',
-      },
-      {
-        date: '2016-05-01',
-        name: 'Tom3',
-        address: 'No. 189, Grove St, Los Angeles',
-      },]
+      fileLists: [
+      //   {
+      //   name: '2016-05-03',
+      //   type: 'Tom',
+      //   imode: 'No. 189, Grove St, Los Angeles',
+      // },
+      // {
+      //   name: '2016-05-03',
+      //   type: 'Tom',
+      //   imode: 'No. 189, Grove St, Los Angeles',
+      // },
+      // {
+      //   name: '2016-05-03',
+      //   type: 'Tom',
+      //   imode: 'No. 189, Grove St, Los Angeles',
+      // },
+      // {
+      //   name: '2016-05-03',
+      //   type: 'Tom',
+      //   imode: 'No. 189, Grove St, Los Angeles',
+      // },
+    ]
     }
   },
   created() {
-    axios.get(serverURL + window.location.pathname, {})
+    console.log(window.location.pathname)
+    name = window.location.pathname.split('/')
+    console.log(name)
+    axios.post(serverURL + '/filesystem',{location: window.location.pathname} )
       .then(response => {
         // 处理响应结果
         console.log(response.data);
-        this.responseData = response.data
+        this.fileLists = response.data
+        // this.responseData = response.data
       })
       .catch(error => {
         // 处理错误
@@ -50,6 +54,7 @@ export default {
   },
   mounted() {
     this.fileLocation = window.location.pathname;
+    console.log(window.location.pathname)
     this.generateBreadcrumb();
     console.log(this.breadcrumbItems);
   
@@ -87,14 +92,14 @@ export default {
     </el-breadcrumb-item>
 
     </el-breadcrumb>
-    <el-table :data="this.fileLists" style="width: 100%">
+    <el-table :data="fileLists" style="width: 100%">
       <el-table-column label="Name" width="180">
         <template #default="scope">
           <div style="display: flex; align-items: center">
             <el-icon color="#409efc" style="color: blue;">
               <folder />
             </el-icon>
-            <a style="margin-left: 10px" v-bind:href="this.fileLocation + '/' + scope.row.name " >{{ scope.row.name }}</a>
+            <a style="margin-left: 10px" v-bind:href="fileLocation + '/' + scope.row.name " >{{ scope.row.name }}</a>
           </div>
         </template>
       </el-table-column>
@@ -102,11 +107,11 @@ export default {
         <template #default="scope">
           <el-popover effect="light" trigger="hover" placement="top" width="190">
             <template #default>
-              <div>date: {{ scope.row.date }}</div>
-              <div>address: {{ scope.row.address }}</div>
+              <div>{{ scope.row.type }}</div>
+              <div>{{ scope.row.imode }}</div>
             </template>
             <template #reference>
-              <el-tag>{{ scope.row.date }}</el-tag>
+              <el-tag>{{ scope.row.type }}</el-tag>
             </template>
           </el-popover>
         </template>
