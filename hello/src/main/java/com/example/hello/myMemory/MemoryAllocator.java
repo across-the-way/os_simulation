@@ -5,10 +5,9 @@ import java.util.BitSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
-import com.example.hello.myMemory.Memory;
-import com.example.hello.myMemory.Block;
-import com.example.hello.myMemory.Pages;
+import org.apache.commons.lang3.tuple.Pair;
 
 public abstract class MemoryAllocator {
     protected int total_memory_size;
@@ -24,26 +23,38 @@ public abstract class MemoryAllocator {
 }
 
 class ContiguousAllocator extends MemoryAllocator {
-    private List<Block> free_blocks;
-    protected Map<Integer, Block> used_memory; // 进程-内存表
-    enum AllocationPolicy { FIRST_FIT, NEXT_FIT, BEST_FIT, WORST_FIT }
-    private AllocationPolicy allocation_policy = AllocationPolicy.FIRST_FIT;
+    public List<Block> free_blocks;
+    public Map<Integer, Block> used_memory; // 进程-内存表
+    private allocateStrategy allocation_policy = allocateStrategy.FirstFit;
     private int last_index = 0;//用于NEXT_FIT,记录上一次在free_blocks中查找结束的位置
 
-    public ContiguousAllocator(int total_memory_size) {
+    public ContiguousAllocator(int total_memory_size, allocateStrategy strategy) {
         super(total_memory_size);
         free_blocks = new ArrayList<>();
         free_blocks.add(new Block(0, total_memory_size));
         used_memory = new HashMap<Integer, Block>();
+        switch (strategy) {
+            case FirstFit:
+                allocation_policy = allocation_policy.FirstFit;
+            case NextFit:
+                allocation_policy = allocation_policy.NextFit;
+            case BestFit:
+                allocation_policy = allocation_policy.BestFit;
+            case WorstFit:
+                allocation_policy = allocation_policy.WorstFit;
+            default:
+                System.out.println("Unknown allocation strategy");
+                break;
+        }
     }
 
     @Override
     Block findFreeSpace(int size) {
         switch (allocation_policy) {
-            case FIRST_FIT: return firstFit(size);
-            case NEXT_FIT: return nextFit(size);
-            case BEST_FIT: return bestFit(size);
-            case WORST_FIT: return worstFit(size);
+            case FirstFit: return firstFit(size);
+            case NextFit: return nextFit(size);
+            case BestFit: return bestFit(size);
+            case WorstFit: return worstFit(size);
             default: break;
         }
         return null;
@@ -189,7 +200,7 @@ class ContiguousAllocator extends MemoryAllocator {
         }
     }
     public static void main(String[] args) {
-        ContiguousAllocator allocator = new ContiguousAllocator(100);
+        ContiguousAllocator allocator = new ContiguousAllocator(100, allocateStrategy.FirstFit);
         allocator.show();
         allocator.allocate(0, allocator.findFreeSpace(10));
         allocator.show();
@@ -249,7 +260,7 @@ class PageAllocator extends MemoryAllocator{
     }
     private int page_size;
     private int page_count;
-    private PageTable page_table;
+    public PageTable page_table;
     public PageAllocator(int total_memory_size, int page_size) {
         super(total_memory_size);
         this.page_size = page_size;
@@ -285,5 +296,272 @@ class PageAllocator extends MemoryAllocator{
         Pages pages3 = allocator.findFreeSpace(256);
         allocator.allocate(3, pages3);
         allocator.show();
+    }
+}
+
+class DemandPageAllocator extends MemoryAllocator {
+    class LRUCache {
+        class Node {
+            int page_num_physical;
+            int pid;
+            int page_num_virtual;
+            Node prev, next;
+            Node() {}
+            Node(int page_num_physical, int pid, int page_num_virtual) {
+                this.page_num_physical = page_num_physical;
+                this.pid = pid;
+                this.page_num_virtual = page_num_virtual;
+            }
+        }
+        private int count;
+        private int capacity;
+        private Node head, tail;
+        private Map<Integer, Node> cache = new HashMap<>();
+        LRUCache(int capacity) {
+            this.count = 0;
+            this.capacity = capacity;
+            head = new Node();
+            tail = new Node();
+            head.next = tail;
+            tail.prev = head;
+        }
+        public boolean visit(int page_num) {
+            Node node = cache.get(page_num);
+            if (node == null) {
+                return false;
+            }
+            moveToHead(node);
+            return true;
+        }
+        public int get(int page_num) {
+            Node node = cache.get(page_num);
+            if (node == null) {
+                return -1;
+            }
+            moveToHead(node);
+            return node.pid;
+        }
+        public void put(int page_num, int pid, int page_num_virtual) {
+            Node node = cache.get(page_num);
+            if (node == null) {
+                node = new Node(page_num, pid, page_num_virtual);
+                cache.put(page_num, node);
+                addToHead(node);
+                count++;
+                if (count > capacity) {
+                    Node tail = removeTail();
+                    cache.remove(tail.page_num_physical);
+                    count--;
+                }
+            }
+            else {
+                moveToHead(node);
+            }
+        }
+        public int getTailPagePhysical() {
+            if (tail.prev == head) return -1;
+            return tail.prev.page_num_physical;
+        }
+        public int getTailPid() {
+            if (tail.prev == head) return -1;
+            return tail.prev.pid;
+        }
+        public int getTailPageVirtual() {
+            if (tail.prev == head) return -1;
+            return tail.prev.page_num_virtual;
+        }
+        public void remove(int page_num) {
+            Node node = cache.get(page_num);
+            if (node != null) {
+                removeNode(node);
+                cache.remove(page_num);
+                count--;
+            }
+        }
+        private void addToHead(Node node) {
+            node.prev = head;
+            node.next = head.next;
+            head.next.prev = node;
+            head.next = node;
+        }
+        private void removeNode(Node node) {
+            node.prev.next = node.next;
+            node.next.prev = node.prev;
+        }
+        private void moveToHead(Node node) {
+            removeNode(node);
+            addToHead(node);
+        }
+        private Node removeTail() {
+            Node res = tail.prev;
+            removeNode(res);
+            return res;
+        }
+    }
+    class SwapPartition {
+        private int page_count;
+        private int used_count;
+
+        public SwapPartition(int page_count) {
+            this.page_count = page_count;
+            this.used_count = 0;
+        }
+        public boolean swapIn() {
+            if (used_count < page_count) {
+                used_count++;
+                return true;
+            }
+            return false;
+        }
+        public boolean swapOut() {
+            if (used_count > 0) {
+                used_count--;
+                return true;
+            }
+            return false;
+        }
+        public void remove() {
+            if (used_count > 0) {
+                used_count--;
+            }
+        }
+        public boolean isFull() {
+            return used_count == page_count;
+        }
+        public boolean isEmpty() {
+            return used_count == 0;
+        }
+    }
+    class PageTable {
+        private Map<Integer, DemandPages> used_pages;
+        private BitSet free_pages;
+        private SwapPartition swap_partition;
+        private LRUCache lru_cache;
+
+        public PageTable(int page_capacity) {
+            used_pages = new HashMap<>();
+            free_pages = new BitSet(page_capacity);
+            free_pages.set(0, page_capacity);
+            swap_partition = new SwapPartition(page_capacity * 10);
+            lru_cache = new LRUCache(page_capacity);
+        }
+
+        public DemandPages findFreePages(int page_count) {
+            DemandPages pages = new DemandPages(page_count * page_size);
+            int cnt = 0;
+            for (int i = 0; i < free_pages.size(); i++) {
+                if (free_pages.get(i)) {
+                    pages.addDemandPage(cnt, i);
+                    cnt++;
+                    if (cnt == page_count) {
+                        return pages;
+                    }
+                }
+            }
+            for (int i = cnt; i < page_count; i++) {
+                if (swap_partition.swapIn()) {
+                    pages.addDemandPage(i);
+                } else {
+                    return null;
+                }
+            }
+            return pages;
+        }
+        
+        public void allocate(int pid, DemandPages pages) {
+            used_pages.put(pid, pages);
+            for (Pair<Integer, Integer> virtual_physical_page : pages.getAllPhysicalPages()) {
+                int physical_page = virtual_physical_page.getRight();
+                free_pages.clear(physical_page);
+                lru_cache.put(physical_page, pid, virtual_physical_page.getLeft());
+            }
+        }
+
+        public void release(int pid) {
+            DemandPages pages = used_pages.remove(pid);
+            if (pages != null) {
+                for (Pair<Integer, Integer> virtual_physical_page : pages.getAllPhysicalPages()) {
+                    int physical_page = virtual_physical_page.getRight();
+                    free_pages.set(physical_page);
+                    lru_cache.remove(physical_page);
+                }
+                for (int i = 0; i < pages.getVirtualPageCount(); i++) {
+                    swap_partition.remove();
+                }
+            }
+        }
+    
+        public boolean isPageFault(int pid, int page_num) {
+            int page_num_physical = getPhysicalPage(pid, page_num);
+            if (page_num_physical == -1) {
+                page_num_physical = lru_cache.getTailPagePhysical();
+                used_pages.get(lru_cache.getTailPid()).swapPageOut(lru_cache.getTailPageVirtual());
+                used_pages.get(pid).swapPageIn(page_num, page_num_physical);
+                lru_cache.put(page_num_physical, pid, page_num);
+                return true;
+            }
+            lru_cache.visit(page_num_physical);
+            return false;
+        }
+
+        public int getPhysicalPage(int pid, int page_num_virtual) {
+            return used_pages.get(pid).getPhysicalPage(page_num_virtual);
+        }
+    }
+    
+    private int page_size;
+    private int page_capacity;
+    public PageTable page_table;
+
+    public DemandPageAllocator(int total_memory_size, int page_size) {
+        super(total_memory_size);
+        this.page_size = page_size;
+        this.page_capacity = total_memory_size / page_size;
+        this.page_table = new PageTable(page_capacity);
+    }
+
+    @Override
+    DemandPages findFreeSpace(int size) {
+        int page_num = (int) Math.ceil((double) size / page_size);
+        return page_table.findFreePages(page_num);
+    }
+
+    @Override
+    void allocate(int pid, Memory memory) {
+        page_table.allocate(pid, (DemandPages)memory);
+    }
+
+    @Override
+    void release(int pid) {
+        page_table.release(pid);
+    }
+    
+    boolean isPageFault(int pid, int pc) {
+        int page_num = pc / page_size;
+        return page_table.isPageFault(pid, page_num);
+    }
+
+    public static void main(String[] args) {
+        DemandPageAllocator allocator = new DemandPageAllocator(100, 10);
+        int pid = 0;
+        for (int i = 0; i < 10; i++) {
+            DemandPages pages = allocator.findFreeSpace(50);
+            if (pages == null) {
+                System.out.println("allocate fault");
+                break;
+            }
+            allocator.allocate(pid, pages);
+            pid++;
+        }
+        Random rand = new Random();
+        int fault = 0;
+        for (int i = 0; i < 1000; i++) {
+            pid = (pid + 3) % 10;
+            if (allocator.isPageFault(pid, rand.nextInt(20))) {
+                System.out.println("Page fault");
+                fault++;
+            }
+        }
+        System.out.println("Page fault rate: " + (double)fault / 100);
     }
 }

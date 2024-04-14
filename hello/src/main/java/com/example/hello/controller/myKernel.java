@@ -31,6 +31,10 @@ public class myKernel implements Runnable {
         return io;
     }
 
+    public myMemory getMm() {
+        return this.mm;
+    }
+
     private myKernel() {
     }
 
