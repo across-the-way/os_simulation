@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import com.example.hello.myInstrunction.Instruction;
 import com.example.hello.myProcess.PCB;
 import com.example.hello.myProcess.PCB.P_STATE;
+import com.example.hello.myDevice.*;
 import com.example.hello.myFile.*;
 import java.util.*;
 
@@ -75,6 +76,11 @@ public class hellocontroller {
         location.setLocation(location.getLocation().substring(1));
         return this.kernel.getFs().filelist(location.getLocation());
     }// 把这里的string改成List<Inode>应该就可以用了
+
+    @PostMapping("/device")
+    public List<Device> getDevice() {
+        return this.kernel.getIo().get();
+    }
 
     @PostMapping("/terminal")
     public String CreateProcess(@RequestBody Object[] instruction) {

@@ -133,19 +133,23 @@ public class myProcess {
             // 启动进程调度（短期和长期）,切换进程
             case InstructionType.Printer:
                 this.RunningtoWaiting(0);
-                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.IORequest, p.p_id, p.ir.getArguments()[0]);
+                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.IORequest, 0, p.p_id,
+                        p.ir.getArguments()[0]);
                 break;
             case InstructionType.Keyboard:
                 this.RunningtoWaiting(1);
-                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.IORequest, p.p_id, p.ir.getArguments()[0]);
+                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.IORequest, 1, p.p_id,
+                        p.ir.getArguments()[0]);
                 break;
             case InstructionType.ReadFile:
                 this.RunningtoWaiting(2);
-                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileRead, p.p_id, p.ir.getArguments()[0],p.ir.getArguments()[1]);
+                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileRead, p.p_id, p.ir.getArguments()[0],
+                        p.ir.getArguments()[1]);
                 break;
             case InstructionType.WriteFile:
                 this.RunningtoWaiting(3);
-                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileWrite, p.p_id, p.ir.getArguments()[0],p.ir.getArguments()[1]);
+                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileWrite, p.p_id, p.ir.getArguments()[0],
+                        p.ir.getArguments()[1]);
                 break;
 
             // 若指令为文件或目录操作

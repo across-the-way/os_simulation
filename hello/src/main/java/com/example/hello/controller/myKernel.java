@@ -27,6 +27,10 @@ public class myKernel implements Runnable {
         return this.fs;
     }
 
+    public myDevice getIo() {
+        return io;
+    }
+
     private myKernel() {
     }
 
