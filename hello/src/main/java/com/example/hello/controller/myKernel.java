@@ -313,94 +313,30 @@ public class myKernel implements Runnable {
         objects = (Object[]) objects[1];
         switch (type) {
             case TerminalCallType.pwd:
-                Terminalpwd();
+                Terminalfunc.Terminalpwd(this);
                 break;
             case TerminalCallType.cd:
-                Terminalcd(objects);
+                Terminalfunc.Terminalcd((String) objects[0], this);
                 break;
             case TerminalCallType.touch:
-                Terminaltouch(objects);
+                Terminalfunc.Terminaltouch((String) objects[0], this);
                 break;
             case TerminalCallType.mkdir:
-                Terminalmkdir(objects);
+                Terminalfunc.Terminalmkdir((String) objects[0], this);
                 break;
             case TerminalCallType.rm:
-                Terminalrm(objects);
+                Terminalfunc.Terminalrm(objects);
                 break;
             case TerminalCallType.ls:
-                Terminalls(objects);
+                Terminalfunc.Terminalls(objects, this);
                 break;
             case TerminalCallType.cat:
-                Terminalcat(objects);
+                Terminalfunc.Terminalcat(objects);
                 break;
             default:
-                TerminalErr(objects);
+                Terminalfunc.TerminalErr(this);
                 break;
         }
-    }
-
-    private void Terminalpwd() {
-        this.terminal_message = "/" + this.fs.getCurPath();
-        this.terminal_update = true;
-    }
-
-    private void Terminalcd(Object[] objects) {
-        if (((String) objects[0]).equals("..")) {
-            if (!this.fs.getCurPath().equals("filesystem")) {
-                int last = this.fs.getCurPath().lastIndexOf("/");
-                this.fs.setCurPath(this.fs.getCurPath().substring(0, last));
-                this.terminal_message = "ok";
-            } else {
-                this.terminal_message = "已经在根目录,无法返回上级目录";
-            }
-        } else if (this.fs.findInode(this.fs.getCurPath() + "/" + (String) objects[0]) == null) {
-            this.terminal_message = "文件夹不存在";
-        } else if (this.fs.findInode(this.fs.getCurPath() + "/" + (String) objects[0]).getType() == 0) {
-            this.fs.setCurPath(this.fs.getCurPath() + "/" + (String) objects[0]);
-            this.terminal_message = "ok";
-        } else {
-            this.terminal_message = "该名称为文件名称,无法打开";
-        }
-        this.terminal_update = true;
-    }
-
-    private void Terminaltouch(Object[] objects) {
-        if (this.fs.touch(this.fs.getCurPath(), (String) objects[0])) {
-            terminal_message = "ok";
-        } else {
-            terminal_message = "文件名重复,创建文件失败";
-        }
-        this.terminal_update = true;
-    }
-
-    private void Terminalmkdir(Object[] objects) {
-        if (this.fs.mkdir(this.fs.getCurPath(), (String) objects[0])) {
-            terminal_message = "ok";
-        } else {
-            terminal_message = "目录名重复,创建目录失败";
-        }
-        this.terminal_update = true;
-    }
-
-    private void Terminalrm(Object[] objects) {
-
-    }
-
-    private void Terminalcat(Object[] objects) {
-
-    }
-
-    private void Terminalls(Object[] objects) {
-        if (objects.length != 0)
-            this.terminal_message = this.fs.ls(this.fs.getCurPath(), (String) objects[0]);
-        else
-            this.terminal_message = this.fs.ls(this.fs.getCurPath(), null);
-        this.terminal_update = true;
-    }
-
-    private void TerminalErr(Object[] objects) {
-        this.terminal_message = "err";
-        this.terminal_update = true;
     }
 
     @Override
