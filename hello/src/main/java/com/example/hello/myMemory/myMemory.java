@@ -9,7 +9,8 @@ public class myMemory {
     private myKernel kernel;
     private allocateStrategy strategy;
     private int memory_size; // 假设内存大小为4096字节，一条指令为4字节
-    private MemoryAllocator allocator;;
+    private MemoryAllocator allocator;
+    private int MidtermCounter;
 
     public myMemory(myKernel kernel) {
         this.kernel = kernel;
@@ -23,17 +24,17 @@ public class myMemory {
         this.strategy = strategy;
         this.memory_size = memory_size;
         switch (strategy) {
-            case FirstFit:  
-                this.allocator = new ContiguousAllocator(memory_size, allocateStrategy.FirstFit); 
+            case FirstFit:
+                this.allocator = new ContiguousAllocator(memory_size, allocateStrategy.FirstFit);
                 break;
-            case NextFit: 
-                this.allocator = new ContiguousAllocator(memory_size, allocateStrategy.NextFit); 
+            case NextFit:
+                this.allocator = new ContiguousAllocator(memory_size, allocateStrategy.NextFit);
                 break;
-            case BestFit: 
-                this.allocator = new ContiguousAllocator(memory_size, allocateStrategy.BestFit); 
+            case BestFit:
+                this.allocator = new ContiguousAllocator(memory_size, allocateStrategy.BestFit);
                 break;
-            case WorstFit: 
-                this.allocator = new ContiguousAllocator(memory_size, allocateStrategy.WorstFit); 
+            case WorstFit:
+                this.allocator = new ContiguousAllocator(memory_size, allocateStrategy.WorstFit);
                 break;
             default:
                 System.out.println("Please use correct construction method");
@@ -50,7 +51,7 @@ public class myMemory {
                 this.allocator = new PageAllocator(memory_size, page_size);
                 break;
             case LRU:
-            case FIFO: 
+            case FIFO:
                 this.allocator = new DemandPageAllocator(memory_size, page_size);
                 break;
             default:
@@ -77,19 +78,27 @@ public class myMemory {
 
     // 检查pid当前pc是否会触发pagefault
     public boolean isPageFault(int pid, int pc) {
-        if (strategy != allocateStrategy.LRU || strategy != allocateStrategy.FIFO) return false;
+        if (strategy != allocateStrategy.LRU || strategy != allocateStrategy.FIFO)
+            return false;
         return ((DemandPageAllocator) allocator).isPageFault(pid, pc);
     }
 
     public void update() {
         // 暂时不知道干什么
+        MidtermCounter = MidtermCounter % this.kernel.getSysData().MidTermScale + 1;
+
+        if (MidtermCounter == this.kernel.getSysData().MidTermScale) {
+            // 检查当前内存负载情况,
+                // 如果太大了，发送SWAPPEDOUT中断
+                // 如果太小了，发送SWAPPEDIN中断
+        }
     }
 
     public void page(int pid, int pc) {
         // 不需要实现了，但还是需要调用，消耗一个时钟中断
         return;
     }
-    
+
     public List<Object> getMemoryStatus() {
         List<Object> list = new ArrayList<>();
         list.add(strategy.toString());
@@ -98,15 +107,15 @@ public class myMemory {
             case NextFit:
             case BestFit:
             case WorstFit:
-                list.add(((ContiguousAllocator)allocator).free_blocks);
-                list.add(((ContiguousAllocator)allocator).used_memory);
+                list.add(((ContiguousAllocator) allocator).free_blocks);
+                list.add(((ContiguousAllocator) allocator).used_memory);
                 break;
             case Page:
-                list.add(((PageAllocator)allocator).page_table);
+                list.add(((PageAllocator) allocator).page_table);
                 break;
             case LRU:
             case FIFO:
-                list.add(((DemandPageAllocator)allocator).page_table);
+                list.add(((DemandPageAllocator) allocator).page_table);
                 break;
         }
         return list;

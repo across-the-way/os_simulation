@@ -468,6 +468,56 @@ public class myProcess {
         }
     }
 
+    // 将Ready的进程转换为SwappedREADY状态.并加入SwappedReady队列
+    public void ReadyToSwappedReady(int pid) {
+        PCB p = this.ProcessMap.get(pid);
+        if (p != null) {
+            p.state = P_STATE.SWAPPED_READY;
+            this.queue.Ready_Queue.remove((Object) pid);
+            this.queue.Swapped_Ready_Queue.add(pid);
+        }
+    }
+
+    // 将Waiting的进程转换为SwappedWaiting状态.并加入SwappedWaitiing队列
+    public void WaitingToSwappedWaiting(int pid) {
+        PCB p = this.ProcessMap.get(pid);
+        if (p != null) {
+            p.state = P_STATE.SWAPPED_WAITING;
+            this.queue.Waiting_Queues.get(p.waiting_for).remove((Object) pid);
+            this.queue.Swapped_Waiting_Queue.add(pid);
+        }
+    }
+
+    // 将SwappedWaiting的进程转换为SwappedReady状态.并加入SwappedReady队列
+    public void SwappedWaitingToSwappedReady(int pid) {
+        PCB p = this.ProcessMap.get(pid);
+        if (p != null) {
+            p.state = P_STATE.SWAPPED_READY;
+            this.queue.Swapped_Waiting_Queue.remove((Object) pid);
+            this.queue.Swapped_Waiting_Queue.add(pid);
+        }
+    }
+
+    // 将SwappedReady的进程转换为Ready状态.并加入Ready队列
+    public void SwappedReadyToReady(int pid) {
+        PCB p = this.ProcessMap.get(pid);
+        if (p != null) {
+            p.state = P_STATE.READY;
+            this.queue.Swapped_Ready_Queue.remove((Object) pid);
+            this.queue.Ready_Queue.add(pid);
+        }
+    }
+
+    // 将SwappedWaiting的进程转换为Waiting状态.并加入Waiting队列
+    public void SwappedWaitingToWaiting(int pid) {
+        PCB p = this.ProcessMap.get(pid);
+        if (p != null) {
+            p.state = P_STATE.WAITING;
+            this.queue.Swapped_Waiting_Queue.remove((Object) pid);
+            this.queue.Waiting_Queues.get(p.waiting_for).add(pid);
+        }
+    }
+
     /*
      * 文件打开表模块
      */
