@@ -8,5 +8,7 @@ public enum InterruptType {
     FileFinish,
     TerminalCall,
     SystemCall,
+    SwappedIn,
+    SwappedOut,
     Exit,
 }

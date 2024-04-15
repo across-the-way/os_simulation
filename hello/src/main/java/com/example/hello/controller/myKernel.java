@@ -9,6 +9,7 @@ import com.example.hello.myMemory.myMemory;
 import com.example.hello.myProcess.PCB;
 import com.example.hello.myProcess.myProcess;
 import com.example.hello.myProcess.scheduleStrategy;
+import com.example.hello.myProcess.PCB.P_STATE;
 
 public class myKernel implements Runnable {
     private static myKernel instance;
@@ -95,6 +96,12 @@ public class myKernel implements Runnable {
                         break;
                     case TerminalCall:
                         terminalCall(interrupt.getObjects());
+                        break;
+                    case SwappedIn:
+                        handleSwappedIn();
+                        break;
+                    case SwappedOut:
+                        handleSwappedOut();
                         break;
                     case Exit:
                     default:
@@ -303,6 +310,60 @@ public class myKernel implements Runnable {
 
     public boolean isPageFault(int pid, int pc) {
         return mm.isPageFault(pid, pc);
+    }
+
+    /*
+     * 处理中期调度中断
+     */
+    private void handleSwappedIn() {
+        while (true) {
+            // 按照中期调度换入算法选择一个要换入的进程（注：为方便处理，二级队列的换入后进入就绪队列）
+            int pid = this.pm.Choose_SwappedIn();
+            if (pid == -1) {
+                return;
+            }
+            // 进程状态转换
+            if (this.pm.getPCB(pid).state == P_STATE.SWAPPED_READY) {
+                this.pm.SwappedReadyToReady(pid);
+            } else if (this.pm.getPCB(pid).state == P_STATE.SWAPPED_WAITING) {
+                this.pm.SwappedWaitingToWaiting(pid);
+            } else {
+                return;
+            }
+            // 进程状态恢复(从Swapped Space 读取)，并删除Swapped Space 中对应的记录
+            // 重新为进程分配空间
+            mm.allocate(pid, pm.getPCB(pid).memory_allocate);
+            // 检查内存负载情况，如果负载低于下限，则重复上述步骤
+            if (!mm.isLower()) {
+                return;
+            }
+        }
+    }
+
+    private void handleSwappedOut() {
+        while (true) {
+            // 按照中期调度换出算法选择一个要换出的进程(ready(包括二级) 队列/waiting 队列)
+            int pid = this.pm.Choose_SwappedOut();
+            if (pid == -1) {
+                return;
+            }
+            // 进程状态转换
+            if (pm.getPCB(pid).state == P_STATE.READY) {
+                pm.ReadyToSwappedReady(pid);
+            } else if (pm.getPCB(pid).state == P_STATE.WAITING) {
+                pm.WaitingToSwappedWaiting(pid);
+            } else {
+                return;
+            }
+            // 将进程状态写入Swapped Space
+
+            // 释放进程占用的内存空间
+            mm.release(pid);
+            // 检查内存负载情况，如果负载仍然超过上限，则重复上述步骤
+            if (!mm.isUpper()) {
+                return;
+            }
+        }
     }
 
     /*

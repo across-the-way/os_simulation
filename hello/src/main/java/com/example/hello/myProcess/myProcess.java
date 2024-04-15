@@ -83,6 +83,9 @@ public class myProcess {
         // Fork的wait队列更新
         ForkWaitUpdate();
 
+        // Swapped Process 的TTL更新
+        SwappedProcess_Update();
+
         // 从就绪队列中调度出一个进程，尝试切换为运行态
         this.schedule();
         // 若无或无法，返回
@@ -463,7 +466,7 @@ public class myProcess {
         PCB p = this.ProcessMap.get(this.current_pid);
         if (p != null) {
             p.state = P_STATE.READY;
-            this.queue.Second_Queue.add(new SecondItem(this.current_pid));
+            this.queue.Second_Queue.add(new TTLItem(this.current_pid));
             this.current_pid = -1;
         }
     }
@@ -473,8 +476,12 @@ public class myProcess {
         PCB p = this.ProcessMap.get(pid);
         if (p != null) {
             p.state = P_STATE.SWAPPED_READY;
-            this.queue.Ready_Queue.remove((Object) pid);
-            this.queue.Swapped_Ready_Queue.add(pid);
+            if (this.isInReadyQueue(pid)) {
+                this.queue.Ready_Queue.remove((Object) pid);
+            } else {
+                this.queue.Second_Queue.remove((Object) pid);
+            }
+            this.queue.Swapped_Ready_Queue.add(new TTLItem(pid));
         }
     }
 
@@ -484,7 +491,7 @@ public class myProcess {
         if (p != null) {
             p.state = P_STATE.SWAPPED_WAITING;
             this.queue.Waiting_Queues.get(p.waiting_for).remove((Object) pid);
-            this.queue.Swapped_Waiting_Queue.add(pid);
+            this.queue.Swapped_Waiting_Queue.add(new TTLItem(pid));
         }
     }
 
@@ -494,7 +501,7 @@ public class myProcess {
         if (p != null) {
             p.state = P_STATE.SWAPPED_READY;
             this.queue.Swapped_Waiting_Queue.remove((Object) pid);
-            this.queue.Swapped_Waiting_Queue.add(pid);
+            this.queue.Swapped_Waiting_Queue.add(new TTLItem(pid));
         }
     }
 
@@ -637,7 +644,7 @@ public class myProcess {
         int size = this.queue.Second_Queue.size();
         if (size > 0) {
             // 防止二级队列的进程饿死
-            for (SecondItem item : this.queue.Second_Queue) {
+            for (TTLItem item : this.queue.Second_Queue) {
                 item.setTTL(item.getTTL() + 100);
                 if (item.getTTL() > this.Second_Queue_Threshold) {
                     this.queue.Ready_Queue.add(item.getPid());
@@ -670,6 +677,84 @@ public class myProcess {
             }
         }
 
+    }
+
+    /*
+     * 中期调度
+     */
+
+    // 换入进程选择
+    // 算法：
+    public int Choose_SwappedIn() {
+        if (this.queue.Swapped_Ready_Queue.isEmpty() && this.queue.Swapped_Waiting_Queue.isEmpty()) {
+            return -1;
+        }
+        int choose_pid = -1;
+        int choose_ttl = -1;
+        for (TTLItem item : this.queue.Swapped_Ready_Queue) {
+            if (choose_pid == -1) {
+                choose_pid = item.getPid();
+                choose_ttl = item.getTTL();
+            } else if (item.getTTL() > choose_ttl) {
+                choose_pid = item.getPid();
+                choose_ttl = item.getTTL();
+            }
+        }
+
+        for (TTLItem item : this.queue.Swapped_Waiting_Queue) {
+            if (choose_pid == -1) {
+                choose_pid = item.getPid();
+                choose_ttl = item.getTTL();
+            } else if (item.getTTL() > choose_ttl) {
+                choose_pid = item.getPid();
+                choose_ttl = item.getTTL();
+            }
+        }
+        return choose_pid;
+    }
+
+    // 换出进程选择
+    // 算法：结合进程内存占用大小和进程优先级
+    public int Choose_SwappedOut() {
+        int choose_pid = -1;
+        for (PCB p : this.ProcessMap.values()) {
+            // 换出进程条件：不是init进程/不是当前正在执行的进程/选择的进程不能已经处于Swapped Space
+            if (p.p_id != 0 && p.p_id != this.current_pid) {
+                if (p.state != P_STATE.SWAPPED_READY && p.state != P_STATE.SWAPPED_WAITING) {
+                    if (choose_pid == -1) {
+                        choose_pid = p.p_id;
+                    }
+                    if (SwappedOut_isPrior(p.p_id, choose_pid)) {
+                        choose_pid = p.p_id;
+                    }
+                }
+            }
+        }
+
+        return choose_pid;
+    }
+
+    private boolean SwappedOut_isPrior(int pid, int choose_pid) {
+        PCB p1 = this.ProcessMap.get(pid);
+        PCB p2 = this.ProcessMap.get(choose_pid);
+        // 换出内存占用最大的进程,如果有多个一样最大的进程，换出优先级最低(数值最大)的进程
+        if (p1.memory_allocate > p2.memory_allocate
+                || (p1.memory_allocate == p2.memory_allocate && p1.priority > p2.priority))
+            return true;
+        return false;
+    }
+
+    public boolean isInReadyQueue(int pid) {
+        return this.queue.Ready_Queue.contains(pid);
+    }
+
+    public void SwappedProcess_Update() {
+        for (TTLItem item : this.queue.Swapped_Ready_Queue) {
+            item.setTTL(item.getTTL() + 1);
+        }
+        for (TTLItem item : this.queue.Swapped_Waiting_Queue) {
+            item.setTTL(item.getTTL() + 1);
+        }
     }
 
     /*

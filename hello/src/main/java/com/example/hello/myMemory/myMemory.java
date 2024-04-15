@@ -101,18 +101,26 @@ public class myMemory {
         // MidtermCounter = MidtermCounter % this.kernel.getSysData().MidTermScale + 1;
         // if(MidtermCounter == this.kernel.getSysData().MidTermscale) {
         // //检查当前内存负载情况，
-        //     //如果太大了，发送SWAPPEDOUT中断
-        //     //如果太小了，发送SWAPPEDIN中断
+        // //如果太大了，发送SWAPPEDOUT中断
+        // //如果太小了，发送SWAPPEDIN中断
         // }
         MidtermCounter = (MidtermCounter + 1) % 5;
         if (MidtermCounter == 0) {
-            int load = memory_size - allocator.free_memory_size;
-            if (load > midterm_higher_bound) {
-
-            } else if (load < midterm_lower_bound) {
-
+            if (isUpper()) {
+                this.sendInterrupt(InterruptType.SwappedOut);
+            }
+            if (isLower()) {
+                this.sendInterrupt(InterruptType.SwappedIn);
             }
         }
+    }
+
+    public boolean isUpper() {
+        return (memory_size - allocator.free_memory_size) > midterm_higher_bound;
+    }
+
+    public boolean isLower() {
+        return (memory_size - allocator.free_memory_size) < midterm_lower_bound;
     }
 
     // 向kernel中央模块发送中断请求
