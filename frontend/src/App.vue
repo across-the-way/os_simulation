@@ -11,6 +11,22 @@ export default {
       responseData: null,
     }
   },
+  method:{
+        hstop(){
+          console.log("msg")
+          axios.get(serverURL + "/stop")
+          .then(
+            console.log(response.data)
+          )
+        },
+        hstart(){
+          console.log("msg")
+          axios.get(serverURL + "/start")
+          .then(
+            console.log(response.data)
+          )
+        }
+      },
   created() {
     // axios.post(serverURL + '/process', 
 
@@ -28,7 +44,7 @@ export default {
     //     type : 'Exit',
     //     arguments: [],
     //     },]
-
+      
 
     // )
     //   .then(response => {
@@ -73,19 +89,25 @@ export default {
           <el-menu-item index="1-3"><router-link to="/device">设备管理</router-link></el-menu-item>
         </el-menu-item-group>
         <el-sub-menu index="1-4">
-          <template #title>item four</template>
-          <el-menu-item index="1-4-1">item one</el-menu-item>
+          <template #title>item one</template>
+          <el-menu-item index="1-4-1"><router-link to="/memory">内存情况</router-link></el-menu-item>
         </el-sub-menu>
       </el-sub-menu>
       <el-menu-item index="/filesystem">
         <el-icon><icon-menu /></el-icon>
         <router-link to="/filesystem">文件系统</router-link>
       </el-menu-item>
-      <el-menu-item index="3" disabled>
+      <el-menu-item index="3" >
         <el-icon>
           <document />
         </el-icon>
-        <span>Navigator Three</span>
+        <el-button @click=hstop>stop</el-button>
+      </el-menu-item>
+      <el-menu-item index="5" >
+        <el-icon>
+          <document />
+        </el-icon>
+        <el-button @click=hstart>start</el-button>
       </el-menu-item>
       <el-menu-item index="4">
         <el-icon>

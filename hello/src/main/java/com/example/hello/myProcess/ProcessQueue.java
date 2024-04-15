@@ -23,15 +23,21 @@ public class ProcessQueue {
     public List<SecondItem> Second_Queue;
     // public List<PCB> Job_Pool;
 
+    // 中期调度队列
+    public List<Integer> Swapped_Ready_Queue;
+    public List<Integer> Swapped_Waiting_Queue;
+
     public ProcessQueue() {
         this.Waiting_Queues = new ArrayList<List<Integer>>();
         for (int i = 0; i < 10; i++) {
             List<Integer> p = new ArrayList<Integer>();
             this.Waiting_Queues.add(p);
         }
-        
+
         this.Ready_Queue = new ArrayList<>();
         this.Second_Queue = new ArrayList<>();
+        this.Swapped_Ready_Queue = new ArrayList<>();
+        this.Swapped_Waiting_Queue = new ArrayList<>();
     }
 
     public void RemoveProcess(int pid) {
@@ -54,6 +60,20 @@ public class ProcessQueue {
         for (int i = 0; i < Second_Queue.size(); i++) {
             if (Second_Queue.get(i).getPid() == pid) {
                 Second_Queue.remove(i);
+                return;
+            }
+        }
+
+        for (int i = 0; i < Swapped_Ready_Queue.size(); i++) {
+            if (Swapped_Ready_Queue.get(i) == pid) {
+                Swapped_Ready_Queue.remove(i);
+                return;
+            }
+        }
+
+        for (int i = 0; i < Swapped_Waiting_Queue.size(); i++) {
+            if (Swapped_Waiting_Queue.get(i) == pid) {
+                Swapped_Waiting_Queue.remove(i);
                 return;
             }
         }

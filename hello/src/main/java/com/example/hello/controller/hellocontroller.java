@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import com.example.hello.myInstrunction.Instruction;
 import com.example.hello.myProcess.PCB;
 import com.example.hello.myProcess.PCB.P_STATE;
+import com.example.hello.myDevice.*;
 import com.example.hello.myFile.*;
 import java.util.*;
 
@@ -76,6 +77,11 @@ public class hellocontroller {
         return this.kernel.getFs().filelist(location.getLocation());
     }// 把这里的string改成List<Inode>应该就可以用了
 
+    @PostMapping("/device")
+    public List<Device> getDevice() {
+        return this.kernel.getIo().get();
+    }
+
     @PostMapping("/terminal")
     public String CreateProcess(@RequestBody Object[] instruction) {
         TerminalCallType type; 
@@ -96,4 +102,18 @@ public class hellocontroller {
         return msg;
     }
 
+    @GetMapping("/memory")
+    public List<Object> getMemoryStatus() {
+        return this.kernel.getMm().getMemoryStatus();
+    }
+    @GetMapping("/stop")
+    public String pause() {
+        return "success";
+    }
+    @GetMapping("/start")
+    public String start() {
+        return "success";
+    }
+    
+    
 }

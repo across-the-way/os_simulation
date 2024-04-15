@@ -133,19 +133,23 @@ public class myProcess {
             // 启动进程调度（短期和长期）,切换进程
             case InstructionType.Printer:
                 this.RunningtoWaiting(0);
-                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.IORequest, p.p_id, p.ir.getArguments()[0]);
+                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.IORequest, 0, p.p_id,
+                        p.ir.getArguments()[0]);
                 break;
             case InstructionType.Keyboard:
                 this.RunningtoWaiting(1);
-                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.IORequest, p.p_id, p.ir.getArguments()[0]);
+                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.IORequest, 1, p.p_id,
+                        p.ir.getArguments()[0]);
                 break;
             case InstructionType.ReadFile:
                 this.RunningtoWaiting(2);
-                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileRead, p.p_id, p.ir.getArguments()[0],p.ir.getArguments()[1]);
+                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileRead, p.p_id, p.ir.getArguments()[0],
+                        p.ir.getArguments()[1]);
                 break;
             case InstructionType.WriteFile:
                 this.RunningtoWaiting(3);
-                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileWrite, p.p_id, p.ir.getArguments()[0],p.ir.getArguments()[1]);
+                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileWrite, p.p_id, p.ir.getArguments()[0],
+                        p.ir.getArguments()[1]);
                 break;
 
             // 若指令为文件或目录操作
@@ -461,6 +465,56 @@ public class myProcess {
             p.state = P_STATE.READY;
             this.queue.Second_Queue.add(new SecondItem(this.current_pid));
             this.current_pid = -1;
+        }
+    }
+
+    // 将Ready的进程转换为SwappedREADY状态.并加入SwappedReady队列
+    public void ReadyToSwappedReady(int pid) {
+        PCB p = this.ProcessMap.get(pid);
+        if (p != null) {
+            p.state = P_STATE.SWAPPED_READY;
+            this.queue.Ready_Queue.remove((Object) pid);
+            this.queue.Swapped_Ready_Queue.add(pid);
+        }
+    }
+
+    // 将Waiting的进程转换为SwappedWaiting状态.并加入SwappedWaitiing队列
+    public void WaitingToSwappedWaiting(int pid) {
+        PCB p = this.ProcessMap.get(pid);
+        if (p != null) {
+            p.state = P_STATE.SWAPPED_WAITING;
+            this.queue.Waiting_Queues.get(p.waiting_for).remove((Object) pid);
+            this.queue.Swapped_Waiting_Queue.add(pid);
+        }
+    }
+
+    // 将SwappedWaiting的进程转换为SwappedReady状态.并加入SwappedReady队列
+    public void SwappedWaitingToSwappedReady(int pid) {
+        PCB p = this.ProcessMap.get(pid);
+        if (p != null) {
+            p.state = P_STATE.SWAPPED_READY;
+            this.queue.Swapped_Waiting_Queue.remove((Object) pid);
+            this.queue.Swapped_Waiting_Queue.add(pid);
+        }
+    }
+
+    // 将SwappedReady的进程转换为Ready状态.并加入Ready队列
+    public void SwappedReadyToReady(int pid) {
+        PCB p = this.ProcessMap.get(pid);
+        if (p != null) {
+            p.state = P_STATE.READY;
+            this.queue.Swapped_Ready_Queue.remove((Object) pid);
+            this.queue.Ready_Queue.add(pid);
+        }
+    }
+
+    // 将SwappedWaiting的进程转换为Waiting状态.并加入Waiting队列
+    public void SwappedWaitingToWaiting(int pid) {
+        PCB p = this.ProcessMap.get(pid);
+        if (p != null) {
+            p.state = P_STATE.WAITING;
+            this.queue.Swapped_Waiting_Queue.remove((Object) pid);
+            this.queue.Waiting_Queues.get(p.waiting_for).add(pid);
         }
     }
 
