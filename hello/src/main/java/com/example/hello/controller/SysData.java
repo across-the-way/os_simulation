@@ -32,6 +32,13 @@ public class SysData {
     public int LongTerm_CeilThreshold;
     public int LongTerm_FloorThreshold;
 
+    // 中期调度时间片
+    public int MidTermScale;
+
+    // 中期调度的上下阈值
+    public double MidTerm_CeilThreshold;
+    public double MidTerm_FloorThreshold;
+
     // 调度算法
     public scheduleStrategy CPUstrategy;
 
@@ -49,10 +56,14 @@ public class SysData {
         Second_Queue_Threshold = 1000;
 
         LongTermScale = 100;
+        MidTermScale = 10;
 
         CPUstrategy = scheduleStrategy.MLFQ;
 
         LongTerm_CeilThreshold = 20;
         LongTerm_FloorThreshold = 3;
+
+        MidTerm_CeilThreshold = 0.8;
+        MidTerm_FloorThreshold = 0.3;
     }
 }

@@ -1,12 +1,12 @@
 const routes = [
     {
-        path: '/cpu',
-        name: 'index',
-        title: '首页',
+        path: '/memory',
+        name: 'memory',
+        title: '内存情况',
         meta:{
-            title: '中央处理器'
+            title: '内存情况'
         },
-        component: () => import('@/components/cpu.vue'),
+        component: () => import('@/components/memory.vue'),
     },
     {
         path: '/filesystem/:id*',
