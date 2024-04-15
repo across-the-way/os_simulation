@@ -63,6 +63,7 @@ class ContiguousAllocator extends MemoryAllocator {
     @Override
     void allocate(int pid, Memory memory) {
         used_memory.put(pid, (Block) memory);
+        free_memory_size -= memory.getSize();
     }
 
     @Override
@@ -93,6 +94,7 @@ class ContiguousAllocator extends MemoryAllocator {
         }
         used_memory.remove(pid);
         free_blocks = new_free_blocks;
+        free_memory_size += block.getSize();
     }
 
     private Block firstFit(int size) {
@@ -259,13 +261,13 @@ class PageAllocator extends MemoryAllocator{
         }
     }
     private int page_size;
-    private int page_count;
+    private int page_capacity;
     public PageTable page_table;
     public PageAllocator(int total_memory_size, int page_size) {
         super(total_memory_size);
         this.page_size = page_size;
-        this.page_count = total_memory_size / page_size;
-        this.page_table = new PageTable(this.page_count);
+        this.page_capacity = total_memory_size / page_size;
+        this.page_table = new PageTable(this.page_capacity);
     }
     @Override
     Pages findFreeSpace(int size) {
@@ -275,9 +277,11 @@ class PageAllocator extends MemoryAllocator{
     @Override
     void allocate(int pid, Memory memory) {
         page_table.allocate(pid, (Pages)memory);
+        free_memory_size -= memory.getSize();
     }
     @Override
     void release(int pid) {
+        free_memory_size += page_table.used_pages.get(pid).getSize();
         page_table.release(pid);
     }
     void show() {
@@ -529,10 +533,12 @@ class DemandPageAllocator extends MemoryAllocator {
     @Override
     void allocate(int pid, Memory memory) {
         page_table.allocate(pid, (DemandPages)memory);
+        free_memory_size -= memory.getSize();
     }
 
     @Override
     void release(int pid) {
+        free_memory_size += page_table.used_pages.get(pid).getSize();
         page_table.release(pid);
     }
     

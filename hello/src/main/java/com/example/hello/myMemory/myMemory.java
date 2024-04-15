@@ -3,19 +3,27 @@ package com.example.hello.myMemory;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.hello.controller.InterruptType;
+import com.example.hello.controller.myInterrupt;
 import com.example.hello.controller.myKernel;
 
 public class myMemory {
     private myKernel kernel;
     private allocateStrategy strategy;
     private int memory_size; // 假设内存大小为4096字节，一条指令为4字节
-    private MemoryAllocator allocator;;
+    private MemoryAllocator allocator;
+    private int MidtermCounter;
+    private int midterm_lower_bound;
+    private int midterm_higher_bound;
 
     public myMemory(myKernel kernel) {
         this.kernel = kernel;
         this.strategy = allocateStrategy.LRU;
         this.memory_size = 4096;
         this.allocator = new DemandPageAllocator(memory_size, 32);
+        this.MidtermCounter = 0;
+        this.midterm_lower_bound = (memory_size / 64) * 1;
+        this.midterm_higher_bound = (memory_size / 32) * 31;
     }
 
     public myMemory(myKernel kernel, allocateStrategy strategy, int memory_size) {
@@ -39,6 +47,9 @@ public class myMemory {
                 System.out.println("Please use correct construction method");
                 break;
         }
+        this.MidtermCounter = 0;
+        this.midterm_lower_bound = (memory_size / 64) * 1;
+        this.midterm_higher_bound = (memory_size / 32) * 31;
     }
 
     public myMemory(myKernel kernel, allocateStrategy strategy, int memory_size, int page_size) {
@@ -57,6 +68,9 @@ public class myMemory {
                 System.out.println("Please use correct construction method");
                 break;
         }
+        this.MidtermCounter = 0;
+        this.midterm_lower_bound = (memory_size / 64) * 1;
+        this.midterm_higher_bound = (memory_size / 32) * 31;
     }
 
     // 按照分配方法分配内存
@@ -82,7 +96,27 @@ public class myMemory {
     }
 
     public void update() {
-        // 暂时不知道干什么
+        // 中期调度
+        // MidtermCounter = MidtermCounter % this.kernel.getSysData().MidTermScale + 1;
+        // if(MidtermCounter == this.kernel.getSysData().MidTermscale) {
+        // //检查当前内存负载情况，
+        //     //如果太大了，发送SWAPPEDOUT中断
+        //     //如果太小了，发送SWAPPEDIN中断
+        // }
+        MidtermCounter = (MidtermCounter + 1) % 5;
+        if (MidtermCounter == 0) {
+            int load = memory_size - allocator.free_memory_size;
+            if (load > midterm_higher_bound) {
+
+            } else if (load < midterm_lower_bound) {
+
+            }
+        }
+    }
+
+    // 向kernel中央模块发送中断请求
+    private void sendInterrupt(InterruptType interrupt, Object... objs) {
+        kernel.receiveInterrupt(new myInterrupt(interrupt, objs));
     }
 
     public void page(int pid, int pc) {
