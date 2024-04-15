@@ -1,6 +1,6 @@
 <script setup>
 import axios from 'axios'
-import { serverURL } from './components/ServerURL'
+import { serverURL } from '@/components/ServerURL'
 import routes from './router/routes'
 </script>
 
@@ -11,22 +11,29 @@ export default {
       responseData: null,
     }
   },
-  method:{
-        hstop(){
-          console.log("msg")
-          axios.get(serverURL + "/stop")
-          .then(
-            console.log(response.data)
-          )
-        },
-        hstart(){
-          console.log("msg")
-          axios.get(serverURL + "/start")
-          .then(
-            console.log(response.data)
-          )
+  method: {
+    
+    handleButtonClick1() {
+      // 处理按钮1点击时的逻辑
+      console.log("msg")
+      axios.get(serverURL + "/stop", {})
+        .then(response => {
+          console.log(response.data)
         }
-      },
+
+        )
+    },
+    handleButtonClick2() {
+      // 处理按钮2点击时的逻辑
+      console.log("msg")
+      axios.get(serverURL + "/start", {})
+        .then(response => {
+          console.log(response.data)
+        }
+
+        )
+    }
+  },
   created() {
     // axios.post(serverURL + '/process', 
 
@@ -44,7 +51,7 @@ export default {
     //     type : 'Exit',
     //     arguments: [],
     //     },]
-      
+
 
     // )
     //   .then(response => {
@@ -63,63 +70,59 @@ export default {
 
 </script>
 
-<template >
+<template>
 
   <!-- <el-row> -->
-    
-    <el-container style="width: 100vw;height: 100vh;">
-      <el-header style="background-color: white;width: 100%;"class="title">
-        <span style="margin-top: 40px;padding-top: 30px;">操作系统</span>
-      </el-header>
-      <el-container>
-        <el-aside width="200px"><el-menu default-active="2" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose"
-      style="width: 200px;height: 100%;;display: flex ;flex-direction: column; margin-left: 0;">
-      <el-sub-menu index="/process">
-        <template #title>
-          <el-icon>
-            <location />
-          </el-icon>
-          <span>进程</span>
-        </template>
-        <el-menu-item-group title="分类">
-          <el-menu-item><router-link to="/process/queue">进程详情</router-link></el-menu-item>
-          <el-menu-item index="/find"><router-link to="/process">创建进程</router-link></el-menu-item>
-        </el-menu-item-group>
-        <el-menu-item-group title="Group Two">
-          <el-menu-item index="1-3"><router-link to="/device">设备管理</router-link></el-menu-item>
-        </el-menu-item-group>
-        <el-sub-menu index="1-4">
-          <template #title>item one</template>
-          <el-menu-item index="1-4-1"><router-link to="/memory">内存情况</router-link></el-menu-item>
-        </el-sub-menu>
-      </el-sub-menu>
-      <el-menu-item index="/filesystem">
-        <el-icon><icon-menu /></el-icon>
-        <router-link to="/filesystem">文件系统</router-link>
-      </el-menu-item>
-      <el-menu-item index="3" >
-        <el-icon>
-          <document />
-        </el-icon>
-        <el-button @click=hstop>stop</el-button>
-      </el-menu-item>
-      <el-menu-item index="5" >
-        <el-icon>
-          <document />
-        </el-icon>
-        <el-button @click=hstart>start</el-button>
-      </el-menu-item>
-      <el-menu-item index="4">
-        <el-icon>
-          <setting />
-        </el-icon>
-        <router-link to="/terminal">终端</router-link>
-      </el-menu-item>
-    </el-menu></el-aside>
-        <el-main><router-view></router-view></el-main>
-      </el-container>
+
+  <el-container style="width: 100vw;height: 100vh;">
+    <el-header style="background-color: white;width: 100%;" class="title">
+      <span style="margin-top: 40px;padding-top: 30px;">操作系统</span>
+      <el-button @click="handleButtonClick2">按钮2</el-button>
+    </el-header>
+    <el-container>
+      <el-aside width="200px"><el-menu default-active="2" class="el-menu-vertical-demo" @open="handleOpen"
+          @close="handleClose"
+          style="width: 200px;height: 100%;;display: flex ;flex-direction: column; margin-left: 0;">
+          <el-sub-menu index="/process">
+            <template #title>
+              <el-icon>
+                <location />
+              </el-icon>
+              <span>进程</span>
+            </template>
+            <el-menu-item-group title="分类">
+              <el-menu-item><router-link to="/process/queue">进程详情</router-link></el-menu-item>
+              <el-menu-item index="/find"><router-link to="/process">创建进程</router-link></el-menu-item>
+            </el-menu-item-group>
+            <el-menu-item-group title="Group Two">
+              <el-menu-item index="1-3"><router-link to="/device">设备管理</router-link></el-menu-item>
+            </el-menu-item-group>
+            <el-sub-menu index="1-4">
+              <template #title>item one</template>
+              <el-menu-item index="1-4-1"><router-link to="/memory">内存情况</router-link></el-menu-item>
+            </el-sub-menu>
+          </el-sub-menu>
+          <el-menu-item index="/filesystem">
+            <el-icon><icon-menu /></el-icon>
+            <router-link to="/filesystem">文件系统</router-link>
+          </el-menu-item>
+          <el-menu-item index="3">
+            <el-icon>
+              <document />
+            </el-icon>
+            <el-button type="primary" round @click="handleButtonClick1">stop</el-button>
+          </el-menu-item>
+          <el-menu-item index="4">
+            <el-icon>
+              <setting />
+            </el-icon>
+            <router-link to="/terminal">终端</router-link>
+          </el-menu-item>
+        </el-menu></el-aside>
+      <el-main><router-view></router-view></el-main>
     </el-container>
-  
+  </el-container>
+
 </template>
 
 <style scoped>
@@ -131,6 +134,4 @@ export default {
   padding: 20px;
   padding-left: 40px;
 }
-
-
 </style>

@@ -1,106 +1,33 @@
 <template>
-  <terminal :name="name" @exec-cmd="onExecCmd" :show-header="false" 
-    :command-store="com">
-
-
-    <template #json="data">
-      {{ data.message }}
-    </template>
-
-    <template #helpBox="{ showHeader, item }">
-      {{ item }}
-    </template>
-
-    <template #textEditor="{ data }">
-      <textarea name="editor" class="t-text-editor" v-model="data.value" @focus="data.onFocus"
-        @blur="data.onBlur"></textarea>
-      <div class="t-text-editor-floor" align="center">
-        <button class="t-text-editor-floor-btn" @click="_textEditorClose(false)">Cancel</button>
-        <button class="t-text-editor-floor-btn" @click="_textEditorClose(true)">Save & Close(Ctrl + S)</button>
-      </div>
-    </template>
-  </terminal>
+  <div>
+    <el-button @click="handleButtonClick1">按钮1</el-button>
+    <el-button @click="handleButtonClick2">按钮2</el-button>
+  </div>
 </template>
+
 <script>
-import Terminal from "vue-web-terminal"
-//  3.2.0 及 2.1.13 以后版本需要引入此样式，之前版本无需引入主题样式
-import 'vue-web-terminal/lib/theme/dark.css'
-import  axios  from "axios"
+import axios from "axios"
 import { serverURL } from "./ServerURL"
 export default {
-  data() {
-    return {
-      com: [
-        'cd',
-        'git',
-        'ls',
-        'cat',
-        'rf'
-      ],
-      responseData: [],
-    }
-  },
   methods: {
-    onExecCmd(key, command, success, failed) {
-      // console.log(command)
-      let temp1 = []
-      let temp = command.split(' ')
-      temp.forEach(str => {
-        const num = parseInt(str); // 转换为整数
-        if (!isNaN(num)) {
-          temp1.push(num); // 如果转换成功，则添加到args数组中
+    handleButtonClick1() {
+      // 处理按钮1点击时的逻辑
+      console.log("msg")
+      axios.get(serverURL + "/stop", {})
+        .then(response => {
+          console.log(response.data)
         }
-        else
-          temp1.push(str) // 否则就直接添加
-      })
-      console.log(temp1)
-      axios.post(serverURL + '/terminal', temp1).then(response =>{
-        console.log(response.data)
-        this.responseData = response.data.split('\n')
-        this.responseData.forEach(res => {
-          success({
-            type: 'normal',
-            content: res
-          })
-        })
-        
-        
-        console.log(this.responseData)
-      })
-      .catch(error => {
-        console.log(error)
-      })
-      console.log(this.responseData)
-      if (key === 'fail') {
-        failed('Something wrong!!!')
-      } else {
-        let allClass = ['success', 'error', 'system', 'info', 'warning'];
-
-        let clazz = allClass[2];
-
-          
-          // failed({
-          //   type: 'normal',
-          //   class: 'success',
-          //   tag: 'success',
-          //   content: command
-          // })
-      }
+        )
     },
-    getres(temp1){
-      
+    handleButtonClick2() {
+      // 处理按钮2点击时的逻辑
+      console.log("msg")
+      axios.get(serverURL + "/stop", {})
+        .then(response => {
+          console.log(response.data)
+        }
+        )
     }
   }
 }
 </script>
-
-<style>
-body,
-html,
-#app {
-  margin: 0;
-  padding: 0;
-  width: 90%;
-  height: 90%;
-}
-</style>
