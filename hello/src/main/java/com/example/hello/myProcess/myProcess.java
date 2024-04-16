@@ -122,13 +122,14 @@ public class myProcess {
         switch (p.ir.getType()) {
             // 若指令为计算，更新当前指令剩余时间
             case InstructionType.Calculate:
-                int remain_burst = (int) p.ir.getArguments()[0] - this.kernel.getSysData().SystemPulse;
+                int remain_burst = (int) p.ir.getArguments()[0] - 1;
                 if (remain_burst <= 0) {
                     remain_burst = 0;
                     p.pc += this.kernel.getSysData().InstructionLength;
                 }
                 p.ir.ModifyArgument(0, remain_burst);
-                System.out.println("Process" + p.p_id + "is running !CPU burst: remain" + remain_burst + "ms");
+                System.out.println("Process" + p.p_id + "is running !CPU burst: remain"
+                        + remain_burst * this.kernel.getSysData().SystemPulse + "ms");
                 break;
             // 若指令为文件读写或IO读写
             // 转换当前进程状态从running为waiting，移入等待队列

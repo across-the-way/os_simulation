@@ -84,11 +84,10 @@ public class hellocontroller {
 
     @PostMapping("/terminal")
     public String CreateProcess(@RequestBody Object[] instruction) {
-        TerminalCallType type; 
-        try{
-            type =  TerminalCallType.valueOf((String) instruction[0]);
-        }
-        catch (java.lang.IllegalArgumentException e){
+        TerminalCallType type;
+        try {
+            type = TerminalCallType.valueOf((String) instruction[0]);
+        } catch (java.lang.IllegalArgumentException e) {
             type = TerminalCallType.err;
         }
         instruction = Arrays.copyOfRange(instruction, 1, instruction.length);
@@ -106,14 +105,24 @@ public class hellocontroller {
     public List<Object> getMemoryStatus() {
         return this.kernel.getMm().getMemoryStatus();
     }
+
     @GetMapping("/stop")
     public String pause() {
-        return "success";
+        this.kernel.receiveInterrupt(new myInterrupt(InterruptType.StopSystem));
+        return "stop success";
     }
+
     @GetMapping("/start")
     public String start() {
-        return "success";
+        this.kernel.receiveInterrupt(new myInterrupt(InterruptType.StartSystem));
+        return "start success";
+    }
+
+    @GetMapping("/singlepause")
+    public String singlepause() {
+        this.kernel.receiveInterrupt(new myInterrupt(InterruptType.SinglePause));
+        return "singlepause success";
     }
     
-    
+
 }
