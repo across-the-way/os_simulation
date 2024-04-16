@@ -12,11 +12,11 @@ export default {
       fileLocation: '',
       breadcrumbItems: [],
       fileLists: [
-      //   {
-      //   name: '2016-05-03',
-      //   type: 'Tom',
-      //   imode: 'No. 189, Grove St, Los Angeles',
-      // },
+        {
+        name: '2016-05-03',
+        type: 'Tom',
+        imode: 'No. 189, Grove St, Los Angeles',
+      },
       // {
       //   name: '2016-05-03',
       //   type: 'Tom',
