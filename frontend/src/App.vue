@@ -3,7 +3,13 @@ import axios from 'axios'
 import { serverURL } from '@/components/ServerURL'
 import routes from './router/routes'
 import { ElButton } from 'element-plus';
-import { Open,ArrowRightBold,TurnOff } from '@element-plus/icons-vue'
+import { 
+  TurnOff,
+  ArrowRightBold,
+  Open
+ } from '@element-plus/icons-vue'
+
+
 </script>
 
 <script>
@@ -60,13 +66,14 @@ export default {
 
   <el-container style="width: 100vw;height: 60px;">
     <el-header style="background-color: white;width: 100%;" class="title">
-      <div style="display: inline-flex;">操作系统</div>
-      <el-button  @click="handleButtonClick1" circle style="display: inline-flex;text-align: right;margin-left:85vw;"  type="success" :icon="Open" />
-      <el-button @click="handleButtonClick2" style="display: inline-flex;" type="danger" circle :icon="TurnOff" />
+      <div style="display: inline-flex;padding-left: 20px;color: black;"class="left-aligned" >操作系统</div>
+      <div style="display: inline-flex;"class="right-aligned"><el-button  @click="handleButtonClick1" circle  style="display: inline-flex;text-align: right;"  type="success" :icon="Open" />
+      <el-button @click="handleButtonClick2"  style="display: inline-flex;" type="danger" circle :icon="TurnOff" />
       
      
-      <el-button  @click="handleButtonClick1" style="display: inline-flex;" type="primary" circle :icon="ArrowRightBold" />
-    </el-header>
+      <el-button  @click="handleButtonClick1" style="display: inline-flex;margin-right: 0;" type="primary"  circle :icon="ArrowRightBold" />
+    </div>
+      </el-header>
     </el-container>
     <el-container style="height: calc(100vh - 60px);">
     <el-aside width="200px" height="100%"><el-menu default-active="2" class="el-menu-vertical-demo" @open="handleOpen"
@@ -90,15 +97,15 @@ export default {
             <el-menu-item index="1-4-1"><router-link to="/memory">内存情况</router-link></el-menu-item>
           </el-sub-menu>
         </el-sub-menu>
-        <el-menu-item index="/filesystem">
-          <el-icon><icon-menu /></el-icon>
+        <el-menu-item index="1">
+          <el-icon><document /></el-icon>
           <router-link to="/filesystem">文件系统</router-link>
         </el-menu-item>
         <el-menu-item index="3">
           <el-icon>
             <document />
           </el-icon>
-          <span>test</span>
+          <span>&nbsp测试</span>
         </el-menu-item>
         <el-menu-item index="4">
           <el-icon>
@@ -119,8 +126,13 @@ export default {
   width: 100vw;
   /* height: auto; */
   background-color: blanchedalmond;
-  margin:0 auto;
-  padding: 16px;
-  padding-left: 40px;
+  /* margin:0 auto; */
+
+  display: flex;
+  justify-content: space-between;
+  /* padding: 16px; */
+  /* padding-left: 40px; */
+  text-align: center;
+  align-items: center;
 }
 </style>
