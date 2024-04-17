@@ -13,18 +13,42 @@ export default {
       breadcrumbItems: [],
       operation: 'default',
       value: '请选择',
-      fileLists: [
+      fileLists: [  
+        {
+          name: 'data.txt',
+          type: 'file',
+          imode: '2016-06-03',
+        },
+        {
+          name: 'drc',
+          type: 'folder',
+          imode: '2009-05-03',
+        },
+        {
+          name: 'cata.txt',
+          type: 'file',
+          imode: '2010-04-03',
+        },
         {
           name: 'src',
           type: 'folder',
-          imode: '2016-05-03',
+          imode: '2016-10-03',
+        },
+        {
+          name: 'eata.txt',
+          type: 'file',
+          imode: '2016-08-03',
+        },
+        {
+          name: 'arc',
+          type: 'folder',
+          imode: '2019-05-03',
         },
         {
           name: 'data.txt',
           type: 'file',
-          imode: '2016-05-03',
+          imode: '2012-04-03',
         },
-        
       ],
       city: [
         {
@@ -35,7 +59,8 @@ export default {
           value: '文件夹',
           label: '文件夹',
         },
-      ]
+      ],
+      isSortedByDate: false,  //跟踪是否按时间排序
     }
   },
   created() {
@@ -47,6 +72,7 @@ export default {
         // 处理响应结果
         console.log(response.data);
         this.fileLists = response.data
+        this.sortFileLists();
         fileLists1 = fileLists
         fileLists1.forEach(item => {
 
@@ -64,7 +90,7 @@ export default {
     console.log(window.location.pathname)
     this.generateBreadcrumb();
     console.log(this.breadcrumbItems);
-
+    this.sortFileLists();
   },
   methods: {
     generateBreadcrumb() {
@@ -85,8 +111,37 @@ export default {
       if(this.operation === 'default')
       this.operation = statusvalue
     else this.operation = 'default'
-    }
-
+    },
+    sortFileLists() {
+      this.fileLists.sort((a, b) => {
+        if (a.type === b.type) {
+          return a.name.localeCompare(b.name); // 同类型时按name排序
+        }
+        return a.type === 'folder' ? -1 : 1; // 将folder类型置前
+      });
+    },
+    sortByDateAndName() {
+      this.fileLists.sort((a, b) => {
+        // 按类型排序，folder始终在前
+        if (a.type !== b.type) {
+          return a.type === 'folder' ? -1 : 1;
+        }
+        // 相同类型按日期排序，如果日期相同则按名称排序
+        const dateComparison = b.imode.localeCompare(a.imode);
+        if (dateComparison !== 0) {
+          return dateComparison;
+        }
+        return a.name.localeCompare(b.name);
+      });
+    },
+    toggleSortByDate() {
+      this.isSortedByDate = !this.isSortedByDate;  // 切换排序状态
+      if (this.isSortedByDate) {
+        this.sortByDateAndName();  // 如果激活按时间排序，则调用按时间排序的方法
+      } else {
+        this.sortFileLists();  // 否则，使用默认的排序方式
+      }
+    },
   },
 }
 </script>
@@ -101,6 +156,12 @@ export default {
 
       </el-breadcrumb>
       <div class="right-aligned" >
+        <Transition name="scale">
+          <!-- 按时间排序/取消按钮 -->
+          <el-button type="info" @click="toggleSortByDate" v-if="operation === 'default'">
+          {{ isSortedByDate ? '取消' : '按时间排序' }} <!-- 根据isSortedByDate显示不同的文本 -->
+          </el-button>
+        </Transition>
         <Transition name="scale">
         <el-button type="success" @click = 'changeNowStatus("add")' v-if="operation === 'default'">
           <el-icon  style="margin-left: 0;margin-right: 5px;" >
