@@ -22,7 +22,7 @@ export default {
     handleButtonClick2() {
       // 处理按钮2点击时的逻辑
       console.log("msg")
-      axios.get(serverURL + "/stop", {})
+      axios.get(serverURL + "/start", {})
         .then(response => {
           console.log(response.data)
         }
