@@ -59,6 +59,7 @@ public class myKernel implements Runnable {
     ConcurrentLinkedQueue<myInterrupt> queue = new ConcurrentLinkedQueue<>();
     public String terminal_message;
     public Boolean terminal_update;
+    public Boolean System_stop;
 
     public void receiveInterrupt(myInterrupt interrupt) {
         queue.offer(interrupt);
@@ -103,12 +104,22 @@ public class myKernel implements Runnable {
                     case SwappedOut:
                         handleSwappedOut();
                         break;
+                    case StopSystem:
+                        StopSystem();
+                        break;
+                    case StartSystem:
+                        StartSystem();
+                        break;
+                    case SinglePause:
+                        SinglePause();
+                        break;
                     case Exit:
                     default:
                         break;
                 }
             }
-            timer.resume();
+            if (!System_stop)
+                timer.resume();
         }
     }
 
@@ -128,8 +139,12 @@ public class myKernel implements Runnable {
     }
 
     private void finish(Object[] objects) {
-        pm.waitToReady((int) objects[0]);
-        pm.getPCB((int) objects[0]).pc += this.getSysData().InstructionLength;
+        int pid = (int) objects[0];
+        if (pm.getPCB(pid).state == P_STATE.WAITING)
+            pm.waitToReady(pid);
+        else
+            pm.SwappedWaitingToSwappedReady(pid);
+        pm.getPCB(pid).pc += this.getSysData().InstructionLength;
     }
 
     /*
@@ -176,6 +191,8 @@ public class myKernel implements Runnable {
                 break;
             case FileWrite:
                 write(objects);
+                break;
+            default:
                 break;
         }
     }
@@ -234,12 +251,11 @@ public class myKernel implements Runnable {
     private void create(Object[] objs) {
 
         int pid = pm.createPCB(objs);
-        pm.addToLongTermQueue(pid);
-        // if (mm.allocate(pid, 0)) {
-        // pm.addToLongTermQueue(pid);
-        // } else {
-        // pm.deletePCB(pid);
-        // }
+        if (mm.allocate(pid, pm.getPCB(pid).memory_allocate)) {
+            pm.addToLongTermQueue(pid);
+        } else {
+            pm.deletePCB(pid);
+        }
 
     }
 
@@ -367,7 +383,7 @@ public class myKernel implements Runnable {
     }
 
     /*
-     * 处理前端终端相应
+     * 处理前端终端响应
      */
     private void terminalCall(Object[] objects) {
         TerminalCallType type = (TerminalCallType) objects[0];
@@ -400,6 +416,31 @@ public class myKernel implements Runnable {
         }
     }
 
+    /*
+     * 处理系统暂停/调试等
+     */
+
+    private void StopSystem() {
+        System_stop = true;
+    }
+
+    private void StartSystem() {
+        System_stop = false;
+    }
+
+    private void SinglePause() {
+        System_stop = false;
+        Thread pauseThread = new Thread(() -> {
+            try {
+                Thread.sleep(this.getSysData().SystemPulse);
+                System_stop = true;
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+        pauseThread.start();
+    }
+
     @Override
     public void run() {
         timer = new myClock(instance);
@@ -410,6 +451,7 @@ public class myKernel implements Runnable {
         Thread timerThread = new Thread(timer);
         terminal_message = new String();
         terminal_update = false;
+        System_stop = false;
 
         timerThread.start();
 

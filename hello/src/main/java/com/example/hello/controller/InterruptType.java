@@ -10,5 +10,8 @@ public enum InterruptType {
     SystemCall,
     SwappedIn,
     SwappedOut,
+    StopSystem,
+    StartSystem,
+    SinglePause,
     Exit,
 }

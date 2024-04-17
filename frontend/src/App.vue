@@ -24,7 +24,7 @@ export default {
     handleButtonClick1() {
       // 处理按钮1点击时的逻辑
       console.log("msg")
-      axios.get(serverURL + "/stop", {})
+      axios.get(serverURL + "/start", {})
         .then(response => {
           console.log(response.data)
         }
@@ -34,7 +34,17 @@ export default {
     handleButtonClick2() {
       // 处理按钮2点击时的逻辑
       console.log("msg")
-      axios.get(serverURL + "/start", {})
+      axios.get(serverURL + "/stop", {})
+        .then(response => {
+          console.log(response.data)
+        }
+
+        )
+    },
+    handleButtonClick3() {
+      // 处理按钮2点击时的逻辑
+      console.log("msg")
+      axios.get(serverURL + "/singlepause", {})
         .then(response => {
           console.log(response.data)
         }
@@ -69,9 +79,7 @@ export default {
       <div style="display: inline-flex;padding-left: 20px;color: black;"class="left-aligned" >操作系统</div>
       <div style="display: inline-flex;"class="right-aligned"><el-button  @click="handleButtonClick1" circle  style="display: inline-flex;text-align: right;"  type="success" :icon="Open" />
       <el-button @click="handleButtonClick2"  style="display: inline-flex;" type="danger" circle :icon="TurnOff" />
-      
-     
-      <el-button  @click="handleButtonClick1" style="display: inline-flex;margin-right: 0;" type="primary"  circle :icon="ArrowRightBold" />
+      <el-button  @click="handleButtonClick3" style="display: inline-flex;margin-right: 0;" type="primary"  circle :icon="ArrowRightBold" />
     </div>
       </el-header>
     </el-container>
