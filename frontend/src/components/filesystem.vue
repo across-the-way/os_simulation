@@ -85,6 +85,14 @@ export default {
       });
     // console.log(window.location.pathname)
   },
+  computed: {
+    buttonClass() {
+      return this.operation === 'default' ? 'success' : 'danger';
+    },
+    buttonText() {
+      return this.operation === 'default' ? 'add' : 'cancel';
+    }
+  },
   mounted() {
     this.fileLocation = window.location.pathname;
     console.log(window.location.pathname)
@@ -156,25 +164,24 @@ export default {
 
       </el-breadcrumb>
       <div class="right-aligned" >
-        <Transition name="scale">
+        
           <!-- 按时间排序/取消按钮 -->
-          <el-button type="info" @click="toggleSortByDate" v-if="operation === 'default'">
+          <el-button type="info" @click="toggleSortByDate" >
           {{ isSortedByDate ? '取消' : '按时间排序' }} <!-- 根据isSortedByDate显示不同的文本 -->
           </el-button>
-        </Transition>
+        
         <Transition name="scale">
-        <el-button type="success" @click = 'changeNowStatus("add")' v-if="operation === 'default'">
-          <el-icon  style="margin-left: 0;margin-right: 5px;" >
+        <el-button :type="buttonClass" @click = 'changeNowStatus("add")' >
+          <el-icon  style="margin-left: 0;margin-right: 5px;" v-if="operation === 'default'">
             <DocumentAdd />
-          </el-icon> add</el-button></Transition>
-          <Transition name="scale">
-        <el-button type="danger" v-if="operation === 'add'" @click = "changeNowStatus('default')">
-          <el-icon style="margin-left: 0;margin-right: 5px;" >
+          </el-icon>
+          <el-icon  style="margin-left: 0;margin-right: 5px;" v-if="operation === 'add'">
             <CircleClose />
-          </el-icon> cancel
-        </el-button></Transition>
-        <el-select v-model="value" placeholder="Select" style="width: 95px;padding-left: 5px;">
-          <el-option v-for="item in city" :key="item.value" :label="item.label" :value="item.value" style="width: 100px;">
+          </el-icon>
+          {{ buttonText }}</el-button></Transition>
+          
+        <el-select v-model="value" placeholder="Select" style="width: 105px;padding-left: 12px;">
+          <el-option v-for="item in city" :key="item.value" :label="item.label" :value="item.value" style="width: 120px;">
             <el-icon><Menu/></el-icon>
             <span style="
           float: right;
