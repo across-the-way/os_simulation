@@ -9,6 +9,7 @@ import com.example.hello.myMemory.myMemory;
 import com.example.hello.myProcess.PCB;
 import com.example.hello.myProcess.myProcess;
 import com.example.hello.myProcess.scheduleStrategy;
+import com.example.hello.myProcess.PCB.P_STATE;
 
 public class myKernel implements Runnable {
     private static myKernel instance;
@@ -25,6 +26,14 @@ public class myKernel implements Runnable {
 
     public myFile getFs() {
         return this.fs;
+    }
+
+    public myDevice getIo() {
+        return io;
+    }
+
+    public myMemory getMm() {
+        return this.mm;
     }
 
     private myKernel() {
@@ -50,6 +59,7 @@ public class myKernel implements Runnable {
     ConcurrentLinkedQueue<myInterrupt> queue = new ConcurrentLinkedQueue<>();
     public String terminal_message;
     public Boolean terminal_update;
+    public Boolean System_stop;
 
     public void receiveInterrupt(myInterrupt interrupt) {
         queue.offer(interrupt);
@@ -88,12 +98,28 @@ public class myKernel implements Runnable {
                     case TerminalCall:
                         terminalCall(interrupt.getObjects());
                         break;
+                    case SwappedIn:
+                        handleSwappedIn();
+                        break;
+                    case SwappedOut:
+                        handleSwappedOut();
+                        break;
+                    case StopSystem:
+                        StopSystem();
+                        break;
+                    case StartSystem:
+                        StartSystem();
+                        break;
+                    case SinglePause:
+                        SinglePause();
+                        break;
                     case Exit:
                     default:
                         break;
                 }
             }
-            timer.resume();
+            if (!System_stop)
+                timer.resume();
         }
     }
 
@@ -113,8 +139,12 @@ public class myKernel implements Runnable {
     }
 
     private void finish(Object[] objects) {
-        pm.waitToReady((int) objects[0]);
-        pm.getPCB((int) objects[0]).pc += this.getSysData().InstructionLength;
+        int pid = (int) objects[0];
+        if (pm.getPCB(pid).state == P_STATE.WAITING)
+            pm.waitToReady(pid);
+        else
+            pm.SwappedWaitingToSwappedReady(pid);
+        pm.getPCB(pid).pc += this.getSysData().InstructionLength;
     }
 
     /*
@@ -161,6 +191,8 @@ public class myKernel implements Runnable {
                 break;
             case FileWrite:
                 write(objects);
+                break;
+            default:
                 break;
         }
     }
@@ -219,12 +251,11 @@ public class myKernel implements Runnable {
     private void create(Object[] objs) {
 
         int pid = pm.createPCB(objs);
-        pm.addToLongTermQueue(pid);
-        // if (mm.allocate(pid, 0)) {
-        // pm.addToLongTermQueue(pid);
-        // } else {
-        // pm.deletePCB(pid);
-        // }
+        if (mm.allocate(pid, pm.getPCB(pid).memory_allocate)) {
+            pm.addToLongTermQueue(pid);
+        } else {
+            pm.deletePCB(pid);
+        }
 
     }
 
@@ -298,101 +329,116 @@ public class myKernel implements Runnable {
     }
 
     /*
-     * 处理前端终端相应
+     * 处理中期调度中断
+     */
+    private void handleSwappedIn() {
+        while (true) {
+            // 按照中期调度换入算法选择一个要换入的进程（注：为方便处理，二级队列的换入后进入就绪队列）
+            int pid = this.pm.Choose_SwappedIn();
+            if (pid == -1) {
+                return;
+            }
+            // 进程状态转换
+            if (this.pm.getPCB(pid).state == P_STATE.SWAPPED_READY) {
+                this.pm.SwappedReadyToReady(pid);
+            } else if (this.pm.getPCB(pid).state == P_STATE.SWAPPED_WAITING) {
+                this.pm.SwappedWaitingToWaiting(pid);
+            } else {
+                return;
+            }
+            // 进程状态恢复(从Swapped Space 读取)，并删除Swapped Space 中对应的记录
+            // 重新为进程分配空间
+            mm.allocate(pid, pm.getPCB(pid).memory_allocate);
+            // 检查内存负载情况，如果负载低于下限，则重复上述步骤
+            if (!mm.isLower()) {
+                return;
+            }
+        }
+    }
+
+    private void handleSwappedOut() {
+        while (true) {
+            // 按照中期调度换出算法选择一个要换出的进程(ready(包括二级) 队列/waiting 队列)
+            int pid = this.pm.Choose_SwappedOut();
+            if (pid == -1) {
+                return;
+            }
+            // 进程状态转换
+            if (pm.getPCB(pid).state == P_STATE.READY) {
+                pm.ReadyToSwappedReady(pid);
+            } else if (pm.getPCB(pid).state == P_STATE.WAITING) {
+                pm.WaitingToSwappedWaiting(pid);
+            } else {
+                return;
+            }
+            // 将进程状态写入Swapped Space
+
+            // 释放进程占用的内存空间
+            mm.release(pid);
+            // 检查内存负载情况，如果负载仍然超过上限，则重复上述步骤
+            if (!mm.isUpper()) {
+                return;
+            }
+        }
+    }
+
+    /*
+     * 处理前端终端响应
      */
     private void terminalCall(Object[] objects) {
         TerminalCallType type = (TerminalCallType) objects[0];
         objects = (Object[]) objects[1];
         switch (type) {
             case TerminalCallType.pwd:
-                Terminalpwd();
+                Terminalfunc.Terminalpwd(this);
                 break;
             case TerminalCallType.cd:
-                Terminalcd(objects);
+                Terminalfunc.Terminalcd((String) objects[0], this);
                 break;
             case TerminalCallType.touch:
-                Terminaltouch(objects);
+                Terminalfunc.Terminaltouch((String) objects[0], this);
                 break;
             case TerminalCallType.mkdir:
-                Terminalmkdir(objects);
+                Terminalfunc.Terminalmkdir((String) objects[0], this);
                 break;
             case TerminalCallType.rm:
-                Terminalrm(objects);
+                Terminalfunc.Terminalrm(objects);
                 break;
             case TerminalCallType.ls:
-                Terminalls(objects);
+                Terminalfunc.Terminalls(objects, this);
                 break;
             case TerminalCallType.cat:
-                Terminalcat(objects);
+                Terminalfunc.Terminalcat(objects);
                 break;
             default:
-                TerminalErr(objects);
+                Terminalfunc.TerminalErr(this);
                 break;
         }
     }
 
-    private void Terminalpwd() {
-        this.terminal_message = "/" + this.fs.getCurPath();
-        this.terminal_update = true;
+    /*
+     * 处理系统暂停/调试等
+     */
+
+    private void StopSystem() {
+        System_stop = true;
     }
 
-    private void Terminalcd(Object[] objects) {
-        if (((String) objects[0]).equals("..")) {
-            if (!this.fs.getCurPath().equals("filesystem")) {
-                int last = this.fs.getCurPath().lastIndexOf("/");
-                this.fs.setCurPath(this.fs.getCurPath().substring(0, last));
-                this.terminal_message = "ok";
-            } else {
-                this.terminal_message = "已经在根目录,无法返回上级目录";
+    private void StartSystem() {
+        System_stop = false;
+    }
+
+    private void SinglePause() {
+        System_stop = false;
+        Thread pauseThread = new Thread(() -> {
+            try {
+                Thread.sleep(this.getSysData().SystemPulse);
+                System_stop = true;
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-        } else if (this.fs.findInode(this.fs.getCurPath() + "/" + (String) objects[0]) == null) {
-            this.terminal_message = "文件夹不存在";
-        } else if (this.fs.findInode(this.fs.getCurPath() + "/" + (String) objects[0]).getType() == 0) {
-            this.fs.setCurPath(this.fs.getCurPath() + "/" + (String) objects[0]);
-            this.terminal_message = "ok";
-        } else {
-            this.terminal_message = "该名称为文件名称,无法打开";
-        }
-        this.terminal_update = true;
-    }
-
-    private void Terminaltouch(Object[] objects) {
-        if (this.fs.touch(this.fs.getCurPath(), (String) objects[0])) {
-            terminal_message = "ok";
-        } else {
-            terminal_message = "文件名重复,创建文件失败";
-        }
-        this.terminal_update = true;
-    }
-
-    private void Terminalmkdir(Object[] objects) {
-        if (this.fs.mkdir(this.fs.getCurPath(), (String) objects[0])) {
-            terminal_message = "ok";
-        } else {
-            terminal_message = "目录名重复,创建目录失败";
-        }
-        this.terminal_update = true;
-    }
-
-    private void Terminalrm(Object[] objects) {
-
-    }
-
-    private void Terminalcat(Object[] objects) {
-
-    }
-
-    private void Terminalls(Object[] objects) {
-        if (objects.length != 0)
-            this.terminal_message = this.fs.ls(this.fs.getCurPath(), (String) objects[0]);
-        else
-            this.terminal_message = this.fs.ls(this.fs.getCurPath(), null);
-        this.terminal_update = true;
-    }
-
-    private void TerminalErr(Object[] objects) {
-        this.terminal_message = "err";
-        this.terminal_update = true;
+        });
+        pauseThread.start();
     }
 
     @Override
@@ -405,6 +451,7 @@ public class myKernel implements Runnable {
         Thread timerThread = new Thread(timer);
         terminal_message = new String();
         terminal_update = false;
+        System_stop = false;
 
         timerThread.start();
 

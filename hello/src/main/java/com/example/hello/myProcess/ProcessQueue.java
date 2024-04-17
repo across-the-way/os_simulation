@@ -20,8 +20,12 @@ public class ProcessQueue {
     public List<List<Integer>> Waiting_Queues;
 
     public List<Integer> Ready_Queue;
-    public List<SecondItem> Second_Queue;
+    public List<TTLItem> Second_Queue;
     // public List<PCB> Job_Pool;
+
+    // 中期调度队列
+    public List<TTLItem> Swapped_Ready_Queue;
+    public List<TTLItem> Swapped_Waiting_Queue;
 
     public ProcessQueue() {
         this.Waiting_Queues = new ArrayList<List<Integer>>();
@@ -29,9 +33,11 @@ public class ProcessQueue {
             List<Integer> p = new ArrayList<Integer>();
             this.Waiting_Queues.add(p);
         }
-        
+
         this.Ready_Queue = new ArrayList<>();
         this.Second_Queue = new ArrayList<>();
+        this.Swapped_Ready_Queue = new ArrayList<>();
+        this.Swapped_Waiting_Queue = new ArrayList<>();
     }
 
     public void RemoveProcess(int pid) {
@@ -57,14 +63,28 @@ public class ProcessQueue {
                 return;
             }
         }
+
+        for (int i = 0; i < Swapped_Ready_Queue.size(); i++) {
+            if (Swapped_Ready_Queue.get(i).getPid() == pid) {
+                Swapped_Ready_Queue.remove(i);
+                return;
+            }
+        }
+
+        for (int i = 0; i < Swapped_Waiting_Queue.size(); i++) {
+            if (Swapped_Waiting_Queue.get(i).getPid() == pid) {
+                Swapped_Waiting_Queue.remove(i);
+                return;
+            }
+        }
     }
 }
 
-class SecondItem {
+class TTLItem {
     private int pid;
     private int TTL;
 
-    public SecondItem(int pid) {
+    public TTLItem(int pid) {
         this.pid = pid;
         this.TTL = 0;
     }

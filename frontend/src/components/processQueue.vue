@@ -119,7 +119,7 @@ export default {
 </script>
 <template>
     <div style="display:inline-block ;">
-        <el-table :data="pcb" height="250">
+        <!-- <el-table :data="pcb" height="250">
             <el-table-column v-for="column in columns" 
                 :key="column.props" 
                 :prop="column.props" 
@@ -127,7 +127,35 @@ export default {
                 width="auto">
             </el-table-column>
             
-        </el-table>
+        </el-table> -->
+        <el-table :data="pcb" style="width: 100%">
+      <el-table-column label="p_id" width="180">
+        <template #default="scope">
+          <div style="display: flex; align-items: center">
+            {{ scope.row.p_id }}
+          </div>
+        </template>
+      </el-table-column>
+      <el-table-column label="prority" width="180">
+        <template #default="scope">
+          <el-popover effect="light" trigger="hover" placement="top" width="190">
+            <template #default>
+              <div>{{ scope.row.p_id }}</div>
+              <div>{{ scope.row.priority }}</div>
+            </template>
+            <template #reference>
+              <el-tag>{{ scope.row.priority }}</el-tag>
+            </template>
+          </el-popover>
+        </template>
+      </el-table-column>
+      <el-table-column label="detail" width="180">
+        <template #default="scope">
+          <el-button size="small" @click="handleEdit(scope.$index, scope.row)">Edit</el-button>
+          <el-button size="small" type="danger" @click="handleDelete(scope.$index, scope.row)">Delete</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
     </div>
 </template>
 <style></style>

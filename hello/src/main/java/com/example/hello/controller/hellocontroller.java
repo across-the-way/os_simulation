@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import com.example.hello.myInstrunction.Instruction;
 import com.example.hello.myProcess.PCB;
 import com.example.hello.myProcess.PCB.P_STATE;
+import com.example.hello.myDevice.*;
 import com.example.hello.myFile.*;
 import java.util.*;
 
@@ -76,13 +77,17 @@ public class hellocontroller {
         return this.kernel.getFs().filelist(location.getLocation());
     }// 把这里的string改成List<Inode>应该就可以用了
 
+    @PostMapping("/device")
+    public List<Device> getDevice() {
+        return this.kernel.getIo().get();
+    }
+
     @PostMapping("/terminal")
     public String CreateProcess(@RequestBody Object[] instruction) {
-        TerminalCallType type; 
-        try{
-            type =  TerminalCallType.valueOf((String) instruction[0]);
-        }
-        catch (java.lang.IllegalArgumentException e){
+        TerminalCallType type;
+        try {
+            type = TerminalCallType.valueOf((String) instruction[0]);
+        } catch (java.lang.IllegalArgumentException e) {
             type = TerminalCallType.err;
         }
         instruction = Arrays.copyOfRange(instruction, 1, instruction.length);
@@ -95,5 +100,29 @@ public class hellocontroller {
         this.kernel.terminal_message = null;
         return msg;
     }
+
+    @GetMapping("/memory")
+    public List<Object> getMemoryStatus() {
+        return this.kernel.getMm().getMemoryStatus();
+    }
+
+    @GetMapping("/stop")
+    public String pause() {
+        this.kernel.receiveInterrupt(new myInterrupt(InterruptType.StopSystem));
+        return "stop success";
+    }
+
+    @GetMapping("/start")
+    public String start() {
+        this.kernel.receiveInterrupt(new myInterrupt(InterruptType.StartSystem));
+        return "start success";
+    }
+
+    @GetMapping("/singlepause")
+    public String singlepause() {
+        this.kernel.receiveInterrupt(new myInterrupt(InterruptType.SinglePause));
+        return "singlepause success";
+    }
+    
 
 }

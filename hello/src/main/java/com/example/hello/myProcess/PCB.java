@@ -6,7 +6,7 @@ import com.example.hello.myInstrunction.*;
 
 public class PCB {
     public enum P_STATE {
-        NEW, READY, RUNNING, WAITING, TERMINATED, SWAPPED_READY
+        NEW, READY, RUNNING, WAITING, TERMINATED, SWAPPED_READY,SWAPPED_WAITING
     }
 
     // 进程状态
