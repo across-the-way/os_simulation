@@ -8,7 +8,7 @@ import java.util.*;
 public class myFile {
     private myKernel kernel;
     private boolean[] bitmap;// false代表空闲
-    private TreeMap<Integer, Integer> spaceTable;// 空闲块的【长度,起始位置】
+    private HashMap<Integer, Integer> spaceTable;// 空闲块的【起始位置,长度】
     private OpenFileTable ftable;
     private Inode root;// 根目录
     private String curPath;
@@ -40,45 +40,43 @@ public class myFile {
     private Queue<queueEntry> rwqueue;
 
     public boolean allocate(Inode file, int fileSize, int pid) {
-        if (spaceTable.higherKey(fileSize) == null) {
-            // 磁盘空间不足，触发中断
-            return false;
-        } else {
-            Map.Entry<Integer, Integer> entry = spaceTable.higherEntry(fileSize);
-            int newSize = entry.getKey() - fileSize;
-            int newSt = entry.getValue() + fileSize;
-            // 更新空闲空间队列
-            spaceTable.remove(entry.getKey());
-            spaceTable.put(newSize, newSt);
-            // 更新bitmap
-            Arrays.fill(bitmap, entry.getValue(), entry.getValue() + fileSize, true);
-            // 更新Inode的storage
-            file.putStorage(entry.getValue(), fileSize);
-            // 加入读写队列
-            rwqueue.offer(new queueEntry(file, 1, entry.getValue(), fileSize, pid));
-            return true;
+        for (int key : spaceTable.keySet()) {
+            int freeSize = spaceTable.get(key);
+            if (freeSize >= fileSize) {
+                // 更新空闲空间队列
+                freeSize -= fileSize;
+                spaceTable.remove(key);
+                spaceTable.put(key + fileSize, freeSize);
+                // 更新bitmap
+                Arrays.fill(bitmap, key, key + fileSize, true);
+                // 更新Inode的storage
+                file.putStorage(key, fileSize);
+                // 加入读写队列
+                rwqueue.offer(new queueEntry(file, 1, key, fileSize, pid));
+                return true;
+            }
         }
+        return false;
     }
 
     public int allocate1(Inode file, int fileSize, int pid) {
-        if (spaceTable.higherKey(fileSize) == null) {
-            // 磁盘空间不足，触发中断
-            return -1;
-        } else {
-            Map.Entry<Integer, Integer> entry = spaceTable.higherEntry(fileSize);
-            int newSize = entry.getKey() - fileSize;
-            int newSt = entry.getValue() + fileSize;
-            // 更新空闲空间队列
-            spaceTable.remove(entry.getKey());
-            spaceTable.put(newSize, newSt);
-            // 更新bitmap
-            Arrays.fill(bitmap, entry.getValue(), entry.getValue() + fileSize, true);
-            // 更新Inode的storage
-            file.putStorage(entry.getValue(), fileSize);
-            // 加入读写队列
-            rwqueue.offer(new queueEntry(file, 1, entry.getValue(), fileSize, pid));
-            return entry.getValue();
+        for (int key : spaceTable.keySet()) {
+            int freeSize = spaceTable.get(key);
+            if (freeSize >= fileSize) {
+                // 更新空闲空间队列
+                freeSize -= fileSize;
+                spaceTable.remove(key);
+                spaceTable.put(key + fileSize, freeSize);
+                // 更新bitmap
+                Arrays.fill(bitmap, key, key + fileSize, true);
+                // 更新Inode的storage
+                file.putStorage(key, fileSize);
+                // 加入读写队列
+                rwqueue.offer(new queueEntry(file, 1, key, fileSize, pid));
+                return key;
+            }
         }
+        return -1;
     }
 
     public myFile(myKernel kernel) {
@@ -87,8 +85,8 @@ public class myFile {
         ftable = new OpenFileTable();
 
         bitmap = new boolean[1024];
-        spaceTable = new TreeMap<>();
-        spaceTable.put(1024, 0);
+        spaceTable = new HashMap<>();
+        spaceTable.put(0, 1024);
         block = new Block[1024];
         for (int i = 0; i < 1024; i++) {
             block[i] = new Block();
@@ -205,17 +203,22 @@ public class myFile {
             mergeStart = end;
         }
         if (mergeStart == -1 && mergeEnd == -1) {
+            spaceTable.put(newStart, newSize);
             return;
         }
-        for (int freeSize : spaceTable.keySet()) {
-            if (spaceTable.get(freeSize) == mergeStart) {
-                newSize += freeSize;
-            }
-            if (spaceTable.get(freeSize) + freeSize == mergeEnd) {
-                newSize += freeSize;
-                newStart -= freeSize;
+        if (spaceTable.get(mergeStart) != null) {
+            newSize += spaceTable.get(mergeStart);
+            spaceTable.remove(mergeStart);
+        }
+        for (int key : spaceTable.keySet()) {
+            if (key + spaceTable.get(key) == mergeEnd) {
+                newSize += spaceTable.get(key);
+                newStart -= spaceTable.get(key);
+                spaceTable.remove(key);
+                break;
             }
         }
+        spaceTable.put(newStart, newSize);
     }
 
     public void freeUp(Inode curInode) {
