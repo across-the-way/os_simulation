@@ -90,6 +90,9 @@ public class myFile {
         spaceTable = new TreeMap<>();
         spaceTable.put(1024, 0);
         block = new Block[1024];
+        for (int i = 0; i < 1024; i++) {
+            block[i] = new Block();
+        }
         rwqueue = new LinkedList<queueEntry>();
         Arrays.fill(bitmap, false);
         root = new Inode("filesystem", 0, 1);
