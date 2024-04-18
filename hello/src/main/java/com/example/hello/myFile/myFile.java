@@ -12,7 +12,7 @@ public class myFile {
     private OpenFileTable ftable;
     private Inode root;// 根目录
     private String curPath;
-
+    private  Block block[];
     public String getCurPath() {
         return curPath;
     }
@@ -60,6 +60,27 @@ public class myFile {
         }
     }
 
+    public int allocate1(Inode file, int fileSize, int pid) {
+        if (spaceTable.higherKey(fileSize) == null) {
+            // 磁盘空间不足，触发中断
+            return -1;
+        } else {
+            Map.Entry<Integer, Integer> entry = spaceTable.higherEntry(fileSize);
+            int newSize = entry.getKey() - fileSize;
+            int newSt = entry.getValue() + fileSize;
+            // 更新空闲空间队列
+            spaceTable.remove(entry.getKey());
+            spaceTable.put(newSize, newSt);
+            // 更新bitmap
+            Arrays.fill(bitmap, entry.getValue(), entry.getValue() + fileSize, true);
+            // 更新Inode的storage
+            file.putStorage(entry.getValue(), fileSize);
+            // 加入读写队列
+            rwqueue.offer(new queueEntry(file, 1, entry.getValue(), fileSize, pid));
+            return entry.getValue();
+        }
+    }
+
     public myFile(myKernel kernel) {
         this.kernel = kernel;
         curPath = "filesystem";
@@ -68,6 +89,7 @@ public class myFile {
         bitmap = new boolean[1024];
         spaceTable = new TreeMap<>();
         spaceTable.put(1024, 0);
+        block = new Block[1024];
         rwqueue = new LinkedList<queueEntry>();
         Arrays.fill(bitmap, false);
         root = new Inode("filesystem", 0, 1);
@@ -215,14 +237,14 @@ public class myFile {
     // 以下parent_name是文件绝对地址
     public boolean touch(String parent_name, String file_name) {
         if (parent_name.isEmpty()) {
-            // 路径为空触发中断
+            // 路径为空
             return false;
         }
         // 寻找父目录
         Inode pInode = findInode(parent_name);
         // 创建文件
         if (pInode == null) {
-            // 路径错误触发中断
+            // 路径错误
             return false;
         }
         if (checkRenameError(parent_name, file_name, 1)) {
@@ -245,14 +267,14 @@ public class myFile {
 
     public void rm(String parent_name, String file_name) {
         if (parent_name.isEmpty()) {
-            // 路径为空触发中断
+            // 路径为空
             return;
         }
         // 寻找父目录
         Inode pInode = findInode(parent_name);
         // 删除文件
         if (pInode == null || pInode.findChild(file_name) == null) {
-            // 路径错误触发中断
+            // 路径错误
             return;
         }
         if (ftable.isExist(parent_name + "/" + file_name)) {
@@ -267,7 +289,7 @@ public class myFile {
 
     public boolean mkdir(String parent_name, String dir_name) {
         if (parent_name.isEmpty()) {
-            // 路径为空触发中断
+            // 路径为空
             System.out.println("路径为空");
             return false;
         }
@@ -275,7 +297,7 @@ public class myFile {
         Inode pInode = findInode(parent_name);
         // 创建目录
         if (pInode == null) {
-            // 路径错误触发中断
+            // 路径错误
             return false;
         }
         if (checkRenameError(parent_name, dir_name, 0)) {
@@ -288,21 +310,20 @@ public class myFile {
 
     public void rmdir(String parent_name, String dir_name) {
         if (parent_name.isEmpty()) {
-            // 路径为空触发中断
+            // 路径为空
             return;
         }
         // 寻找父目录
         Inode pInode = findInode(parent_name);
 
         if (pInode == null) {
-            // 路径错误触发中断
+            // 路径错误
             return;
         }
         // 递归释放文件夹中所有文件的磁盘空间
         freeUp(pInode.findChild(dir_name));
         // 删除目录
         pInode.deleteFileInDir(dir_name);
-        // 删除所有
     }
 
     public int open(int pid, String path) {
@@ -319,6 +340,27 @@ public class myFile {
         Inode file = findInode(path);
         if (file != null) {
             allocate(file, usage_size, pid);
+        }
+    }
+
+    public void write1(int pid, int fd, String s) {
+        String path = ftable.findInodeByFd(fd);
+        Inode file = findInode(path);
+        int usage_size = (s.length() + 3) / 4;
+        int startBlock;
+        char[] data;
+        if (file != null) {
+            startBlock = allocate1(file, usage_size, pid);
+            data = s.toCharArray();
+            int i = 0, curBlock = startBlock;
+            for (char c : data) {
+                if (i == 4) {
+                    i = 0;
+                    curBlock++;
+                }
+                block[curBlock].data[i] = c;
+                i++;
+            }
         }
     }
 
