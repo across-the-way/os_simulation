@@ -46,12 +46,31 @@ public class Terminalfunc {
         kernel.terminal_update = true;
     }
 
-    public static void Terminalrm(Object[] objects) {
-
+    public static void Terminalrm(Object[] objects, myKernel kernel) {
+        if(objects.length == 2)
+        {
+            if((String)objects[0]=="-r")
+            {
+                if (kernel.getFs().rmdir(kernel.getFs().getCurPath(),(String)objects[1])) {
+                    kernel.terminal_message = "ok";
+                } else {
+                    kernel.terminal_message = "文件夹删除失败";
+                }
+            }
+        }
+        else if(objects.length == 1)
+        {
+            if (kernel.getFs().rm(kernel.getFs().getCurPath(),(String)objects[1])) {
+                kernel.terminal_message = "ok";
+            } else {
+                kernel.terminal_message = "文件删除失败";
+            }
+        }
+        kernel.terminal_update=true;
     }
 
     public static void Terminalcat(Object[] objects) {
-
+        
     }
 
     public static void Terminalls(Object[] objects, myKernel kernel) {

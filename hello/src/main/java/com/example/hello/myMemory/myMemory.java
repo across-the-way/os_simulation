@@ -91,7 +91,7 @@ public class myMemory {
 
     // 检查pid当前pc是否会触发pagefault
     public boolean isPageFault(int pid, int pc) {
-        if (strategy != allocateStrategy.LRU || strategy != allocateStrategy.FIFO)
+        if (strategy != allocateStrategy.LRU && strategy != allocateStrategy.FIFO)
             return false;
         return ((DemandPageAllocator) allocator).isPageFault(pid, pc);
     }

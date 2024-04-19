@@ -243,26 +243,29 @@ public class myFile {
         return false;
     }
 
-    public void rm(String parent_name, String file_name) {
+    public boolean rm(String parent_name, String file_name) {
         if (parent_name.isEmpty()) {
             // 路径为空触发中断
-            return;
+            System.out.println("rm:路径为空");
+            return false;
         }
         // 寻找父目录
         Inode pInode = findInode(parent_name);
         // 删除文件
         if (pInode == null || pInode.findChild(file_name) == null) {
             // 路径错误触发中断
-            return;
+            System.out.println("rm:路径错误");
+            return false;
         }
         if (ftable.isExist(parent_name + "/" + file_name)) {
             // 打开文件表中存在此文件，不能删除
-            return;
+            System.out.println("rm:打开文件表中存在此文件，不能删除");
+            return false;
         }
         // 释放文件磁盘空间
         freeUp(pInode.findChild(file_name));
         pInode.deleteFileInDir(file_name);
-
+        return true;
     }
 
     public boolean mkdir(String parent_name, String dir_name) {
@@ -286,23 +289,24 @@ public class myFile {
         return true;
     }
 
-    public void rmdir(String parent_name, String dir_name) {
+    public boolean rmdir(String parent_name, String dir_name) {
         if (parent_name.isEmpty()) {
             // 路径为空触发中断
-            return;
+            return false;
         }
         // 寻找父目录
         Inode pInode = findInode(parent_name);
 
         if (pInode == null) {
             // 路径错误触发中断
-            return;
+            return false;
         }
         // 递归释放文件夹中所有文件的磁盘空间
         freeUp(pInode.findChild(dir_name));
         // 删除目录
         pInode.deleteFileInDir(dir_name);
         // 删除所有
+        return true;
     }
 
     public int open(int pid, String path) {

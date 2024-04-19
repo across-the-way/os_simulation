@@ -83,6 +83,10 @@ public class myDevice {
         devices.add(new Device(type));
     }
 
+    // public void deleteDevice(int num)
+    // {
+
+    // }
     public List<Device> get() {
         return this.devices;
     }

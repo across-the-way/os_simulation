@@ -402,7 +402,7 @@ public class myKernel implements Runnable {
                 Terminalfunc.Terminalmkdir((String) objects[0], this);
                 break;
             case TerminalCallType.rm:
-                Terminalfunc.Terminalrm(objects);
+                Terminalfunc.Terminalrm(objects,this);
                 break;
             case TerminalCallType.ls:
                 Terminalfunc.Terminalls(objects, this);
