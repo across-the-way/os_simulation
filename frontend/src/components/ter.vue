@@ -81,7 +81,7 @@ html,
 #app {
   margin: 0;
   padding: 0;
-  width: 90%;
+  /* width: 90%; */
   height: 90%;
 }
 </style>

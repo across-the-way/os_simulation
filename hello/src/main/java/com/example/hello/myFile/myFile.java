@@ -8,11 +8,11 @@ import java.util.*;
 public class myFile {
     private myKernel kernel;
     private boolean[] bitmap;// false代表空闲
-    private TreeMap<Integer, Integer> spaceTable;// 空闲块的【长度,起始位置】
+    private HashMap<Integer, Integer> spaceTable;// 空闲块的【起始位置,长度】
     private OpenFileTable ftable;
     private Inode root;// 根目录
     private String curPath;
-
+    private  Block block[];
     public String getCurPath() {
         return curPath;
     }
@@ -40,24 +40,43 @@ public class myFile {
     private Queue<queueEntry> rwqueue;
 
     public boolean allocate(Inode file, int fileSize, int pid) {
-        if (spaceTable.higherKey(fileSize) == null) {
-            // 磁盘空间不足，触发中断
-            return false;
-        } else {
-            Map.Entry<Integer, Integer> entry = spaceTable.higherEntry(fileSize);
-            int newSize = entry.getKey() - fileSize;
-            int newSt = entry.getValue() + fileSize;
-            // 更新空闲空间队列
-            spaceTable.remove(entry.getKey());
-            spaceTable.put(newSize, newSt);
-            // 更新bitmap
-            Arrays.fill(bitmap, entry.getValue(), entry.getValue() + fileSize, true);
-            // 更新Inode的storage
-            file.putStorage(entry.getValue(), fileSize);
-            // 加入读写队列
-            rwqueue.offer(new queueEntry(file, 1, entry.getValue(), fileSize, pid));
-            return true;
+        for (int key : spaceTable.keySet()) {
+            int freeSize = spaceTable.get(key);
+            if (freeSize >= fileSize) {
+                // 更新空闲空间队列
+                freeSize -= fileSize;
+                spaceTable.remove(key);
+                spaceTable.put(key + fileSize, freeSize);
+                // 更新bitmap
+                Arrays.fill(bitmap, key, key + fileSize, true);
+                // 更新Inode的storage
+                file.putStorage(key, fileSize);
+                // 加入读写队列
+                rwqueue.offer(new queueEntry(file, 1, key, fileSize, pid));
+                return true;
+            }
         }
+        return false;
+    }
+
+    public int allocate1(Inode file, int fileSize, int pid) {
+        for (int key : spaceTable.keySet()) {
+            int freeSize = spaceTable.get(key);
+            if (freeSize >= fileSize) {
+                // 更新空闲空间队列
+                freeSize -= fileSize;
+                spaceTable.remove(key);
+                spaceTable.put(key + fileSize, freeSize);
+                // 更新bitmap
+                Arrays.fill(bitmap, key, key + fileSize, true);
+                // 更新Inode的storage
+                file.putStorage(key, fileSize);
+                // 加入读写队列
+                rwqueue.offer(new queueEntry(file, 1, key, fileSize, pid));
+                return key;
+            }
+        }
+        return -1;
     }
 
     public myFile(myKernel kernel) {
@@ -66,8 +85,12 @@ public class myFile {
         ftable = new OpenFileTable();
 
         bitmap = new boolean[1024];
-        spaceTable = new TreeMap<>();
-        spaceTable.put(1024, 0);
+        spaceTable = new HashMap<>();
+        spaceTable.put(0, 1024);
+        block = new Block[1024];
+        for (int i = 0; i < 1024; i++) {
+            block[i] = new Block();
+        }
         rwqueue = new LinkedList<queueEntry>();
         Arrays.fill(bitmap, false);
         root = new Inode("filesystem", 0, 1);
@@ -180,17 +203,22 @@ public class myFile {
             mergeStart = end;
         }
         if (mergeStart == -1 && mergeEnd == -1) {
+            spaceTable.put(newStart, newSize);
             return;
         }
-        for (int freeSize : spaceTable.keySet()) {
-            if (spaceTable.get(freeSize) == mergeStart) {
-                newSize += freeSize;
-            }
-            if (spaceTable.get(freeSize) + freeSize == mergeEnd) {
-                newSize += freeSize;
-                newStart -= freeSize;
+        if (spaceTable.get(mergeStart) != null) {
+            newSize += spaceTable.get(mergeStart);
+            spaceTable.remove(mergeStart);
+        }
+        for (int key : spaceTable.keySet()) {
+            if (key + spaceTable.get(key) == mergeEnd) {
+                newSize += spaceTable.get(key);
+                newStart -= spaceTable.get(key);
+                spaceTable.remove(key);
+                break;
             }
         }
+        spaceTable.put(newStart, newSize);
     }
 
     public void freeUp(Inode curInode) {
@@ -215,14 +243,14 @@ public class myFile {
     // 以下parent_name是文件绝对地址
     public boolean touch(String parent_name, String file_name) {
         if (parent_name.isEmpty()) {
-            // 路径为空触发中断
+            // 路径为空
             return false;
         }
         // 寻找父目录
         Inode pInode = findInode(parent_name);
         // 创建文件
         if (pInode == null) {
-            // 路径错误触发中断
+            // 路径错误
             return false;
         }
         if (checkRenameError(parent_name, file_name, 1)) {
@@ -270,7 +298,7 @@ public class myFile {
 
     public boolean mkdir(String parent_name, String dir_name) {
         if (parent_name.isEmpty()) {
-            // 路径为空触发中断
+            // 路径为空
             System.out.println("路径为空");
             return false;
         }
@@ -278,7 +306,7 @@ public class myFile {
         Inode pInode = findInode(parent_name);
         // 创建目录
         if (pInode == null) {
-            // 路径错误触发中断
+            // 路径错误
             return false;
         }
         if (checkRenameError(parent_name, dir_name, 0)) {
@@ -323,6 +351,27 @@ public class myFile {
         Inode file = findInode(path);
         if (file != null) {
             allocate(file, usage_size, pid);
+        }
+    }
+
+    public void write1(int pid, int fd, String s) {
+        String path = ftable.findInodeByFd(fd);
+        Inode file = findInode(path);
+        int usage_size = (s.length() + 3) / 4;
+        int startBlock;
+        char[] data;
+        if (file != null) {
+            startBlock = allocate1(file, usage_size, pid);
+            data = s.toCharArray();
+            int i = 0, curBlock = startBlock;
+            for (char c : data) {
+                if (i == 4) {
+                    i = 0;
+                    curBlock++;
+                }
+                block[curBlock].data[i] = c;
+                i++;
+            }
         }
     }
 
