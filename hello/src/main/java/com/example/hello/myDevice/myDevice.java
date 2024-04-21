@@ -83,10 +83,14 @@ public class myDevice {
         devices.add(new Device(type));
     }
 
-    // public void deleteDevice(int num)
-    // {
+    public boolean deleteDevice(int num) {
+        if (devices.get(num - 1).getWaitQueue().size() == 0) {
+            devices.remove(num - 1);
+            return true;
+        }
+        return false;
+    }
 
-    // }
     public List<Device> get() {
         return this.devices;
     }

@@ -109,7 +109,7 @@ public class myProcess {
 
         // 若PC值超限，发送中断PageFault
         if (kernel.isPageFault(this.current_pid, p.pc)) {
-            this.sendInterrupt(InterruptType.PageFault);
+            this.sendInterrupt(InterruptType.PageFault, this.current_pid, p.pc);
             return;
         }
 

@@ -446,7 +446,7 @@ class DemandPageAllocator extends MemoryAllocator {
             used_pages = new HashMap<>();
             free_pages = new BitSet(page_capacity);
             free_pages.set(0, page_capacity);
-            swap_partition = new SwapPartition(page_capacity * 10);
+            swap_partition = new SwapPartition(page_capacity * 2);
             lru_cache = new LRUCache(page_capacity);
         }
 

@@ -49,7 +49,7 @@ public class SysData {
         Osmode = OSState.kernel;
 
         // 单位毫秒
-        SystemPulse = 1000;
+        SystemPulse = 100;
 
         InstructionLength = 4;
 

@@ -124,7 +124,7 @@ public class myKernel implements Runnable {
     }
 
     private void page(Object[] objects) {
-        mm.page(0, 0);
+        mm.page((int)objects[0], (int)objects[1]);
     }
 
     private void update() {
@@ -402,7 +402,7 @@ public class myKernel implements Runnable {
                 Terminalfunc.Terminalmkdir((String) objects[0], this);
                 break;
             case TerminalCallType.rm:
-                Terminalfunc.Terminalrm(objects,this);
+                Terminalfunc.Terminalrm(objects, this);
                 break;
             case TerminalCallType.ls:
                 Terminalfunc.Terminalls(objects, this);

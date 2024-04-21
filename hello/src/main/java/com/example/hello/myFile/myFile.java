@@ -12,7 +12,8 @@ public class myFile {
     private OpenFileTable ftable;
     private Inode root;// 根目录
     private String curPath;
-    private  Block block[];
+    private Block block[];
+
     public String getCurPath() {
         return curPath;
     }
@@ -451,6 +452,23 @@ public class myFile {
             }
         } else {
             return "未定义该选项,请检查该命令是否正确\n指令格式: ls (-l)";
+        }
+        return res;
+    }
+
+    public String cat(String path, String filename) {
+        String res = "";
+        Inode inode = findInode(path).getDirectoryEntries().get(filename);
+        if (inode == null || inode.getType() == 0 || inode.getStorage().size() == 0)
+            return res;
+        for (Map.Entry<Integer, Integer> entry : inode.getStorage().entrySet()) {
+            int start = entry.getKey();
+            int bsize = entry.getValue();
+            for (int i = start; i < start + bsize; i++) {
+                for (int j = 0; j < 4; j++) {
+                    res += block[i].data[j];
+                }
+            }
         }
         return res;
     }

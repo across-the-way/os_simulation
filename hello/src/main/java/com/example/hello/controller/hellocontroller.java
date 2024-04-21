@@ -77,9 +77,19 @@ public class hellocontroller {
         return this.kernel.getFs().filelist(location.getLocation());
     }// 把这里的string改成List<Inode>应该就可以用了
 
-    @PostMapping("/device")
+    @GetMapping("/device")
     public List<Device> getDevice() {
         return this.kernel.getIo().get();
+    }
+
+    @GetMapping("/device/add")
+    public void addDevice() {
+        this.kernel.getIo().addDevice("");
+    }
+
+    @GetMapping("/device/delete")
+    public void deleteDevice() {
+        this.kernel.getIo().deleteDevice(-1);
     }
 
     @PostMapping("/terminal")
@@ -123,6 +133,5 @@ public class hellocontroller {
         this.kernel.receiveInterrupt(new myInterrupt(InterruptType.SinglePause));
         return "singlepause success";
     }
-    
 
 }

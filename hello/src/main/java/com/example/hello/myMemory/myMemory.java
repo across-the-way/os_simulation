@@ -19,10 +19,10 @@ public class myMemory {
     public myMemory(myKernel kernel) {
         this.kernel = kernel;
         this.strategy = allocateStrategy.LRU;
-        this.memory_size = 4096;
-        this.allocator = new DemandPageAllocator(memory_size, 32);
+        this.memory_size = 32;
+        this.allocator = new DemandPageAllocator(memory_size, 8);
         this.MidtermCounter = 0;
-        this.midterm_lower_bound = (memory_size / 64) * 1;
+        this.midterm_lower_bound = (memory_size / 32) * 9;
         this.midterm_higher_bound = (memory_size / 32) * 31;
     }
 
@@ -104,7 +104,7 @@ public class myMemory {
         // //如果太大了，发送SWAPPEDOUT中断
         // //如果太小了，发送SWAPPEDIN中断
         // }
-        MidtermCounter = (MidtermCounter + 1) % 5;
+        MidtermCounter = (MidtermCounter + 1) % 100000;
         if (MidtermCounter == 0) {
             if (isUpper()) {
                 this.sendInterrupt(InterruptType.SwappedOut);
@@ -130,6 +130,7 @@ public class myMemory {
 
     public void page(int pid, int pc) {
         // 不需要实现了，但还是需要调用，消耗一个时钟中断
+        System.out.println("Pid: " + pid + " PC: " + pc + " page fault");
         return;
     }
 
