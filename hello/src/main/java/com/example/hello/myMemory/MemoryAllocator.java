@@ -316,6 +316,11 @@ class DemandPageAllocator extends MemoryAllocator {
                 this.pid = pid;
                 this.page_num_virtual = page_num_virtual;
             }
+            public void set(int page_num_physical, int pid, int page_num_virtual) {
+                this.page_num_physical = page_num_physical;
+                this.pid = pid;
+                this.page_num_virtual = page_num_virtual;
+            }
         }
         private int count;
         private int capacity;
@@ -359,6 +364,7 @@ class DemandPageAllocator extends MemoryAllocator {
                 }
             }
             else {
+                cache.get(page_num).set(page_num, pid, page_num_virtual);
                 moveToHead(node);
             }
         }
@@ -446,8 +452,17 @@ class DemandPageAllocator extends MemoryAllocator {
             used_pages = new HashMap<>();
             free_pages = new BitSet(page_capacity);
             free_pages.set(0, page_capacity);
-            swap_partition = new SwapPartition(page_capacity * 2);
+            swap_partition = new SwapPartition(page_capacity * 4);
             lru_cache = new LRUCache(page_capacity);
+        }
+
+        public int findFreePage() {
+            for (int i = 0; i < free_pages.size(); i++) {
+                if (free_pages.get(i)) {
+                    return i;
+                }
+            }
+            return -1;
         }
 
         public DemandPages findFreePages(int page_count) {
@@ -478,6 +493,7 @@ class DemandPageAllocator extends MemoryAllocator {
                 int physical_page = virtual_physical_page.getRight();
                 free_pages.clear(physical_page);
                 lru_cache.put(physical_page, pid, virtual_physical_page.getLeft());
+                free_memory_size -= page_size;
             }
         }
 
@@ -494,12 +510,31 @@ class DemandPageAllocator extends MemoryAllocator {
                 }
             }
         }
+
+        public void swapOut(int pid) {
+            DemandPages pages = used_pages.get(pid);
+            if (pages != null) {
+                for (Pair<Integer, Integer> virtual_physical_page : pages.getAllPhysicalPages()) {
+                    int physical_page = virtual_physical_page.getRight();
+                    free_pages.set(physical_page);
+                    lru_cache.remove(physical_page);
+                    swap_partition.swapIn();
+                }
+            }
+        }
     
         public boolean isPageFault(int pid, int page_num) {
             int page_num_physical = getPhysicalPage(pid, page_num);
             if (page_num_physical == -1) {
-                page_num_physical = lru_cache.getTailPagePhysical();
-                used_pages.get(lru_cache.getTailPid()).swapPageOut(lru_cache.getTailPageVirtual());
+                page_num_physical = findFreePage();
+                if (page_num_physical == -1) {
+                    page_num_physical = lru_cache.getTailPagePhysical();
+                    if (lru_cache.getTailPid() != -1) {
+                        used_pages.get(lru_cache.getTailPid()).swapPageOut(lru_cache.getTailPageVirtual());
+                    }
+                } else {
+                    swap_partition.swapOut();
+                }
                 used_pages.get(pid).swapPageIn(page_num, page_num_physical);
                 lru_cache.put(page_num_physical, pid, page_num);
                 return true;
@@ -533,41 +568,51 @@ class DemandPageAllocator extends MemoryAllocator {
     @Override
     void allocate(int pid, Memory memory) {
         page_table.allocate(pid, (DemandPages)memory);
-        free_memory_size -= memory.getSize();
     }
 
     @Override
     void release(int pid) {
-        free_memory_size += page_table.used_pages.get(pid).getSize();
+        free_memory_size += page_table.used_pages.get(pid).getPhysicalPageCount() * page_size;
         page_table.release(pid);
     }
-    
+
+    public void swapIn(int pid, int pc) {
+        isPageFault(pid, pc);
+        page_table.swap_partition.swapOut();
+        free_memory_size -= page_size;
+    }
+
+    public void swapOut(int pid) {
+        free_memory_size += page_table.used_pages.get(pid).getPhysicalPageCount() * page_size;
+        page_table.swapOut(pid);
+    }
+
     boolean isPageFault(int pid, int pc) {
         int page_num = pc / page_size;
         return page_table.isPageFault(pid, page_num);
     }
 
-    public static void main(String[] args) {
-        DemandPageAllocator allocator = new DemandPageAllocator(100, 10);
-        int pid = 0;
-        for (int i = 0; i < 10; i++) {
-            DemandPages pages = allocator.findFreeSpace(50);
-            if (pages == null) {
-                System.out.println("allocate fault");
-                break;
-            }
-            allocator.allocate(pid, pages);
-            pid++;
-        }
-        Random rand = new Random();
-        int fault = 0;
-        for (int i = 0; i < 1000; i++) {
-            pid = (pid + 3) % 10;
-            if (allocator.isPageFault(pid, rand.nextInt(20))) {
-                System.out.println("Page fault");
-                fault++;
-            }
-        }
-        System.out.println("Page fault rate: " + (double)fault / 100);
-    }
+//    public static void main(String[] args) {
+//        DemandPageAllocator allocator = new DemandPageAllocator(100, 10);
+//        int pid = 0;
+//        for (int i = 0; i < 10; i++) {
+//            DemandPages pages = allocator.findFreeSpace(50);
+//            if (pages == null) {
+//                System.out.println("allocate fault");
+//                break;
+//            }
+//            allocator.allocate(pid, pages);
+//            pid++;
+//        }
+//        Random rand = new Random();
+//        int fault = 0;
+//        for (int i = 0; i < 1000; i++) {
+//            pid = (pid + 3) % 10;
+//            if (allocator.isPageFault(pid, rand.nextInt(20))) {
+//                System.out.println("Page fault");
+//                fault++;
+//            }
+//        }
+//        System.out.println("Page fault rate: " + (double)fault / 100);
+//    }
 }

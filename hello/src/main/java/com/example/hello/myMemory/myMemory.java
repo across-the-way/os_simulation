@@ -22,8 +22,8 @@ public class myMemory {
         this.memory_size = 32;
         this.allocator = new DemandPageAllocator(memory_size, 8);
         this.MidtermCounter = 0;
-        this.midterm_lower_bound = (memory_size / 32) * 9;
-        this.midterm_higher_bound = (memory_size / 32) * 31;
+        this.midterm_lower_bound = (memory_size / 32) * 8;
+        this.midterm_higher_bound = (memory_size / 32) * 24;
     }
 
     public myMemory(myKernel kernel, allocateStrategy strategy, int memory_size) {
@@ -89,6 +89,18 @@ public class myMemory {
         allocator.release(pid);
     }
 
+    public void swapIn(int pid, int pc) {
+        if (strategy == allocateStrategy.LRU || strategy == allocateStrategy.FIFO) {
+            ((DemandPageAllocator) allocator).swapIn(pid, pc);
+        }
+    }
+
+    public void swapOut(int pid) {
+        if (strategy == allocateStrategy.LRU || strategy == allocateStrategy.FIFO) {
+            ((DemandPageAllocator) allocator).swapOut(pid);
+        }
+    }
+
     // 检查pid当前pc是否会触发pagefault
     public boolean isPageFault(int pid, int pc) {
         if (strategy != allocateStrategy.LRU && strategy != allocateStrategy.FIFO)
@@ -104,7 +116,7 @@ public class myMemory {
         // //如果太大了，发送SWAPPEDOUT中断
         // //如果太小了，发送SWAPPEDIN中断
         // }
-        MidtermCounter = (MidtermCounter + 1) % 100000;
+        MidtermCounter = (MidtermCounter + 1) % 20;
         if (MidtermCounter == 0) {
             if (isUpper()) {
                 this.sendInterrupt(InterruptType.SwappedOut);
@@ -116,11 +128,11 @@ public class myMemory {
     }
 
     public boolean isUpper() {
-        return (memory_size - allocator.free_memory_size) > midterm_higher_bound;
+        return (memory_size - allocator.free_memory_size) >= midterm_higher_bound;
     }
 
     public boolean isLower() {
-        return (memory_size - allocator.free_memory_size) < midterm_lower_bound;
+        return (memory_size - allocator.free_memory_size) <= midterm_lower_bound;
     }
 
     // 向kernel中央模块发送中断请求

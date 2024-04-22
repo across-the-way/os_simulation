@@ -348,7 +348,7 @@ public class myKernel implements Runnable {
             }
             // 进程状态恢复(从Swapped Space 读取)，并删除Swapped Space 中对应的记录
             // 重新为进程分配空间
-            mm.allocate(pid, pm.getPCB(pid).memory_allocate);
+            mm.swapIn(pid, pm.getPCB(pid).pc);
             // 检查内存负载情况，如果负载低于下限，则重复上述步骤
             if (!mm.isLower()) {
                 return;
@@ -371,10 +371,8 @@ public class myKernel implements Runnable {
             } else {
                 return;
             }
-            // 将进程状态写入Swapped Space
-
-            // 释放进程占用的内存空间
-            mm.release(pid);
+            // 释放进程占用的内存空间, 将进程状态写入Swapped Space
+            mm.swapOut(pid);
             // 检查内存负载情况，如果负载仍然超过上限，则重复上述步骤
             if (!mm.isUpper()) {
                 return;
