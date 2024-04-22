@@ -109,6 +109,9 @@ class DemandPages extends Memory {
         }
         return physicalPages;
     }
+    public  int getPhysicalPageCount() {
+        return demandPages.size() - page_count_virtual;
+    }
     public int getVirtualPageCount() {
         return page_count_virtual;
     }

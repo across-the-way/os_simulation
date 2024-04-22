@@ -86,6 +86,9 @@ public class myProcess {
         // Swapped Process 的TTL更新
         SwappedProcess_Update();
 
+        // 动态调整多级队列
+        MLFQ_DynamicAdjust();
+
         // 从就绪队列中调度出一个进程，尝试切换为运行态
         this.schedule();
         // 若无或无法，返回
@@ -95,9 +98,6 @@ public class myProcess {
 
         // 模拟当前进程运行
         processRunning();
-
-        // 动态调整多级队列
-        MLFQ_DynamicAdjust();
 
         // 指定短期调度时间片和系统时间片单独处理,即调用update函数模拟处理TimeoutSlice中断
     }
@@ -109,7 +109,7 @@ public class myProcess {
 
         // 若PC值超限，发送中断PageFault
         if (kernel.isPageFault(this.current_pid, p.pc)) {
-            this.sendInterrupt(InterruptType.PageFault);
+            this.sendInterrupt(InterruptType.PageFault, this.current_pid, p.pc);
             return;
         }
 
@@ -365,7 +365,33 @@ public class myProcess {
     // 模拟CPU调度
     public void schedule() {
         // 当前有进程在执行,保存现场
-        if (this.current_pid != -1) {
+        /*
+         * current_pid = -1的情况:
+         * 1.当前CPU负载为0
+         * 2.Processrunning 函数执行的指令
+         * 2.1 调用 runningtowaiting函数
+         * 2.2 调用 runningtoready函数
+         * 2.3 产生 ProcessExit 的 systemcall
+         * (目前系统只保留 process manager update 函数的 schedule,即不会在上述情况后调用schedule使current pid
+         * 发生变化)
+         * 
+         * current_pid != -1 的情况:
+         * 当前存在负载并且当前进程执行的指令并没有触发中断(在下一个时钟周期片可能发生变化)
+         */
+        if (this.strategy == scheduleStrategy.MLFQ) {
+            if (this.current_pid != -1) {
+                PCB p = this.ProcessMap.get(this.current_pid);
+                int index = (p.pc - p.memory_start) / this.kernel.getSysData().InstructionLength;
+                // 如果时间片用完后该进程只剩下Exit命令或者没有命令,则不会调整到二级队列
+                // 如果当前指令为Fork指令,时间片耗尽后不应该将该进程移到二级队列,如果有Wait则应该移到Waiting队列,如果没有则移到Ready队列
+                if (index < p.bursts.size() - 1 && !p.bursts.get(index).getType().equals(InstructionType.Fork)) {
+                    // 将当前进程调整到二级队列
+                    this.RunningtoSecondReady();
+                } else {
+                    return;
+                }
+            }
+        } else if (this.current_pid != -1) {
             this.RunningtoReady();
         }
         switch (this.strategy) {
@@ -651,30 +677,6 @@ public class myProcess {
                     this.queue.Ready_Queue.add(item.getPid());
                     this.queue.Second_Queue.remove(item);
                 }
-            }
-        }
-
-        /*
-         * current_pid = -1的情况:
-         * 1.当前CPU负载为0
-         * 2.Processrunning 函数执行的指令
-         * 2.1 调用 runningtowaiting函数
-         * 2.2 调用 runningtoready函数
-         * 2.3 产生 ProcessExit 的 systemcall
-         * (目前系统只保留 process manager update 函数的 schedule,即不会在上述情况后调用schedule使current pid
-         * 发生变化)
-         * 
-         * current_pid != -1 的情况:
-         * 当前存在负载并且当前进程执行的指令并没有触发中断(在下一个时钟周期片可能发生变化)
-         */
-        if (this.current_pid != -1) {
-            PCB p = this.ProcessMap.get(this.current_pid);
-            int index = (p.pc - p.memory_start) / this.kernel.getSysData().InstructionLength;
-            // 如果时间片用完后该进程只剩下Exit命令或者没有命令,则不会调整到二级队列
-            // 如果当前指令为Fork指令,时间片耗尽后不应该将该进程移到二级队列,如果有Wait则应该移到Waiting队列,如果没有则移到Ready队列
-            if (index < p.bursts.size() - 1 && !p.bursts.get(index).getType().equals(InstructionType.Fork)) {
-                // 将当前进程调整到二级队列
-                this.RunningtoSecondReady();
             }
         }
 

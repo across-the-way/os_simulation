@@ -6,7 +6,7 @@ import com.example.hello.myInstrunction.*;
 
 public class PCB {
     public enum P_STATE {
-        NEW, READY, RUNNING, WAITING, TERMINATED, SWAPPED_READY,SWAPPED_WAITING
+        NEW, READY, RUNNING, WAITING, TERMINATED, SWAPPED_READY, SWAPPED_WAITING
     }
 
     // 进程状态
@@ -109,6 +109,7 @@ public class PCB {
         c_id = new ArrayList<Integer>();
         FileTable = p.FileTable;
         memory_allocate = p.memory_allocate;
+        priority = p.priority;
 
         for (Instruction instruction : p.bursts) {
             Instruction newinstruction = new Instruction(instruction.getType(), instruction.getArguments());

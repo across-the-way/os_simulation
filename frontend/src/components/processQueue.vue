@@ -95,7 +95,7 @@ export default {
 
     },
     mounted() {
-        // setInterval(this.fetchData, 1000); // 每秒发送请求
+        setInterval(this.fetchData, 1000); // 每秒发送请求
         // this.fetchData
         // this.transformStructs
     },
@@ -149,7 +149,7 @@ export default {
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="prority" width="180">
+      <el-table-column label="priority" width="180">
         <template #default="scope">
           <el-popover effect="light" trigger="hover" placement="top" width="190">
             <template #default>

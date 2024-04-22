@@ -28,13 +28,13 @@ public class myDevice {
         // 更新所有被进程占用的IO设备
         for (Device device : devices) {
             if (device.isBusy()) {
-                int remain_IOburst = device.getWaitQueue().getFirst().getIotime()
-                        - this.kernel.getSysData().SystemPulse;
+                int remain_IOburst = device.getWaitQueue().getFirst().getIotime() - 1;
                 if (remain_IOburst > 0) {
                     device.getWaitQueue().getFirst().setIotime(remain_IOburst);
                     System.out.println(
                             device.getType() + " is occupied by process" + device.getWaitQueue().getFirst().getPid()
-                                    + ", remain burst :" + remain_IOburst + "ms!");
+                                    + ", remain burst :" + remain_IOburst * this.kernel.getSysData().SystemPulse
+                                    + "ms!");
                 } else {
                     System.out.println(
                             device.getType() + "burst for process" + device.getWaitQueue().getFirst().getPid()
@@ -81,6 +81,14 @@ public class myDevice {
 
     public void addDevice(String type) {
         devices.add(new Device(type));
+    }
+
+    public boolean deleteDevice(int num) {
+        if (devices.get(num - 1).getWaitQueue().size() == 0) {
+            devices.remove(num - 1);
+            return true;
+        }
+        return false;
     }
 
     public List<Device> get() {
