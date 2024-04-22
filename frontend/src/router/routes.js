@@ -27,6 +27,15 @@ const routes = [
         component: () => import('@/components/test.vue'),
     },
     {
+        path: '/test1',
+        name: 'test1',
+        title: '测试页',
+        meta:{
+            title: '测试页'
+        },
+        component: () => import('@/components/test1.vue'),
+    },
+    {
         path: '/process/queue',
         name: 'processqueue',
         title: '文件系统',
@@ -34,6 +43,15 @@ const routes = [
             title: '进程队列'
         },
         component: () => import('@/components/processQueue.vue'),
+    },
+    {
+        path: '/process/create/gui',
+        name: 'processqueue',
+        title: '文件系统',
+        meta:{
+            title: '创建进程(图形化)'
+        },
+        component: () => import('@/components/processCreateGUI.vue'),
     },
     {
         path: '/device',

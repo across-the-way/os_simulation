@@ -95,7 +95,8 @@ export default {
           </template>
           <el-menu-item-group title="分类">
             <el-menu-item><router-link to="/process/queue">进程详情</router-link></el-menu-item>
-            <el-menu-item index="/find"><router-link to="/process">创建进程</router-link></el-menu-item>
+            <el-menu-item index="/find"><router-link to="/process">创建进程（命令行）</router-link></el-menu-item>
+            <el-menu-item index="1-2"><router-link to="/process/create/gui">创建进程（图形化）</router-link></el-menu-item>
           </el-menu-item-group>
           <el-menu-item-group title="Group Two">
             <el-menu-item index="1-3"><router-link to="/device">设备管理</router-link></el-menu-item>
@@ -113,7 +114,7 @@ export default {
           <el-icon>
             <document />
           </el-icon>
-          <span>&nbsp测试</span>
+          <router-link to="/test">测试</router-link>
         </el-menu-item>
         <el-menu-item index="4">
           <el-icon>
