@@ -124,7 +124,7 @@ public class myKernel implements Runnable {
     }
 
     private void page(Object[] objects) {
-        mm.page((int)objects[0], (int)objects[1]);
+        mm.page((int) objects[0], (int) objects[1]);
     }
 
     private void update() {
@@ -283,13 +283,12 @@ public class myKernel implements Runnable {
         }
 
         int pid = this.pm.ForkPCB(pp_id, index);
-        // if (mm.allocate(pid, 0)) {
-        // pm.addToLongTermQueue(pid);
-        // } else {
-        // pm.deletePCB(pid);
-        // return false;
-        // }
-        pm.addToLongTermQueue(pid);
+        if (mm.allocate(pid, 0)) {
+            pm.addToLongTermQueue(pid);
+        } else {
+            pm.deletePCB(pid);
+            return false;
+        }
 
         if (objects.length > 2) {
             String option = (String) objects[2];
