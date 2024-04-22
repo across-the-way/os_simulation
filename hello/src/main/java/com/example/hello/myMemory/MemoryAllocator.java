@@ -1,11 +1,6 @@
 package com.example.hello.myMemory;
 
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -304,12 +299,20 @@ class PageAllocator extends MemoryAllocator{
 }
 
 class DemandPageAllocator extends MemoryAllocator {
-    class LRUCache {
+    abstract class Cache {
+        Cache (int capacity) {
+            this.count = 0;
+            this.capacity = capacity;
+            head = new Node();
+            tail = new Node();
+            head.next = tail;
+            tail.prev = head;
+        }
         class Node {
             int page_num_physical;
             int pid;
             int page_num_virtual;
-            Node prev, next;
+            LRUCache.Node prev, next;
             Node() {}
             Node(int page_num_physical, int pid, int page_num_virtual) {
                 this.page_num_physical = page_num_physical;
@@ -322,25 +325,33 @@ class DemandPageAllocator extends MemoryAllocator {
                 this.page_num_virtual = page_num_virtual;
             }
         }
-        private int count;
-        private int capacity;
-        private Node head, tail;
-        Map<Integer, Node> cache = new HashMap<>();
-        LRUCache(int capacity) {
-            this.count = 0;
-            this.capacity = capacity;
-            head = new Node();
-            tail = new Node();
-            head.next = tail;
-            tail.prev = head;
-        }
-        public boolean visit(int page_num) {
+        int count;
+        int capacity;
+        Node head, tail;
+        Map<Integer, Node> cache = new HashMap<Integer, Node>();
+
+        public abstract void visit(int page_num);
+
+        public void put(int page_num, int pid, int page_num_virtual) {
             Node node = cache.get(page_num);
             if (node == null) {
-                return false;
+                node = new Node(page_num, pid, page_num_virtual);
+                cache.put(page_num, node);
+                addToHead(node);
+                count++;
             }
-            moveToHead(node);
-            return true;
+            else {
+                cache.get(page_num).set(page_num, pid, page_num_virtual);
+                moveToHead(node);
+            }
+        }
+        public void remove(int page_num) {
+            Node node = cache.get(page_num);
+            if (node != null) {
+                removeNode(node);
+                cache.remove(page_num);
+                count--;
+            }
         }
         public int get(int page_num) {
             Node node = cache.get(page_num);
@@ -349,24 +360,6 @@ class DemandPageAllocator extends MemoryAllocator {
             }
             moveToHead(node);
             return node.pid;
-        }
-        public void put(int page_num, int pid, int page_num_virtual) {
-            Node node = cache.get(page_num);
-            if (node == null) {
-                node = new Node(page_num, pid, page_num_virtual);
-                cache.put(page_num, node);
-                addToHead(node);
-                count++;
-                if (count > capacity) {
-                    Node tail = removeTail();
-                    cache.remove(tail.page_num_physical);
-                    count--;
-                }
-            }
-            else {
-                cache.get(page_num).set(page_num, pid, page_num_virtual);
-                moveToHead(node);
-            }
         }
         public int getTailPagePhysical() {
             if (tail.prev == head) return -1;
@@ -380,32 +373,56 @@ class DemandPageAllocator extends MemoryAllocator {
             if (tail.prev == head) return -1;
             return tail.prev.page_num_virtual;
         }
-        public void remove(int page_num) {
-            Node node = cache.get(page_num);
-            if (node != null) {
-                removeNode(node);
-                cache.remove(page_num);
-                count--;
-            }
-        }
-        private void addToHead(Node node) {
+
+        protected void addToHead(Node node) {
             node.prev = head;
             node.next = head.next;
             head.next.prev = node;
             head.next = node;
         }
-        private void removeNode(Node node) {
+        protected void addToEnd(Node node) {
+            node.prev = tail.prev;
+            node.next = tail;
+            tail.prev.next = node;
+            tail.prev = node;
+        }
+        protected void removeNode(Node node) {
             node.prev.next = node.next;
             node.next.prev = node.prev;
         }
-        private void moveToHead(Node node) {
+        protected void moveToHead(Node node) {
             removeNode(node);
             addToHead(node);
         }
-        private Node removeTail() {
+        protected void moveToEnd(Node node) {
+            removeNode(node);
+            addToEnd(node);
+        }
+        protected Node removeTail() {
             Node res = tail.prev;
             removeNode(res);
             return res;
+        }
+    }
+    class FIFOCache extends Cache {
+        FIFOCache(int capacity) {
+            super(capacity);
+        }
+        public void visit(int page_num) {
+            return;
+        }
+    }
+    class LRUCache extends Cache {
+        LRUCache(int capacity) {
+            super(capacity);
+        }
+        public void visit(int page_num) {
+            Node node = cache.get(page_num);
+            if (node == null) {
+                return;
+            }
+            moveToHead(node);
+            return;
         }
     }
     class SwapPartition {
@@ -446,14 +463,15 @@ class DemandPageAllocator extends MemoryAllocator {
         Map<Integer, DemandPages> used_pages;
         BitSet free_pages;
         SwapPartition swap_partition;
-        LRUCache lru_cache;
+        Cache cache;
 
-        public PageTable(int page_capacity) {
+        public PageTable(int page_capacity, allocateStrategy strategy) {
             used_pages = new HashMap<>();
             free_pages = new BitSet(page_capacity);
             free_pages.set(0, page_capacity);
             swap_partition = new SwapPartition(page_capacity * 4);
-            lru_cache = new LRUCache(page_capacity);
+            if (strategy == allocateStrategy.LRU) cache = new LRUCache(page_capacity);
+            else cache = new FIFOCache(page_capacity);
         }
 
         public int findFreePage() {
@@ -492,7 +510,7 @@ class DemandPageAllocator extends MemoryAllocator {
             for (Pair<Integer, Integer> virtual_physical_page : pages.getAllPhysicalPages()) {
                 int physical_page = virtual_physical_page.getRight();
                 free_pages.clear(physical_page);
-                lru_cache.put(physical_page, pid, virtual_physical_page.getLeft());
+                cache.put(physical_page, pid, virtual_physical_page.getLeft());
                 free_memory_size -= page_size;
             }
         }
@@ -503,7 +521,7 @@ class DemandPageAllocator extends MemoryAllocator {
                 for (Pair<Integer, Integer> virtual_physical_page : pages.getAllPhysicalPages()) {
                     int physical_page = virtual_physical_page.getRight();
                     free_pages.set(physical_page);
-                    lru_cache.remove(physical_page);
+                    cache.remove(physical_page);
                 }
                 for (int i = 0; i < pages.getVirtualPageCount(); i++) {
                     swap_partition.remove();
@@ -517,7 +535,7 @@ class DemandPageAllocator extends MemoryAllocator {
                 for (Pair<Integer, Integer> virtual_physical_page : pages.getAllPhysicalPages()) {
                     int physical_page = virtual_physical_page.getRight();
                     free_pages.set(physical_page);
-                    lru_cache.remove(physical_page);
+                    cache.remove(physical_page);
                     swap_partition.swapIn();
                 }
             }
@@ -528,18 +546,18 @@ class DemandPageAllocator extends MemoryAllocator {
             if (page_num_physical == -1) {
                 page_num_physical = findFreePage();
                 if (page_num_physical == -1) {
-                    page_num_physical = lru_cache.getTailPagePhysical();
-                    if (lru_cache.getTailPid() != -1) {
-                        used_pages.get(lru_cache.getTailPid()).swapPageOut(lru_cache.getTailPageVirtual());
+                    page_num_physical = cache.getTailPagePhysical();
+                    if (cache.getTailPid() != -1) {
+                        used_pages.get(cache.getTailPid()).swapPageOut(cache.getTailPageVirtual());
                     }
                 } else {
                     swap_partition.swapOut();
                 }
                 used_pages.get(pid).swapPageIn(page_num, page_num_physical);
-                lru_cache.put(page_num_physical, pid, page_num);
+                cache.put(page_num_physical, pid, page_num);
                 return true;
             }
-            lru_cache.visit(page_num_physical);
+            cache.visit(page_num_physical);
             return false;
         }
 
@@ -552,11 +570,20 @@ class DemandPageAllocator extends MemoryAllocator {
     private int page_capacity;
     public PageTable page_table;
 
-    public DemandPageAllocator(int total_memory_size, int page_size) {
+    public DemandPageAllocator(int total_memory_size, int page_size, allocateStrategy strategy) {
         super(total_memory_size);
         this.page_size = page_size;
         this.page_capacity = total_memory_size / page_size;
-        this.page_table = new PageTable(page_capacity);
+        switch (strategy) {
+            case LRU:
+                this.page_table = new PageTable(page_capacity, strategy);
+                break;
+            case FIFO:
+                this.page_table = new PageTable(page_capacity, strategy);
+                break;
+            default:
+                break;
+        }
     }
 
     @Override
@@ -592,27 +619,4 @@ class DemandPageAllocator extends MemoryAllocator {
         return page_table.isPageFault(pid, page_num);
     }
 
-//    public static void main(String[] args) {
-//        DemandPageAllocator allocator = new DemandPageAllocator(100, 10);
-//        int pid = 0;
-//        for (int i = 0; i < 10; i++) {
-//            DemandPages pages = allocator.findFreeSpace(50);
-//            if (pages == null) {
-//                System.out.println("allocate fault");
-//                break;
-//            }
-//            allocator.allocate(pid, pages);
-//            pid++;
-//        }
-//        Random rand = new Random();
-//        int fault = 0;
-//        for (int i = 0; i < 1000; i++) {
-//            pid = (pid + 3) % 10;
-//            if (allocator.isPageFault(pid, rand.nextInt(20))) {
-//                System.out.println("Page fault");
-//                fault++;
-//            }
-//        }
-//        System.out.println("Page fault rate: " + (double)fault / 100);
-//    }
 }

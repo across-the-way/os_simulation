@@ -1,8 +1,5 @@
 package com.example.hello.myMemory;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.example.hello.controller.InterruptType;
 import com.example.hello.controller.myInterrupt;
 import com.example.hello.controller.myKernel;
@@ -20,7 +17,7 @@ public class myMemory {
         this.kernel = kernel;
         this.strategy = allocateStrategy.LRU;
         this.memory_size = 32;
-        this.allocator = new DemandPageAllocator(memory_size, 8);
+        this.allocator = new DemandPageAllocator(memory_size, 8, allocateStrategy.LRU);
         this.MidtermCounter = 0;
         this.midterm_lower_bound = (memory_size / 32) * 8;
         this.midterm_higher_bound = (memory_size / 32) * 24;
@@ -62,7 +59,7 @@ public class myMemory {
                 break;
             case LRU:
             case FIFO:
-                this.allocator = new DemandPageAllocator(memory_size, page_size);
+                this.allocator = new DemandPageAllocator(memory_size, page_size, strategy);
                 break;
             default:
                 System.out.println("Please use correct construction method");
@@ -146,29 +143,29 @@ public class myMemory {
         return;
     }
 
-    public List<Object> getMemoryStatus() {
-        List<Object> list = new ArrayList<>();
-        list.add(strategy.toString());
+    public MemoryStatus getMemoryStatus() {
+        MemoryStatus memoryStatus = new MemoryStatus(strategy.toString());
+
         switch (strategy) {
             case FirstFit:
             case NextFit:
             case BestFit:
             case WorstFit:
-                list.add(((ContiguousAllocator) allocator).free_blocks);
-                list.add(((ContiguousAllocator) allocator).used_memory);
+                memoryStatus.addDetail("free_blocks", ((ContiguousAllocator) allocator).free_blocks);
+                memoryStatus.addDetail("used_memory", ((ContiguousAllocator) allocator).used_memory);
                 break;
             case Page:
-                list.add(((PageAllocator) allocator).page_table);
+                memoryStatus.addDetail("page_table", ((PageAllocator) allocator).page_table);
                 break;
             case LRU:
             case FIFO:
-                list.add(((DemandPageAllocator) allocator).page_table.free_pages);
-                list.add(((DemandPageAllocator) allocator).page_table.lru_cache.cache);
-                list.add(((DemandPageAllocator) allocator).page_table.used_pages);
-                list.add(((DemandPageAllocator) allocator).page_table.swap_partition.page_count);
-                list.add(((DemandPageAllocator) allocator).page_table.swap_partition.used_count);
+                memoryStatus.addDetail("free_pages", ((DemandPageAllocator) allocator).page_table.free_pages);
+                memoryStatus.addDetail("lru_cache", ((DemandPageAllocator) allocator).page_table.cache.cache);
+                memoryStatus.addDetail("used_pages", ((DemandPageAllocator) allocator).page_table.used_pages);
+                memoryStatus.addDetail("swapped_page_count", ((DemandPageAllocator) allocator).page_table.swap_partition.page_count);
+                memoryStatus.addDetail("swapped_used_count", ((DemandPageAllocator) allocator).page_table.swap_partition.used_count);
                 break;
         }
-        return list;
+        return memoryStatus;
     }
 }

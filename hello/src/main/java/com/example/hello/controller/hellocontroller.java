@@ -1,5 +1,6 @@
 package com.example.hello.controller;
 
+import com.example.hello.myMemory.MemoryStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -112,7 +113,7 @@ public class hellocontroller {
     }
 
     @GetMapping("/memory")
-    public List<Object> getMemoryStatus() {
+    public MemoryStatus getMemoryStatus() {
         return this.kernel.getMm().getMemoryStatus();
     }
 
