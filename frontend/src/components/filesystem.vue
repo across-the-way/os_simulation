@@ -13,7 +13,9 @@ export default {
       breadcrumbItems: [],
       operation: 'default',
       value: '请选择',
-      fileLists: [  
+      addfilename: '',
+      addfiletype: '',
+      fileLists: [
         {
           name: 'data.txt',
           type: 'file',
@@ -87,10 +89,10 @@ export default {
   },
   computed: {
     buttonClass() {
-      return this.operation === 'default' ? 'success' : 'danger';
+      return this.operation === 'delete' ? 'danger' : 'primary';
     },
     buttonText() {
-      return this.operation === 'default' ? 'add' : 'cancel';
+      return this.operation === 'delete' ? 'cancel' : 'option';
     }
   },
   mounted() {
@@ -116,9 +118,9 @@ export default {
       });
     },
     changeNowStatus(statusvalue) {
-      if(this.operation === 'default')
-      this.operation = statusvalue
-    else this.operation = 'default'
+      if (this.operation === 'default')
+        this.operation = statusvalue
+      else this.operation = 'default'
     },
     sortFileLists() {
       this.fileLists.sort((a, b) => {
@@ -150,11 +152,44 @@ export default {
         this.sortFileLists();  // 否则，使用默认的排序方式
       }
     },
+    handleDelete(index, data) {
+      this.fileLists.splice(index, 1)
+    },
+    newFile(str, type) {
+      const date = new Date();
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      let currentDate = `${year}-${month}-${day}`;
+      let temp = { name: str, type: type, imode: currentDate.toString() }
+      this.fileLists.push(temp)
+      // this.sortFileLists()
+      this.addfilename = ''
+      this.addfiletype = ''
+      this.operation = 'default'
+      console.log(this.operation)
+    }
   },
 }
 </script>
 <template>
+  <div class="add" 
+  v-if="operation === 'add'"
+  >
+    <el-form>
+      <el-form-item label="file name" style="margin-left: 6vw;margin-top: 4vh;width: 180px;">
+      <el-input v-model="addfilename"  />
+    </el-form-item>
+    <el-form-item label="file type" style="margin-left: 6vw;width: 180px;">
+      <el-input v-model="addfiletype" />
+    </el-form-item>
+    <el-button type="primary" @click="newFile(addfilename,addfiletype)" style="margin-left: 7vw;">confirm</el-button>
+    <el-button @click="changeNowStatus('default')">cancel</el-button>
+    </el-form>
+  </div>
+  <div class="addzhezhao" v-if="operation === 'add'"></div>
   <div style="padding: 10rem;padding-bottom: 20px;">
+
     <div class="fileheader">
       <el-breadcrumb separator="/" class="left-aligned" style="display: inline-flex;margin-left: 8px;">
 
@@ -163,26 +198,31 @@ export default {
         </el-breadcrumb-item>
 
       </el-breadcrumb>
-      <div class="right-aligned" >
-        
-          <!-- 按时间排序/取消按钮 -->
-          <el-button type="info" @click="toggleSortByDate" >
+      <div class="right-aligned">
+
+        <!-- 按时间排序/取消按钮 -->
+        <el-button @click="changeNowStatus('add')" type="success">add files</el-button>
+        <el-button :type="!isSortedByDate ? 'primary' : 'info'" @click="toggleSortByDate">
           {{ isSortedByDate ? '取消' : '按时间排序' }} <!-- 根据isSortedByDate显示不同的文本 -->
-          </el-button>
-        
+        </el-button>
+
         <Transition name="scale">
-        <el-button :type="buttonClass" @click = 'changeNowStatus("add")' >
-          <el-icon  style="margin-left: 0;margin-right: 5px;" v-if="operation === 'default'">
-            <DocumentAdd />
-          </el-icon>
-          <el-icon  style="margin-left: 0;margin-right: 5px;" v-if="operation === 'add'">
-            <CircleClose />
-          </el-icon>
-          {{ buttonText }}</el-button></Transition>
-          
+          <el-button :type="buttonClass" @click='changeNowStatus("delete")'>
+            <el-icon style="margin-left: 0;margin-right: 5px;" v-if="operation != 'delete'">
+              <DocumentRemove />
+            </el-icon>
+            <el-icon style="margin-left: 0;margin-right: 5px;" v-if="operation === 'delete'">
+              <CircleClose />
+            </el-icon>
+            {{ buttonText }}</el-button>
+        </Transition>
+
         <el-select v-model="value" placeholder="Select" style="width: 105px;padding-left: 12px;">
-          <el-option v-for="item in city" :key="item.value" :label="item.label" :value="item.value" style="width: 120px;">
-            <el-icon><Menu/></el-icon>
+          <el-option v-for="item in city" :key="item.value" :label="item.label" :value="item.value"
+            style="width: 120px;">
+            <el-icon>
+              <Menu />
+            </el-icon>
             <span style="
           float: right;
           color: var(--el-text-color-secondary);
@@ -198,18 +238,18 @@ export default {
         <template #default="scope">
           <div style="display: flex; align-items: center">
             <div v-if="scope.row.type === 'folder'">
-            <el-icon color="#409efc" style="color: blue;">
-              <folder />
-            </el-icon>
-            <a style="margin-left: 10px" v-bind:href="fileLocation + '/' + scope.row.name">{{ scope.row.name }}</a>
+              <el-icon color="#409efc" style="color: blue;">
+                <folder />
+              </el-icon>
+              <a style="margin-left: 10px" v-bind:href="fileLocation + '/' + scope.row.name">{{ scope.row.name }}</a>
+            </div>
+            <div v-else>
+              <el-icon color="#409efc" style="color: blue;">
+                <Document />
+              </el-icon>
+              <a style="margin-left: 10px;">{{ scope.row.name }}</a>
+            </div>
           </div>
-        <div v-else>
-          <el-icon color="#409efc" style="color: blue;">
-              <Document />
-            </el-icon>
-            <a style="margin-left: 10px;" >{{ scope.row.name }}</a>  
-        </div>
-        </div>
         </template>
       </el-table-column>
       <el-table-column label="Date" width="180">
@@ -225,10 +265,10 @@ export default {
           </el-popover>
         </template>
       </el-table-column>
-      <el-table-column label="Operations" width="180">
+      <el-table-column label="Operations" width="180"v-if="operation != 'default'">
         <template #default="scope">
-          <el-button size="small" @click="handleEdit(scope.$index, scope.row)">Edit</el-button>
-          <el-button size="small" type="danger" v-if="operation != 'default'" @click="handleDelete(scope.$index, scope.row)">Delete</el-button>
+          <el-button size="small" v-if="scope.row.type==='file'" @click="handleEdit(scope.$index, scope.row)">Edit</el-button>
+          <el-button size="small" type="danger" @click="handleDelete(scope.$index, scope.row)">Delete</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -242,6 +282,7 @@ export default {
   justify-content: space-between;
   padding-bottom: 10px;
 }
+
 .scale-enter-active,
 .scale-leave-active {
   transition: transform 0.5s;
@@ -250,5 +291,25 @@ export default {
 .scale-enter,
 .scale-leave-to {
   transform: scale(0);
+}
+
+.add {
+  z-index: 10;
+  top: 40vh;
+  left: calc(50vw - 100px);
+  position: absolute;
+  width: 25vw;
+  border-radius: 30px;
+  align-items: center;
+  padding: 5vw,5vh;
+  height: 20vh;
+  background-color: white;
+}
+.addzhezhao{
+  background-color: rgba(0,0,0,0.3);
+  z-index: 9;
+  width: calc(100vw - 240px);
+  height: calc(100vh - 100px);
+  position: absolute;
 }
 </style>
