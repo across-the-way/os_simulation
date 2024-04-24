@@ -12,7 +12,7 @@ export default {
     }
   },
   created() {
-    axios.get(serverURL + '/hello', {})
+    axios.get(serverURL + '/device', {})
       .then(response => {
         // 处理响应结果
         console.log(response.data);
@@ -22,6 +22,11 @@ export default {
         // 处理错误
         console.error(error);
       });
+  },
+  methods:{
+    handleDelete(index, data) {
+      
+    }
   }
 }
 
@@ -30,7 +35,34 @@ export default {
 </script>
 
 <template>
-   <div>测试</div>
+   <div><el-table :data="pcb" style="width: 100%">
+      <el-table-column label="p_id" width="180">
+        <template #default="scope">
+          <div style="display: flex; align-items: center">
+            {{ scope.row.p_id }}
+          </div>
+        </template>
+      </el-table-column>
+      <el-table-column label="prority" width="180">
+        <template #default="scope">
+          <el-popover effect="light" trigger="hover" placement="top" width="190">
+            <template #default>
+              <div>{{ scope.row.p_id }}</div>
+              <div>{{ scope.row.priority }}</div>
+            </template>
+            <template #reference>
+              <el-tag>{{ scope.row.priority }}</el-tag>
+            </template>
+          </el-popover>
+        </template>
+      </el-table-column>
+      <el-table-column label="detail" width="180">
+        <template #default="scope">
+          <el-button size="small" @click="handleEdit(scope.$index, scope.row)">Edit</el-button>
+          <el-button size="small" type="danger" @click="handleDelete(scope.$index, scope.row)">Delete</el-button>
+        </template>
+      </el-table-column>
+    </el-table></div>
 </template>
 
 <style scoped>
