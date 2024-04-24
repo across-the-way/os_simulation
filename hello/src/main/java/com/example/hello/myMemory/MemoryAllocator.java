@@ -30,13 +30,17 @@ class ContiguousAllocator extends MemoryAllocator {
         used_memory = new HashMap<Integer, Block>();
         switch (strategy) {
             case FirstFit:
-                allocation_policy = allocation_policy.FirstFit;
+                allocation_policy = allocateStrategy.FirstFit;
+                break;
             case NextFit:
-                allocation_policy = allocation_policy.NextFit;
+                allocation_policy = allocateStrategy.NextFit;
+                break;
             case BestFit:
-                allocation_policy = allocation_policy.BestFit;
+                allocation_policy = allocateStrategy.BestFit;
+                break;
             case WorstFit:
-                allocation_policy = allocation_policy.WorstFit;
+                allocation_policy = allocateStrategy.WorstFit;
+                break;
             default:
                 System.out.println("Unknown allocation strategy");
                 break;

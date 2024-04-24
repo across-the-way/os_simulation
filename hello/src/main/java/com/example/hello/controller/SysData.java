@@ -1,6 +1,7 @@
 package com.example.hello.controller;
 
 import com.example.hello.myFile.*;
+import com.example.hello.myMemory.*;
 import com.example.hello.myProcess.*;
 
 import java.util.*;
@@ -42,6 +43,15 @@ public class SysData {
     // 调度算法
     public scheduleStrategy CPUstrategy;
 
+    // 内存分配算法
+    public allocateStrategy MMstrategy;
+
+    // 内存大小
+    public int Memory_Size;
+
+    // 页大小
+    public int Page_Size;
+
     public SysData() {
         sysConfig = new SysConfig();
         // fileSystem = new FileSystem();
@@ -65,5 +75,10 @@ public class SysData {
 
         MidTerm_CeilThreshold = 0.8;
         MidTerm_FloorThreshold = 0.3;
+
+        MMstrategy = allocateStrategy.LRU;
+
+        Memory_Size = 4096;
+        Page_Size = 256;
     }
 }
