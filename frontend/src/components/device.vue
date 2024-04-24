@@ -35,23 +35,23 @@ export default {
 </script>
 
 <template>
-   <div><el-table :data="pcb" style="width: 100%">
-      <el-table-column label="p_id" width="180">
+   <div><el-table :data="responseData" style="width: 100%">
+      <el-table-column label="busy" width="180">
         <template #default="scope">
           <div style="display: flex; align-items: center">
-            {{ scope.row.p_id }}
+            {{ scope.row.busy }}
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="prority" width="180">
+      <el-table-column label="type" width="180">
         <template #default="scope">
           <el-popover effect="light" trigger="hover" placement="top" width="190">
             <template #default>
-              <div>{{ scope.row.p_id }}</div>
+              <div>{{ scope.row.type }}</div>
               <div>{{ scope.row.priority }}</div>
             </template>
             <template #reference>
-              <el-tag>{{ scope.row.priority }}</el-tag>
+              <el-tag>{{ scope.row.type }}</el-tag>
             </template>
           </el-popover>
         </template>

@@ -38,7 +38,7 @@ const routes = [
     {
         path: '/process/queue',
         name: 'processqueue',
-        title: '文件系统',
+        title: 'asdfasefa',
         meta:{
             title: '进程队列'
         },
@@ -46,8 +46,8 @@ const routes = [
     },
     {
         path: '/process/create/gui',
-        name: 'processqueue',
-        title: '文件系统',
+        name: 'processcreategui',
+        title: 'sdfasd',
         meta:{
             title: '创建进程(图形化)'
         },

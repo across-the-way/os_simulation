@@ -38,7 +38,8 @@ export default {
           temp1.push(str) // 否则就直接添加
       })
       console.log(temp1)
-      axios.post(serverURL + '/terminal', temp1).then(response => {
+      axios.post(serverURL + '/terminal', temp1)
+      .then(response => {
         console.log(response.data)
         this.responseData = response.data.split('\n')
         this.responseData.forEach(res => {

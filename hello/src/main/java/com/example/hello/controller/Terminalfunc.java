@@ -56,7 +56,7 @@ public class Terminalfunc {
                 }
             }
         } else if (objects.length == 1) {
-            if (kernel.getFs().rm(kernel.getFs().getCurPath(), (String) objects[1])) {
+            if (kernel.getFs().rm(kernel.getFs().getCurPath(), (String) objects[0])) {
                 kernel.terminal_message = "ok";
             } else {
                 kernel.terminal_message = "文件删除失败";

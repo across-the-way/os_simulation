@@ -18,37 +18,37 @@ export default {
       fileLists: [
         {
           name: 'data.txt',
-          type: 'file',
+          type: 1,
           imode: '2016-06-03',
         },
         {
           name: 'drc',
-          type: 'folder',
+          type: 0,
           imode: '2009-05-03',
         },
         {
           name: 'cata.txt',
-          type: 'file',
+          type: 1,
           imode: '2010-04-03',
         },
         {
           name: 'src',
-          type: 'folder',
+          type: 0,
           imode: '2016-10-03',
         },
         {
           name: 'eata.txt',
-          type: 'file',
+          type: 1,
           imode: '2016-08-03',
         },
         {
           name: 'arc',
-          type: 'folder',
+          type: 0,
           imode: '2019-05-03',
         },
         {
           name: 'data.txt',
-          type: 'file',
+          type: 1,
           imode: '2012-04-03',
         },
       ],
@@ -127,14 +127,14 @@ export default {
         if (a.type === b.type) {
           return a.name.localeCompare(b.name); // 同类型时按name排序
         }
-        return a.type === 'folder' ? -1 : 1; // 将folder类型置前
+        return a.type === 0 ? -1 : 1; // 将folder类型置前
       });
     },
     sortByDateAndName() {
       this.fileLists.sort((a, b) => {
         // 按类型排序，folder始终在前
         if (a.type !== b.type) {
-          return a.type === 'folder' ? -1 : 1;
+          return a.type === 0 ? -1 : 1;
         }
         // 相同类型按日期排序，如果日期相同则按名称排序
         const dateComparison = b.imode.localeCompare(a.imode);
@@ -153,6 +153,14 @@ export default {
       }
     },
     handleDelete(index, data) {
+      
+      axios.post(serverURL + '/terminal',['rm',data.name])
+      .then((response)=>{
+        console.log(response.data)
+      })
+      .catch(error => {
+          console.log(error)
+        })
       this.fileLists.splice(index, 1)
     },
     newFile(str, type) {
@@ -161,8 +169,34 @@ export default {
       const month = String(date.getMonth() + 1).padStart(2, '0');
       const day = String(date.getDate()).padStart(2, '0');
       let currentDate = `${year}-${month}-${day}`;
-      let temp = { name: str, type: type, imode: currentDate.toString() }
+      let temp = { name: str, type: type, imode: 1 }
       this.fileLists.push(temp)
+      console.log(str)
+
+      if(type == 1){
+        axios.post(serverURL + '/terminal', ['touch',str] )
+        .then(res => {
+          console.log(res.data)
+        })
+        .catch(error =>{
+          console.log(error)
+        })
+      }
+      else {
+        axios.post(serverURL + '/terminal', ['mkdir',str] )
+        .then(res => {
+          console.log(res.data)
+        })
+        .catch(error =>{
+          console.log(error)
+        })
+      }
+      this.fileLists.sort((a, b) => {
+        if (a.type === b.type) {
+          return a.name.localeCompare(b.name); // 同类型时按name排序
+        }
+        return a.type === 0 ? -1 : 1; // 将folder类型置前
+      });
       // this.sortFileLists()
       this.addfilename = ''
       this.addfiletype = ''
@@ -237,7 +271,7 @@ export default {
       <el-table-column label="Name" width="180">
         <template #default="scope">
           <div style="display: flex; align-items: center">
-            <div v-if="scope.row.type === 'folder'">
+            <div v-if="scope.row.type == 0">
               <el-icon color="#409efc" style="color: blue;">
                 <folder />
               </el-icon>
@@ -265,9 +299,9 @@ export default {
           </el-popover>
         </template>
       </el-table-column>
-      <el-table-column label="Operations" width="180"v-if="operation != 'default'">
+      <el-table-column label="Operations" width="180"v-if="operation == 'delete'">
         <template #default="scope">
-          <el-button size="small" v-if="scope.row.type==='file'" @click="handleEdit(scope.$index, scope.row)">Edit</el-button>
+          <el-button size="small" v-if="scope.row.type==1" @click="handleEdit(scope.$index, scope.row)">Edit</el-button>
           <el-button size="small" type="danger" @click="handleDelete(scope.$index, scope.row)">Delete</el-button>
         </template>
       </el-table-column>
