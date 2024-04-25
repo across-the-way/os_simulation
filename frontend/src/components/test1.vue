@@ -1,76 +1,56 @@
-<template>
-  <div class="container">
-    <div class="select-box" @click="toggleOptions">
-      {{ selectedOption }}
-      <ul v-if="showOptions" class="options">
-        <li v-for="option in options" :key="option" @click="selectOption(option)">
-          {{ option }}
-        </li>
-      </ul>
-    </div>
-  </div>
-</template>
-
+<script setup>
+import Chart from 'chart.js';
+</script>
 <script>
 export default {
-  data() {
-    return {
-      options: ['Option 1', 'Option 2', 'Option 3'], // 选项列表
-      showOptions: false, // 是否显示选项列表
-      selectedOption: 'Select an option' // 当前选中的选项
-    };
+  mounted() {
+    this.renderChart();
   },
   methods: {
-    toggleOptions() {
-      this.showOptions = !this.showOptions;
-    },
-    selectOption(option) {
-      this.selectedOption = option;
-      this.showOptions = false;
-      this.handleOptionSelection(option); // 触发自定义函数
-    },
-    handleOptionSelection(option) {
-      // 在这里处理选项选择后的逻辑
-      console.log('选中的选项:', option);
+    renderChart() {
+      const chartCanvas = this.$refs.chartCanvas;
+      const ctx = chartCanvas.getContext('2d');
+
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+          datasets: [{
+            label: '# of Votes',
+            data: [12, 19, 3, 5, 2, 3],
+            backgroundColor: [
+              'rgba(255, 99, 132, 0.2)',
+              'rgba(54, 162, 235, 0.2)',
+              'rgba(255, 206, 86, 0.2)',
+              'rgba(75, 192, 192, 0.2)',
+              'rgba(153, 102, 255, 0.2)',
+              'rgba(255, 159, 64, 0.2)'
+            ],
+            borderColor: [
+              'rgba(255, 99, 132, 1)',
+              'rgba(54, 162, 235, 1)',
+              'rgba(255, 206, 86, 1)',
+              'rgba(75, 192, 192, 1)',
+              'rgba(153, 102, 255, 1)',
+              'rgba(255, 159, 64, 1)'
+            ],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
     }
   }
 };
 </script>
-
-<style>
-.container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-}
-
-.select-box {
-  position: relative;
-  display: inline-block;
-  padding: 8px;
-  border: 1px solid #ccc;
-  cursor: pointer;
-}
-
-.options {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  background-color: #fff;
-  border: 1px solid #ccc;
-  border-top: none;
-}
-
-.options li {
-  padding: 8px;
-  cursor: pointer;
-}
-
-.options li:hover {
-  background-color: #f0f0f0;
-}
-</style>
+<template>
+  <div>
+    <canvas ref="chartCanvas"></canvas>
+  </div>
+</template>

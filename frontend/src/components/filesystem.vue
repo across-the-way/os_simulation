@@ -12,9 +12,12 @@ export default {
       fileLocation: '',
       breadcrumbItems: [],
       operation: 'default',
+      ioperation: false,
       value: '请选择',
-      addfilename: '',
-      addfiletype: '',
+      form: {
+        name: '',
+        type: '',
+      },
       fileLists: [
         {
           name: 'data.txt',
@@ -118,8 +121,12 @@ export default {
       });
     },
     changeNowStatus(statusvalue) {
+      
       if (this.operation === 'default')
         this.operation = statusvalue
+        if(statusvalue === 'add' && !this.ioperation){
+          this.ioperation = true
+        }
       else this.operation = 'default'
     },
     sortFileLists() {
@@ -163,6 +170,10 @@ export default {
         })
       this.fileLists.splice(index, 1)
     },
+    handleReset(){
+      this.operation = 'default'
+      this.ioperation = false
+    },
     newFile(str, type) {
       const date = new Date();
       const year = date.getFullYear();
@@ -192,38 +203,46 @@ export default {
         })
       }
       this.fileLists.sort((a, b) => {
-        if (a.type === b.type) {
+        if (a.type == b.type) {
           return a.name.localeCompare(b.name); // 同类型时按name排序
         }
-        return a.type === 0 ? -1 : 1; // 将folder类型置前
+        return a.type == 0 ? -1 : 1; // 将folder类型置前
       });
       // this.sortFileLists()
-      this.addfilename = ''
-      this.addfiletype = ''
+      this.form.name = ''
+      this.form.type = ''
       this.operation = 'default'
+      this.ioperation = false
       console.log(this.operation)
     }
   },
 }
 </script>
 <template>
-  <div class="add" 
-  v-if="operation === 'add'"
-  >
-    <el-form>
-      <el-form-item label="file name" style="margin-left: 6vw;margin-top: 4vh;width: 180px;">
-      <el-input v-model="addfilename"  />
-    </el-form-item>
-    <el-form-item label="file type" style="margin-left: 6vw;width: 180px;">
-      <el-input v-model="addfiletype" />
-    </el-form-item>
-    <el-button type="primary" @click="newFile(addfilename,addfiletype)" style="margin-left: 7vw;">confirm</el-button>
-    <el-button @click="changeNowStatus('default')">cancel</el-button>
+  
+  <el-dialog v-model="ioperation" title="apply file" width="500">
+    <el-form :model="form">
+      <el-form-item label="Promotion name" label-width="140px">
+        <el-input v-model="form.name" autocomplete="off" />
+      </el-form-item>
+      <el-form-item label="Zones" label-width="140px">
+        <el-select v-model="form.type" placeholder="Please select a type">
+          <el-option label="folder" value=0 />
+          <el-option label="file" value=1 />
+        </el-select>
+      </el-form-item>
     </el-form>
-  </div>
-  <div class="addzhezhao" v-if="operation === 'add'"></div>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="ioperation = false">Cancel</el-button>
+        <el-button type="primary" @click="newFile(form.name,form.type)">
+          Confirm
+        </el-button>
+      </div>
+    </template>
+  </el-dialog>
   <div style="padding: 10rem;padding-bottom: 20px;">
-
+  
     <div class="fileheader">
       <el-breadcrumb separator="/" class="left-aligned" style="display: inline-flex;margin-left: 8px;">
 

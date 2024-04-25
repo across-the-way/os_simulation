@@ -101,10 +101,9 @@ export default {
           <el-menu-item-group title="Group Two">
             <el-menu-item index="1-3"><router-link to="/device">设备管理</router-link></el-menu-item>
           </el-menu-item-group>
-          <el-sub-menu index="1-4">
-            <template #title>item one</template>
-            <el-menu-item index="1-4-1"><router-link to="/memory">内存情况</router-link></el-menu-item>
-          </el-sub-menu>
+          
+            <el-menu-item index="1-4"><router-link to="/memory">内存情况</router-link></el-menu-item>
+        
         </el-sub-menu>
         <el-menu-item index="1">
           <el-icon><document /></el-icon>
