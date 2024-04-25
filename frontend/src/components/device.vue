@@ -1,6 +1,7 @@
 <script setup>
 import axios from 'axios'
 import { serverURL } from '@/components/ServerURL'
+import { dialogEmits } from 'element-plus';
 
 </script>
 
@@ -9,6 +10,29 @@ export default {
   data() {
     return {
       responseData: null,
+      displayList: [],
+      dialogTableVisible: false,
+      gridData: [
+        {
+          date: '2016-05-02',
+          name: 'John Smith',
+          address: 'No.1518,  Jinshajiang Road, Putuo District',
+        },
+        {
+          date: '2016-05-04',
+          name: 'John Smith',
+          address: 'No.1518,  Jinshajiang Road, Putuo District',
+        },
+        {
+          date: '2016-05-01',
+          name: 'John Smith',
+          address: 'No.1518,  Jinshajiang Road, Putuo District',
+        },
+        {
+          date: '2016-05-03',
+          name: 'John Smith',
+          address: 'No.1518,  Jinshajiang Road, Putuo District',
+        },],
     }
   },
   created() {
@@ -23,9 +47,10 @@ export default {
         console.error(error);
       });
   },
-  methods:{
-    handleDelete(index, data) {
-      
+  methods: {
+    handleSet(data) {
+      this.dialogTableVisible = true
+      this.displayList=data
     }
   }
 }
@@ -35,14 +60,7 @@ export default {
 </script>
 
 <template>
-   <div><el-table :data="responseData" style="width: 100%">
-      <el-table-column label="busy" width="180">
-        <template #default="scope">
-          <div style="display: flex; align-items: center">
-            {{ scope.row.busy }}
-          </div>
-        </template>
-      </el-table-column>
+  <div><el-table :data="responseData" style="width: 100%">
       <el-table-column label="type" width="180">
         <template #default="scope">
           <el-popover effect="light" trigger="hover" placement="top" width="190">
@@ -51,18 +69,36 @@ export default {
               <div>{{ scope.row.priority }}</div>
             </template>
             <template #reference>
-              <el-tag>{{ scope.row.type }}</el-tag>
+              <span>{{ scope.row.type }}</span>
             </template>
           </el-popover>
         </template>
       </el-table-column>
-      <el-table-column label="detail" width="180">
+      <el-table-column label="busy" width="180">
         <template #default="scope">
-          <el-button size="small" @click="handleEdit(scope.$index, scope.row)">Edit</el-button>
-          <el-button size="small" type="danger" @click="handleDelete(scope.$index, scope.row)">Delete</el-button>
+          <el-tag type="danger" v-if="scope.row.busy == false">
+            {{ scope.row.busy }}
+          </el-tag>
+          <el-tag type="success" v-if="scope.row.busy == true">
+            {{ scope.row.busy }}
+          </el-tag>
         </template>
       </el-table-column>
+
+      <el-table-column label="detail" width="180">
+        <template #default="scope">
+          <el-button size="small" @click="handleSet(scope.row.waitQueue)">display</el-button>
+
+        </template>
+      
+      </el-table-column>
     </el-table></div>
+    <el-dialog v-model="dialogTableVisible" title="waiting Queue" width="400" align-center>
+    <el-table :data="displayList">
+      <el-table-column property="pid" label="p_id" />
+      <el-table-column property="iotime" label="iotime" />
+    </el-table>
+  </el-dialog>
 </template>
 
 <style scoped>

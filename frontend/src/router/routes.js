@@ -31,14 +31,23 @@ const routes = [
         name: 'test1',
         title: '测试页',
         meta:{
-            title: '测试页'
+            title: '测试页1'
         },
         component: () => import('@/components/test1.vue'),
     },
     {
+        path: '/process',
+        name: 'process',
+        title: 'process',
+        meta:{
+            title: '进程详情'
+        },
+        component: () => import('@/components/process.vue'),
+    },
+    {
         path: '/process/queue',
         name: 'processqueue',
-        title: 'asdfasefa',
+        title: 'processqueue',
         meta:{
             title: '进程队列'
         },
@@ -72,13 +81,13 @@ const routes = [
         component: () => import('@/components/ter.vue'),
     },
     {
-        path: '/process',
-        name: 'process',
-        title: '进程',
+        path: '/process/create/cmd',
+        name: 'processcreatecmd',
+        title: '进程创建',
         meta:{
-            title: '进程'
+            title: '进程创建(命令行)'
         },
-        component: () => import('@/components/process.vue'),
+        component: () => import('@/components/processCreateCmd.vue'),
     },
 ]
 export default routes

@@ -19,41 +19,7 @@ export default {
         type: '',
       },
       fileLists: [
-        {
-          name: 'data.txt',
-          type: 1,
-          imode: '2016-06-03',
-        },
-        {
-          name: 'drc',
-          type: 0,
-          imode: '2009-05-03',
-        },
-        {
-          name: 'cata.txt',
-          type: 1,
-          imode: '2010-04-03',
-        },
-        {
-          name: 'src',
-          type: 0,
-          imode: '2016-10-03',
-        },
-        {
-          name: 'eata.txt',
-          type: 1,
-          imode: '2016-08-03',
-        },
-        {
-          name: 'arc',
-          type: 0,
-          imode: '2019-05-03',
-        },
-        {
-          name: 'data.txt',
-          type: 1,
-          imode: '2012-04-03',
-        },
+        
       ],
       city: [
         {
@@ -92,10 +58,10 @@ export default {
   },
   computed: {
     buttonClass() {
-      return this.operation === 'delete' ? 'danger' : 'primary';
+      return this.operation == 'delete' ? 'danger' : 'primary';
     },
     buttonText() {
-      return this.operation === 'delete' ? 'cancel' : 'option';
+      return this.operation == 'delete' ? 'cancel' : 'option';
     }
   },
   mounted() {
@@ -103,6 +69,9 @@ export default {
     console.log(window.location.pathname)
     this.generateBreadcrumb();
     console.log(this.breadcrumbItems);
+    this.sortFileLists();
+  },
+  updated(){
     this.sortFileLists();
   },
   methods: {
@@ -121,13 +90,16 @@ export default {
       });
     },
     changeNowStatus(statusvalue) {
-      
+      console.log(statusvalue);
       if (this.operation === 'default')
-        this.operation = statusvalue
+        {this.operation = statusvalue
+        console.log(this.operation);
         if(statusvalue === 'add' && !this.ioperation){
           this.ioperation = true
-        }
-      else this.operation = 'default'
+        }}
+      else 
+        {this.operation = 'default'
+        console.log('default');}
     },
     sortFileLists() {
       this.fileLists.sort((a, b) => {
@@ -220,12 +192,12 @@ export default {
 </script>
 <template>
   
-  <el-dialog v-model="ioperation" title="apply file" width="500">
+  <el-dialog v-model="ioperation" title="apply file" width="500" align-center>
     <el-form :model="form">
-      <el-form-item label="Promotion name" label-width="140px">
+      <el-form-item label="file name" label-width="140px">
         <el-input v-model="form.name" autocomplete="off" />
       </el-form-item>
-      <el-form-item label="Zones" label-width="140px">
+      <el-form-item label="type" label-width="140px">
         <el-select v-model="form.type" placeholder="Please select a type">
           <el-option label="folder" value=0 />
           <el-option label="file" value=1 />
@@ -254,17 +226,19 @@ export default {
       <div class="right-aligned">
 
         <!-- 按时间排序/取消按钮 -->
-        <el-button @click="changeNowStatus('add')" type="success">add files</el-button>
-        <el-button :type="!isSortedByDate ? 'primary' : 'info'" @click="toggleSortByDate">
-          {{ isSortedByDate ? '取消' : '按时间排序' }} <!-- 根据isSortedByDate显示不同的文本 -->
-        </el-button>
+        <el-button @click="changeNowStatus('add')" type="success">
+          <el-icon style="margin-left: 0;margin-right: 5px;" >
+              <DocumentAdd />
+            </el-icon>
+          add files</el-button>
+        
 
         <Transition name="scale">
           <el-button :type="buttonClass" @click='changeNowStatus("delete")'>
             <el-icon style="margin-left: 0;margin-right: 5px;" v-if="operation != 'delete'">
-              <DocumentRemove />
+              <setting />
             </el-icon>
-            <el-icon style="margin-left: 0;margin-right: 5px;" v-if="operation === 'delete'">
+            <el-icon style="margin-left: 0;margin-right: 5px;" v-if="operation == 'delete'">
               <CircleClose />
             </el-icon>
             {{ buttonText }}</el-button>
@@ -346,23 +320,6 @@ export default {
   transform: scale(0);
 }
 
-.add {
-  z-index: 10;
-  top: 40vh;
-  left: calc(50vw - 100px);
-  position: absolute;
-  width: 25vw;
-  border-radius: 30px;
-  align-items: center;
-  padding: 5vw,5vh;
-  height: 20vh;
-  background-color: white;
-}
-.addzhezhao{
-  background-color: rgba(0,0,0,0.3);
-  z-index: 9;
-  width: calc(100vw - 240px);
-  height: calc(100vh - 100px);
-  position: absolute;
-}
+
+
 </style>

@@ -1,6 +1,7 @@
 <template>
-  
-    <terminal name="my-terminal" @exec-cmd="onExecCmd" :show-header="false":command-store="com"></terminal>
+
+  <terminal name="my-terminal" @exec-cmd="onExecCmd" :show-header="false" :command-store="com" :context="content">
+  </terminal>
 
 </template>
 
@@ -9,7 +10,7 @@ import Terminal from "vue-web-terminal"
 //  3.2.0 及 2.1.13 以后版本需要引入此样式，之前版本无需引入主题样式
 import 'vue-web-terminal/lib/theme/dark.css'
 
-import  axios  from "axios"
+import axios from "axios"
 import { serverURL } from "./ServerURL"
 export default {
   data() {
@@ -21,8 +22,28 @@ export default {
         'cat',
         'rf'
       ],
+      content: '/root/data',
       responseData: [],
     }
+  },
+  created() {
+    axios.post(serverURL + '/terminal', ['pwd'])
+      .then(res => {
+        this.content = res.data
+        console.log(this.content)
+      })
+      .catch(err => {
+        console.log(err)
+      })
+  },
+  updated() {
+    axios.post(serverURL + '/terminal', ['pwd'])
+      .then(res => {
+        this.content = res.data
+      })
+      .catch(err => {
+        console.log(err)
+      })
   },
   components: { Terminal },
   methods: {
@@ -39,21 +60,28 @@ export default {
       })
       console.log(temp1)
       axios.post(serverURL + '/terminal', temp1)
-      .then(response => {
-        console.log(response.data)
-        this.responseData = response.data.split('\n')
-        this.responseData.forEach(res => {
-          success({
-            type: 'normal',
-            content: res
+        .then(response => {
+          console.log(response.data)
+          this.responseData = response.data.split('\n')
+          this.responseData.forEach(res => {
+            success({
+              type: 'normal',
+              content: res
+            })
           })
+
+
+          console.log(this.responseData)
         })
-
-
-        console.log(this.responseData)
-      })
         .catch(error => {
           console.log(error)
+        })
+      axios.post(serverURL + '/terminal', ['pwd'])
+        .then(res => {
+          this.content = res.data
+        })
+        .catch(err => {
+          console.log(err)
         })
       console.log(this.responseData)
       if (key === 'fail') {

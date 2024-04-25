@@ -9,6 +9,15 @@
         ]">
             <el-input v-model="instructionQueue.memory" />
         </el-form-item>
+        <el-form-item prop="priority" label="Priority" :rules="[
+            {
+                required: true,
+                message: 'Please input instructions argus',
+                trigger: 'blur',
+            },
+        ]">
+            <el-input v-model="instructionQueue.priority" />
+        </el-form-item>
         <el-form-item v-for="(domain, index) in instructionQueue.domains" :key="domain.key" :label="domain.type"
             :prop="'domains.' + index + '.arguments'" :rules="{
                 required: true,
@@ -20,12 +29,18 @@
                 Delete
             </el-button>
         </el-form-item>
+        <el-form-item prop="exit" label="Exit" :rules="[
+            {
+                required: false,
+            },
+        ]"></el-form-item>
         <el-form-item>
             <el-button type="primary" @click="submitForm(instructionQueue)">Submit</el-button>
             <!-- <el-button @click="dismode" ></el-button> -->
             <!-- <div v-show="mode"> -->
             <el-select v-model="value" placeholder="Select" style="width: 105px;padding-left: 12px;">
-                <el-option v-for="item in instructionQueue.instructiontype" :key="item.index" :label="instructionQueue.instructiontype" :value="instructionQueue.instructiontype"
+                <el-option v-for="item in instructionQueue.instructiontype" :key="item.index"
+                    :label="instructionQueue.instructiontype" :value="instructionQueue.instructiontype"
                     style="width: 120px;">
                     <el-icon>
                         <Menu />
@@ -37,7 +52,7 @@
         ">{{ item.value }}</span>
                 </el-option>
             </el-select>
-            <el-button @click="addDomain('ins')">New domain</el-button>
+            <el-button @click="addDomain('Calculate')">New Calc</el-button>
             <el-button @click="addDomain('Exit')">New exit</el-button>
             <el-button @click="addDomain('ins')">New domain</el-button>
             <el-button @click="addDomain('ins')">New domain</el-button>
@@ -69,13 +84,11 @@ export default {
             ],
             instructionQueue: {
                 domains: [
-                    {
-                        key: 1,
-                        arguments: '',
-                        type: 'Calculate',
-                    },
+                    
                 ],
                 memory: '',
+                priority: 1,
+                exit: '',
                 index: 1,
                 instructiontype: [
                     'Memory',  // 参数：内存大小
@@ -128,6 +141,27 @@ export default {
         submitForm() {
             //ifvalid()
             //axios
+            let temp = []
+            temp.push({type: 'Memory',arguments: [parseInt(this.instructionQueue.memory)]})
+            temp.push({type: 'Priority',arguments: [this.instructionQueue.priority]})
+
+            this.instructionQueue.domains.forEach(element => {
+                let temp1 = []
+                let el = element.arguments.split(' ')
+                el.forEach(str => {
+                    const num = parseInt(str); // 转换为整数
+                    if (!isNaN(num)) {
+                        temp1.push(num); // 如果转换成功，则添加到args数组中
+                    }
+                    else
+                        temp1.push(str) // 否则就直接添加
+                })
+                temp.push({type:element.type,arguments:temp1})
+            });
+            temp.push({type: 'Exit',arguments:[]})
+            axios.post(serverURL + '/process', temp)
+            
+            console.log(temp)
             console.log(this.instructionQueue)
             //reset
         },
