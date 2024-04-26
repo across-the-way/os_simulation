@@ -127,16 +127,16 @@ export default {
 
             if (index !== -1) {
                 this.instructionQueue.domains.splice(index, 1)
-                this.index = this.index - 1
+                
             }
         },
         addDomain(type) {
             this.instructionQueue.domains.push({
-                key: this.index + 1,
+                // key: this.index + 1,
                 type: type,
                 arguments: '',
             })
-            this.index = this.index + 1
+            // this.index = this.index + 1
         },
         submitForm() {
             //ifvalid()
