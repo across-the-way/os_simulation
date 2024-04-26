@@ -36,28 +36,11 @@
         ]"></el-form-item>
         <el-form-item>
             <el-button type="primary" @click="submitForm(instructionQueue)">Submit</el-button>
-            <!-- <el-button @click="dismode" ></el-button> -->
-            <!-- <div v-show="mode"> -->
-            <el-select v-model="value" placeholder="Select" style="width: 105px;padding-left: 12px;">
-                <el-option v-for="item in instructionQueue.instructiontype" :key="item.index"
-                    :label="instructionQueue.instructiontype" :value="instructionQueue.instructiontype"
-                    style="width: 120px;">
-                    <el-icon>
-                        <Menu />
-                    </el-icon>
-                    <span style="
-          float: right;
-          color: var(--el-text-color-secondary);
-          font-size: 12px;
-        ">{{ item.value }}</span>
-                </el-option>
+            <el-select v-model="selectedDomain" placeholder="Select" style="width: 105px;padding-left: 12px;" @change="addDomain(selectedDomain)">
+                <el-option label="New Calc" value="Calculate"></el-option>
+                <el-option label="New Exit" value="Exit"></el-option>
+                <el-option label="New Domain" value="ins"></el-option>
             </el-select>
-            <el-button @click="addDomain('Calculate')">New Calc</el-button>
-            <el-button @click="addDomain('Exit')">New exit</el-button>
-            <el-button @click="addDomain('ins')">New domain</el-button>
-            <el-button @click="addDomain('ins')">New domain</el-button>
-            <el-button @click="addDomain('ins')">New domain</el-button>
-            <!-- </div> -->
         </el-form-item>
     </el-form>
 </template>
@@ -119,7 +102,8 @@ export default {
                     'Keyboard',  // 参数：使用时间
                 ],
 
-            }
+            },
+            selectedDomain: ''
         }
     },
     methods: {
@@ -127,16 +111,20 @@ export default {
 
             if (index !== -1) {
                 this.instructionQueue.domains.splice(index, 1)
-                this.index = this.index - 1
+                // this.index = this.index - 1
             }
         },
         addDomain(type) {
-            this.instructionQueue.domains.push({
-                key: this.index + 1,
-                type: type,
-                arguments: '',
-            })
-            this.index = this.index + 1
+            if (type) {
+                this.instructionQueue.domains.push({
+                    // key: this.index + 1,
+                    type: type,
+                    arguments: '',
+                });
+                // this.index = this.index + 1;
+                // Reset the selected value to default after adding the domain
+                this.selectedDomain = '';
+            }
         },
         submitForm() {
             //ifvalid()
