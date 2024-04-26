@@ -1,36 +1,41 @@
 <template>
-  <div style="height: 50vh;width: 50vw;margin: auto;align-items: center;">
-  <Pie :data="data" :options="options" /></div>
+  <el-table-v2
+    :columns="columns"
+    :data="data"
+    :width="700"
+    :height="400"
+    fixed
+  />
 </template>
 
-<script setup>
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
-import { Pie } from 'vue-chartjs'
-ChartJS.register(ArcElement, Tooltip, Legend)
-</script>
+<script lang="ts" setup>
+const generateColumns = (length = 10, prefix = 'column-', props?: any) =>
+  Array.from({ length }).map((_, columnIndex) => ({
+    ...props,
+    key: `${prefix}${columnIndex}`,
+    dataKey: `${prefix}${columnIndex}`,
+    title: `Column ${columnIndex}`,
+    width: 150,
+  }))
 
-<script>
-export default {
-
-  components: {
-    Pie
-  },
-  data() {
-    return {
-      data: {
-        labels: ['VueJs', 'EmberJs', 'ReactJs', 'AngularJs','JavaScript'],
-        datasets: [
-          {
-            backgroundColor: ['#41B883', '#E46651', '#00D8FF', '#DD1B16','#6a3f9b'],
-            data: [40, 20, 80, 10,20]
-          }
-        ]
+const generateData = (
+  columns: ReturnType<typeof generateColumns>,
+  length = 200,
+  prefix = 'row-'
+) =>
+  Array.from({ length }).map((_, rowIndex) => {
+    return columns.reduce(
+      (rowData, column, columnIndex) => {
+        rowData[column.dataKey] = `Row ${rowIndex} - Col ${columnIndex}`
+        return rowData
       },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false
+      {
+        id: `${prefix}${rowIndex}`,
+        parentId: null,
       }
-    }
-  }
-}
+    )
+  })
+
+const columns = generateColumns(10)
+const data = generateData(columns, 10)
 </script>

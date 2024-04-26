@@ -1,29 +1,41 @@
 <template>
-  <div>
-    <el-table :data="tableData" border>
-      <el-table-column v-for="(row, rowIndex) in tableData" :key="rowIndex" :label="`Row`">
-        <template slot-scope="scope">
-          <el-table-column v-for="(cell, cellIndex) in row" :key="cellIndex" :label="`Column`">
-            <template slot-scope="scope">
-              {{ cell }}
-            </template>
-          </el-table-column>
-        </template>
-      </el-table-column>
-    </el-table>
-  </div>
+  <el-table-v2
+    :columns="columns"
+    :data="data"
+    :width="700"
+    :height="400"
+    fixed
+  />
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      tableData: [
-        ['A1', 'B1', 'C1'],
-        ['A2', 'B2', 'C2'],
-        ['A3', 'B3', 'C3']
-      ]
-    };
-  }
-};
+<script lang="ts" setup>
+const generateColumns = (length = 10, prefix = 'column-', props?: any) =>
+  Array.from({ length }).map((_, columnIndex) => ({
+    ...props,
+    key: `${prefix}${columnIndex}`,
+    dataKey: `${prefix}${columnIndex}`,
+    title: `Column ${columnIndex}`,
+    width: 150,
+  }))
+
+const generateData = (
+  columns: ReturnType<typeof generateColumns>,
+  length = 200,
+  prefix = 'row-'
+) =>
+  Array.from({ length }).map((_, rowIndex) => {
+    return columns.reduce(
+      (rowData, column, columnIndex) => {
+        rowData[column.dataKey] = `Row ${rowIndex} - Col ${columnIndex}`
+        return rowData
+      },
+      {
+        id: `${prefix}${rowIndex}`,
+        parentId: null,
+      }
+    )
+  })
+
+const columns = generateColumns(10)
+const data = generateData(columns, 10)
 </script>
