@@ -1,56 +1,29 @@
-<script setup>
-import Chart from 'chart.js';
-</script>
+<template>
+  <div>
+    <el-table :data="tableData" border>
+      <el-table-column v-for="(row, rowIndex) in tableData" :key="rowIndex" :label="`Row`">
+        <template slot-scope="scope">
+          <el-table-column v-for="(cell, cellIndex) in row" :key="cellIndex" :label="`Column`">
+            <template slot-scope="scope">
+              {{ cell }}
+            </template>
+          </el-table-column>
+        </template>
+      </el-table-column>
+    </el-table>
+  </div>
+</template>
+
 <script>
 export default {
-  mounted() {
-    this.renderChart();
-  },
-  methods: {
-    renderChart() {
-      const chartCanvas = this.$refs.chartCanvas;
-      const ctx = chartCanvas.getContext('2d');
-
-      new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-          datasets: [{
-            label: '# of Votes',
-            data: [12, 19, 3, 5, 2, 3],
-            backgroundColor: [
-              'rgba(255, 99, 132, 0.2)',
-              'rgba(54, 162, 235, 0.2)',
-              'rgba(255, 206, 86, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(153, 102, 255, 0.2)',
-              'rgba(255, 159, 64, 0.2)'
-            ],
-            borderColor: [
-              'rgba(255, 99, 132, 1)',
-              'rgba(54, 162, 235, 1)',
-              'rgba(255, 206, 86, 1)',
-              'rgba(75, 192, 192, 1)',
-              'rgba(153, 102, 255, 1)',
-              'rgba(255, 159, 64, 1)'
-            ],
-            borderWidth: 1
-          }]
-        },
-        options: {
-          scales: {
-            y: {
-              beginAtZero: true
-            }
-          }
-        }
-      });
-    }
+  data() {
+    return {
+      tableData: [
+        ['A1', 'B1', 'C1'],
+        ['A2', 'B2', 'C2'],
+        ['A3', 'B3', 'C3']
+      ]
+    };
   }
 };
 </script>
-<template>
-  <div>
-    <canvas ref="chartCanvas"></canvas>
-  </div>
-</template>

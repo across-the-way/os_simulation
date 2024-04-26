@@ -1,63 +1,36 @@
-<script setup>
-import axios from 'axios'
-import { serverURL } from '@/components/ServerURL'
+<template>
+  <div style="height: 50vh;width: 50vw;margin: auto;align-items: center;">
+  <Pie :data="data" :options="options" /></div>
+</template>
 
+<script setup>
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
+import { Pie } from 'vue-chartjs'
+ChartJS.register(ArcElement, Tooltip, Legend)
 </script>
 
 <script>
 export default {
+
+  components: {
+    Pie
+  },
   data() {
     return {
-      responseData: null,
+      data: {
+        labels: ['VueJs', 'EmberJs', 'ReactJs', 'AngularJs','JavaScript'],
+        datasets: [
+          {
+            backgroundColor: ['#41B883', '#E46651', '#00D8FF', '#DD1B16','#6a3f9b'],
+            data: [40, 20, 80, 10,20]
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false
+      }
     }
-  },
-  created() {
-    axios.get(serverURL + '/memory', {})
-      .then(response => {
-        // 处理响应结果
-        console.log(response.data);
-        this.responseData = response.data
-      })
-      .catch(error => {
-        // 处理错误
-        console.error(error);
-      });
   }
 }
-
-
-
 </script>
-
-<template>
-   <div>测试</div>
-</template>
-
-<style scoped>
-header {
-  line-height: 1.5;
-}
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-}
-</style>

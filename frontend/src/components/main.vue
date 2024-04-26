@@ -30,7 +30,7 @@ export default {
 </script>
 
 <template>
-   <div>测试</div>
+   <div>欢迎登录系统</div>
 </template>
 
 <style scoped>

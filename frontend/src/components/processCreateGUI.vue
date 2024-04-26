@@ -1,5 +1,5 @@
 <template>
-    <el-form ref="formRef" style="max-width: 600px" :model="instructionQueue" label-width="auto" class="demo-dynamic">
+    <el-form ref="formRef" style="max-width: 600px;margin: auto;" :model="instructionQueue" label-width="auto" class="demo-dynamic">
         <el-form-item prop="memory" label="Memory" :rules="[
             {
                 required: true,
@@ -21,7 +21,7 @@
         <el-form-item v-for="(domain, index) in instructionQueue.domains" :key="domain.key" :label="domain.type"
             :prop="'domains.' + index + '.arguments'" :rules="{
                 required: true,
-                message: 'domain can not be null',
+                message: 'arguments must be input',
                 trigger: 'blur',
             }">
             <el-input v-model="domain.arguments" v-if="domain.type != 'Exit'" />
@@ -36,28 +36,9 @@
         ]"></el-form-item>
         <el-form-item>
             <el-button type="primary" @click="submitForm(instructionQueue)">Submit</el-button>
-            <!-- <el-button @click="dismode" ></el-button> -->
-            <!-- <div v-show="mode"> -->
-            <el-select v-model="value" placeholder="Select" style="width: 105px;padding-left: 12px;">
-                <el-option v-for="item in instructionQueue.instructiontype" :key="item.index"
-                    :label="instructionQueue.instructiontype" :value="instructionQueue.instructiontype"
-                    style="width: 120px;">
-                    <el-icon>
-                        <Menu />
-                    </el-icon>
-                    <span style="
-          float: right;
-          color: var(--el-text-color-secondary);
-          font-size: 12px;
-        ">{{ item.value }}</span>
-                </el-option>
+            <el-select v-model="selectedDomain" placeholder="Select" style="width: 105px;padding-left: 12px;" @change="addDomain(selectedDomain)">
+                <el-option v-for="option in instructiontype" :label="option.label" :value="option.value"></el-option>
             </el-select>
-            <el-button @click="addDomain('Calculate')">New Calc</el-button>
-            <el-button @click="addDomain('Exit')">New exit</el-button>
-            <el-button @click="addDomain('ins')">New domain</el-button>
-            <el-button @click="addDomain('ins')">New domain</el-button>
-            <el-button @click="addDomain('ins')">New domain</el-button>
-            <!-- </div> -->
         </el-form-item>
     </el-form>
 </template>
@@ -82,6 +63,34 @@ export default {
                     label: '文件夹',
                 },
             ],
+            instructiontype: [
+                    {label:'Memory',value:'Memory' }, // 参数：内存大小
+                    {label:'AccessMemory',value:'AccessMemory'},  // 参数：内存地址
+
+                    // 进程管理
+                    {label:'Priority',value:'Priority'},  // 参数：进程优先级
+                    {label:'Calculate',value:'Calculate'},  // 参数：计算时间
+                    {label:'Fork',value:'Fork'}, // 参数：子进程的入口
+                    {label:'Exit',value:'Exit'},   // 参数：无
+                    {label:'Wait',value:'Wait'}, // 参数：无
+                    {label:'CondNew',value:'CondNew'}, // 参数：信号量名，初始值
+                    {label:'CondWait',value:'CondWait'}, // 参数：信号量名
+                    {label:'CondSignal',value:'CondSignal'}, // 参数：信号量名
+
+                    // 文件系统
+                    {label:'CreateDir',value:'CreateDir'}, // 参数：父目录路径，目录名
+                    {label:'CreateFile',value:'CreateFile'}, // 参数：目录路径，文件名
+                    {label:'DeleteDir',value:'DeleteDir'}, // 参数：目录路径
+                    {label:'DeleteFile',value:'DeleteFile'}, // 参数：文件路径
+                    {label:'WriteFile',value:'WriteFile'}, // 参数：文件路径，写入时间
+                    {label:'ReadFile',value:'ReadFile'}, // 参数：文件路径，读取时间
+                    {label:'OpenFile',value:'OpenFile'}, // 参数：文件路径
+                    {label:'CloseFile',value:'CloseFile'}, // 参数：文件号
+
+                    // 设备管理
+                    {label:'Printer',value:'Printer'},  // 参数：使用时间
+                    {label:'Keyboard',value:'Keyboard'},  // 参数：使用时间
+                ],
             instructionQueue: {
                 domains: [
                     
@@ -90,36 +99,10 @@ export default {
                 priority: 1,
                 exit: '',
                 index: 1,
-                instructiontype: [
-                    'Memory',  // 参数：内存大小
-                    'AccessMemory',  // 参数：内存地址
+                
 
-                    // 进程管理
-                    'Priority',  // 参数：进程优先级
-                    'Calculate',  // 参数：计算时间
-                    'Fork', // 参数：子进程的入口
-                    'Exit',   // 参数：无
-                    'Wait', // 参数：无
-                    'CondNew', // 参数：信号量名，初始值
-                    'CondWait', // 参数：信号量名
-                    'CondSignal', // 参数：信号量名
-
-                    // 文件系统
-                    'CreateDir', // 参数：父目录路径，目录名
-                    'CreateFile', // 参数：目录路径，文件名
-                    'DeleteDir', // 参数：目录路径
-                    'DeleteFile', // 参数：文件路径
-                    'WriteFile', // 参数：文件路径，写入时间
-                    'ReadFile', // 参数：文件路径，读取时间
-                    'OpenFile', // 参数：文件路径
-                    'CloseFile', // 参数：文件号
-
-                    // 设备管理
-                    'Printer',  // 参数：使用时间
-                    'Keyboard',  // 参数：使用时间
-                ],
-
-            }
+            },
+            selectedDomain: ''
         }
     },
     methods: {
@@ -127,16 +110,20 @@ export default {
 
             if (index !== -1) {
                 this.instructionQueue.domains.splice(index, 1)
-                
+                // this.index = this.index - 1
             }
         },
         addDomain(type) {
-            this.instructionQueue.domains.push({
-                // key: this.index + 1,
-                type: type,
-                arguments: '',
-            })
-            // this.index = this.index + 1
+            if (type) {
+                this.instructionQueue.domains.push({
+                    // key: this.index + 1,
+                    type: type,
+                    arguments: '',
+                });
+                // this.index = this.index + 1;
+                // Reset the selected value to default after adding the domain
+                this.selectedDomain = '';
+            }
         },
         submitForm() {
             //ifvalid()

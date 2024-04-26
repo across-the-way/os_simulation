@@ -9,6 +9,15 @@ const routes = [
         component: () => import('@/components/memory.vue'),
     },
     {
+        path: '/',
+        name: 'main',
+        title: 'main',
+        meta:{
+            title: '欢迎页'
+        },
+        component: () => import('@/components/main.vue'),
+    },
+    {
         path: '/filesystem/:id*',
         name: 'filesystem',
         title: '文件系统',

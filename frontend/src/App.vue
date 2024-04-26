@@ -112,13 +112,13 @@ export default {
         </el-menu-item>
         <el-menu-item index="3">
           <el-icon>
-            <document />
+            <Operation />
           </el-icon>
           <router-link to="/test">测试</router-link>
         </el-menu-item>
         <el-menu-item index="4">
           <el-icon>
-            <setting />
+            <Switch />
           </el-icon>
           <router-link to="/terminal">终端</router-link>
         </el-menu-item>

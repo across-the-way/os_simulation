@@ -67,6 +67,7 @@ export default {
       clearInterval(this.timer);
     }
   },
+  
   mounted() {
     this.fetchData(); // 每秒发送请求
   },
