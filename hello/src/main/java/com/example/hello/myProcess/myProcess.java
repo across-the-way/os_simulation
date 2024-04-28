@@ -686,11 +686,13 @@ public class myProcess {
         int size = this.queue.Second_Queue.size();
         if (size > 0) {
             // 防止二级队列的进程饿死
-            for (TTLItem item : this.queue.Second_Queue) {
+            for (int i = 0; i < this.queue.Second_Queue.size(); i++) {
+                TTLItem item = this.queue.Second_Queue.get(i);
                 item.setTTL(item.getTTL() + 100);
                 if (item.getTTL() > this.Second_Queue_Threshold) {
                     this.queue.Ready_Queue.add(item.getPid());
                     this.queue.Second_Queue.remove(item);
+                    i--;
                 }
             }
         }

@@ -52,8 +52,8 @@ export default {
 }
 </script>
 <template>
-    <div>
-        <form @submit.prevent="handleSubmit">
+    <div style="margin:auto">
+        <form @submit.prevent="handleSubmit" style="margin:auto">
             <label for="name">instruction</label>
             <br>
             <el-input v-model="formData" style="width: 240px" :rows="2" type="textarea" placeholder="Please input" />

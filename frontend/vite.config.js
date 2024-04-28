@@ -11,8 +11,7 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        CPU: 'src/pages/CPU/main.js',
-        filesystem: 'src/pages/filesystem/main.js',
+        
         index: 'src/main.js'
       },
     },

@@ -94,17 +94,17 @@ export default {
             <span>进程</span>
           </template>
           <el-menu-item-group title="分类">
-            <el-menu-item><router-link to="/process/queue">进程详情</router-link></el-menu-item>
-            <el-menu-item index="/find"><router-link to="/process">创建进程（命令行）</router-link></el-menu-item>
+            <el-menu-item><router-link to="/process">进程详情</router-link></el-menu-item>
+            <el-menu-item><router-link to="/process/queue">进程队列</router-link></el-menu-item>
+            <el-menu-item index="/find"><router-link to="/process/create/cmd">创建进程（命令行）</router-link></el-menu-item>
             <el-menu-item index="1-2"><router-link to="/process/create/gui">创建进程（图形化）</router-link></el-menu-item>
           </el-menu-item-group>
           <el-menu-item-group title="Group Two">
             <el-menu-item index="1-3"><router-link to="/device">设备管理</router-link></el-menu-item>
           </el-menu-item-group>
-          <el-sub-menu index="1-4">
-            <template #title>item one</template>
-            <el-menu-item index="1-4-1"><router-link to="/memory">内存情况</router-link></el-menu-item>
-          </el-sub-menu>
+          
+            <el-menu-item index="1-4"><router-link to="/memory">内存情况</router-link></el-menu-item>
+        
         </el-sub-menu>
         <el-menu-item index="1">
           <el-icon><document /></el-icon>
@@ -112,13 +112,13 @@ export default {
         </el-menu-item>
         <el-menu-item index="3">
           <el-icon>
-            <document />
+            <Operation />
           </el-icon>
           <router-link to="/test">测试</router-link>
         </el-menu-item>
         <el-menu-item index="4">
           <el-icon>
-            <setting />
+            <Switch />
           </el-icon>
           <router-link to="/terminal">终端</router-link>
         </el-menu-item>
