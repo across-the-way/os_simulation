@@ -2,15 +2,25 @@ package com.example.hello.myDevice;
 
 import java.util.*;
 
-public class Device {    
+public class Device {
     private String type;
     private boolean isBusy;
     private LinkedList<ioRequest> waitQueue;
+    private int device_id;
 
-    public Device(String type) {
+    public Device(String type, int deviceid) {
         this.type = type;
         isBusy = false;
         waitQueue = new LinkedList<>();
+        device_id = deviceid;
+    }
+
+    public int getDevice_id() {
+        return device_id;
+    }
+
+    public void setDevice_id(int device_id) {
+        this.device_id = device_id;
     }
 
     public String getType() {
@@ -37,5 +47,4 @@ public class Device {
         this.waitQueue = waitQueue;
     }
 
-    
 }

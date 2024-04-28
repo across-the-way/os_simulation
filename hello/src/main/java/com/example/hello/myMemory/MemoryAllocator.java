@@ -541,6 +541,7 @@ class DemandPageAllocator extends MemoryAllocator {
                     free_pages.set(physical_page);
                     cache.remove(physical_page);
                     swap_partition.swapIn();
+                    used_pages.get(pid).swapPageOut(virtual_physical_page.getLeft());
                 }
             }
         }
@@ -555,6 +556,7 @@ class DemandPageAllocator extends MemoryAllocator {
                         used_pages.get(cache.getTailPid()).swapPageOut(cache.getTailPageVirtual());
                     }
                 } else {
+                    free_memory_size -= page_size;
                     swap_partition.swapOut();
                 }
                 used_pages.get(pid).swapPageIn(page_num, page_num_physical);
@@ -610,7 +612,6 @@ class DemandPageAllocator extends MemoryAllocator {
     public void swapIn(int pid, int pc) {
         isPageFault(pid, pc);
         page_table.swap_partition.swapOut();
-        free_memory_size -= page_size;
     }
 
     public void swapOut(int pid) {

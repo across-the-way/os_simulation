@@ -12,45 +12,14 @@ export default {
       fileLocation: '',
       breadcrumbItems: [],
       operation: 'default',
+      ioperation: false,
       value: '请选择',
-      addfilename: '',
-      addfiletype: '',
+      form: {
+        name: '',
+        type: '',
+      },
       fileLists: [
-        {
-          name: 'data.txt',
-          type: 'file',
-          imode: '2016-06-03',
-        },
-        {
-          name: 'drc',
-          type: 'folder',
-          imode: '2009-05-03',
-        },
-        {
-          name: 'cata.txt',
-          type: 'file',
-          imode: '2010-04-03',
-        },
-        {
-          name: 'src',
-          type: 'folder',
-          imode: '2016-10-03',
-        },
-        {
-          name: 'eata.txt',
-          type: 'file',
-          imode: '2016-08-03',
-        },
-        {
-          name: 'arc',
-          type: 'folder',
-          imode: '2019-05-03',
-        },
-        {
-          name: 'data.txt',
-          type: 'file',
-          imode: '2012-04-03',
-        },
+        
       ],
       city: [
         {
@@ -89,10 +58,10 @@ export default {
   },
   computed: {
     buttonClass() {
-      return this.operation === 'delete' ? 'danger' : 'primary';
+      return this.operation == 'delete' ? 'danger' : 'primary';
     },
     buttonText() {
-      return this.operation === 'delete' ? 'cancel' : 'option';
+      return this.operation == 'delete' ? 'cancel' : 'option';
     }
   },
   mounted() {
@@ -100,6 +69,9 @@ export default {
     console.log(window.location.pathname)
     this.generateBreadcrumb();
     console.log(this.breadcrumbItems);
+    this.sortFileLists();
+  },
+  updated(){
     this.sortFileLists();
   },
   methods: {
@@ -118,23 +90,30 @@ export default {
       });
     },
     changeNowStatus(statusvalue) {
+      console.log(statusvalue);
       if (this.operation === 'default')
-        this.operation = statusvalue
-      else this.operation = 'default'
+        {this.operation = statusvalue
+        console.log(this.operation);
+        if(statusvalue === 'add' && !this.ioperation){
+          this.ioperation = true
+        }}
+      else 
+        {this.operation = 'default'
+        console.log('default');}
     },
     sortFileLists() {
       this.fileLists.sort((a, b) => {
         if (a.type === b.type) {
           return a.name.localeCompare(b.name); // 同类型时按name排序
         }
-        return a.type === 'folder' ? -1 : 1; // 将folder类型置前
+        return a.type === 0 ? -1 : 1; // 将folder类型置前
       });
     },
     sortByDateAndName() {
       this.fileLists.sort((a, b) => {
         // 按类型排序，folder始终在前
         if (a.type !== b.type) {
-          return a.type === 'folder' ? -1 : 1;
+          return a.type === 0 ? -1 : 1;
         }
         // 相同类型按日期排序，如果日期相同则按名称排序
         const dateComparison = b.imode.localeCompare(a.imode);
@@ -153,7 +132,19 @@ export default {
       }
     },
     handleDelete(index, data) {
+      
+      axios.post(serverURL + '/terminal',['rm',data.name])
+      .then((response)=>{
+        console.log(response.data)
+      })
+      .catch(error => {
+          console.log(error)
+        })
       this.fileLists.splice(index, 1)
+    },
+    handleReset(){
+      this.operation = 'default'
+      this.ioperation = false
     },
     newFile(str, type) {
       const date = new Date();
@@ -161,35 +152,69 @@ export default {
       const month = String(date.getMonth() + 1).padStart(2, '0');
       const day = String(date.getDate()).padStart(2, '0');
       let currentDate = `${year}-${month}-${day}`;
-      let temp = { name: str, type: type, imode: currentDate.toString() }
+      let temp = { name: str, type: type, imode: 1 }
       this.fileLists.push(temp)
+      console.log(str)
+
+      if(type == 1){
+        axios.post(serverURL + '/terminal', ['touch',str] )
+        .then(res => {
+          console.log(res.data)
+        })
+        .catch(error =>{
+          console.log(error)
+        })
+      }
+      else {
+        axios.post(serverURL + '/terminal', ['mkdir',str] )
+        .then(res => {
+          console.log(res.data)
+        })
+        .catch(error =>{
+          console.log(error)
+        })
+      }
+      this.fileLists.sort((a, b) => {
+        if (a.type == b.type) {
+          return a.name.localeCompare(b.name); // 同类型时按name排序
+        }
+        return a.type == 0 ? -1 : 1; // 将folder类型置前
+      });
       // this.sortFileLists()
-      this.addfilename = ''
-      this.addfiletype = ''
+      this.form.name = ''
+      this.form.type = ''
       this.operation = 'default'
+      this.ioperation = false
       console.log(this.operation)
     }
   },
 }
 </script>
 <template>
-  <div class="add" 
-  v-if="operation === 'add'"
-  >
-    <el-form>
-      <el-form-item label="file name" style="margin-left: 6vw;margin-top: 4vh;width: 180px;">
-      <el-input v-model="addfilename"  />
-    </el-form-item>
-    <el-form-item label="file type" style="margin-left: 6vw;width: 180px;">
-      <el-input v-model="addfiletype" />
-    </el-form-item>
-    <el-button type="primary" @click="newFile(addfilename,addfiletype)" style="margin-left: 7vw;">confirm</el-button>
-    <el-button @click="changeNowStatus('default')">cancel</el-button>
+  
+  <el-dialog v-model="ioperation" title="apply file" width="500" align-center>
+    <el-form :model="form">
+      <el-form-item label="file name" label-width="140px">
+        <el-input v-model="form.name" autocomplete="off" />
+      </el-form-item>
+      <el-form-item label="type" label-width="140px">
+        <el-select v-model="form.type" placeholder="Please select a type">
+          <el-option label="folder" value=0 />
+          <el-option label="file" value=1 />
+        </el-select>
+      </el-form-item>
     </el-form>
-  </div>
-  <div class="addzhezhao" v-if="operation === 'add'"></div>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="ioperation = false">Cancel</el-button>
+        <el-button type="primary" @click="newFile(form.name,form.type)">
+          Confirm
+        </el-button>
+      </div>
+    </template>
+  </el-dialog>
   <div style="padding: 10rem;padding-bottom: 20px;">
-
+  
     <div class="fileheader">
       <el-breadcrumb separator="/" class="left-aligned" style="display: inline-flex;margin-left: 8px;">
 
@@ -201,17 +226,19 @@ export default {
       <div class="right-aligned">
 
         <!-- 按时间排序/取消按钮 -->
-        <el-button @click="changeNowStatus('add')" type="success">add files</el-button>
-        <el-button :type="!isSortedByDate ? 'primary' : 'info'" @click="toggleSortByDate">
-          {{ isSortedByDate ? '取消' : '按时间排序' }} <!-- 根据isSortedByDate显示不同的文本 -->
-        </el-button>
+        <el-button @click="changeNowStatus('add')" type="success">
+          <el-icon style="margin-left: 0;margin-right: 5px;" >
+              <DocumentAdd />
+            </el-icon>
+          add files</el-button>
+        
 
         <Transition name="scale">
           <el-button :type="buttonClass" @click='changeNowStatus("delete")'>
             <el-icon style="margin-left: 0;margin-right: 5px;" v-if="operation != 'delete'">
-              <DocumentRemove />
+              <setting />
             </el-icon>
-            <el-icon style="margin-left: 0;margin-right: 5px;" v-if="operation === 'delete'">
+            <el-icon style="margin-left: 0;margin-right: 5px;" v-if="operation == 'delete'">
               <CircleClose />
             </el-icon>
             {{ buttonText }}</el-button>
@@ -237,7 +264,7 @@ export default {
       <el-table-column label="Name" width="180">
         <template #default="scope">
           <div style="display: flex; align-items: center">
-            <div v-if="scope.row.type === 'folder'">
+            <div v-if="scope.row.type == 0">
               <el-icon color="#409efc" style="color: blue;">
                 <folder />
               </el-icon>
@@ -265,9 +292,9 @@ export default {
           </el-popover>
         </template>
       </el-table-column>
-      <el-table-column label="Operations" width="180"v-if="operation != 'default'">
+      <el-table-column label="Operations" width="180"v-if="operation == 'delete'">
         <template #default="scope">
-          <el-button size="small" v-if="scope.row.type==='file'" @click="handleEdit(scope.$index, scope.row)">Edit</el-button>
+          <el-button size="small" v-if="scope.row.type==1" @click="handleEdit(scope.$index, scope.row)">Edit</el-button>
           <el-button size="small" type="danger" @click="handleDelete(scope.$index, scope.row)">Delete</el-button>
         </template>
       </el-table-column>
@@ -293,23 +320,6 @@ export default {
   transform: scale(0);
 }
 
-.add {
-  z-index: 10;
-  top: 40vh;
-  left: calc(50vw - 100px);
-  position: absolute;
-  width: 25vw;
-  border-radius: 30px;
-  align-items: center;
-  padding: 5vw,5vh;
-  height: 20vh;
-  background-color: white;
-}
-.addzhezhao{
-  background-color: rgba(0,0,0,0.3);
-  z-index: 9;
-  width: calc(100vw - 240px);
-  height: calc(100vh - 100px);
-  position: absolute;
-}
+
+
 </style>

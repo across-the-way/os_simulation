@@ -52,9 +52,12 @@ public class SysData {
     // 页大小
     public int Page_Size;
 
-    // 测试相关
-    public int Test_Max_Line;
-    public int Test_Max_Time;
+    // 设备数量
+    public int Printer_Number;
+    public int Keyboard_Number;
+
+    // 可用资源数
+    public Map<String, Integer> availableMap;
 
     public SysData() {
         sysConfig = new SysConfig();
@@ -83,9 +86,41 @@ public class SysData {
         MMstrategy = allocateStrategy.LRU;
 
         Memory_Size = 4096;
-        Page_Size = 256;
+        Page_Size = 8;
 
-        Test_Max_Line = 10;
-        Test_Max_Time = 10;
+        Printer_Number = 3;
+        Keyboard_Number = 2;
+
+        InitResourcemap();
+    }
+
+    public void InitResourcemap() {
+        this.availableMap = new HashMap<>();
+        this.availableMap.put("printer", Printer_Number * 5);
+        this.availableMap.put("keyboard", Keyboard_Number * 5);
+        this.availableMap.put("file", 1000);
+    }
+
+    public boolean AvailableResource(String ResourceName) {
+        if (!this.availableMap.containsKey(ResourceName))
+            return false;
+        if (this.availableMap.get(ResourceName) <= 0)
+            return false;
+        else
+            return true;
+    }
+
+    public void AllocateResource(String ResourceName) {
+        if (!this.availableMap.containsKey(ResourceName))
+            return;
+        if (this.availableMap.get(ResourceName) < 1)
+            return;
+        this.availableMap.put(ResourceName, this.availableMap.get(ResourceName) - 1);
+    }
+
+    public void FreeResource(String ResourceName) {
+        if (!this.availableMap.containsKey(ResourceName))
+            return;
+        this.availableMap.put(ResourceName, this.availableMap.get(ResourceName) + 1);
     }
 }

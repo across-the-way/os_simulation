@@ -136,24 +136,34 @@ public class myProcess {
             // 发送中断系统调用FileRead、FileWrite、IORequest
             // 启动进程调度（短期和长期）,切换进程
             case InstructionType.Printer:
-                this.RunningtoWaiting(0);
-                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.IORequest, 0, p.p_id,
-                        p.ir.getArguments()[0]);
+                if (!p.OverResource("printer") && kernel.getSysData().AvailableResource("printer")) {
+                    this.RunningtoWaiting(0);
+                    this.sendInterrupt(InterruptType.SystemCall, SystemCallType.IORequest, 0, p.p_id,
+                            p.ir.getArguments()[0]);
+                }
                 break;
             case InstructionType.Keyboard:
-                this.RunningtoWaiting(1);
-                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.IORequest, 1, p.p_id,
-                        p.ir.getArguments()[0]);
+                if (!p.OverResource("keyboard") && kernel.getSysData().AvailableResource("keyboard")) {
+                    this.RunningtoWaiting(1);
+                    this.sendInterrupt(InterruptType.SystemCall, SystemCallType.IORequest, 1, p.p_id,
+                            p.ir.getArguments()[0]);
+                }
                 break;
             case InstructionType.ReadFile:
-                this.RunningtoWaiting(2);
-                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileRead, p.p_id, p.ir.getArguments()[0],
-                        p.ir.getArguments()[1]);
+                if (!p.OverResource("file") && kernel.getSysData().AvailableResource("file")) {
+                    this.RunningtoWaiting(2);
+                    this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileRead, p.p_id,
+                            p.ir.getArguments()[0],
+                            p.ir.getArguments()[1]);
+                }
                 break;
             case InstructionType.WriteFile:
-                this.RunningtoWaiting(3);
-                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileWrite, p.p_id, p.ir.getArguments()[0],
-                        p.ir.getArguments()[1]);
+                if (!p.OverResource("file") && kernel.getSysData().AvailableResource("file")) {
+                    this.RunningtoWaiting(3);
+                    this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileWrite, p.p_id,
+                            p.ir.getArguments()[0],
+                            p.ir.getArguments()[1]);
+                }
                 break;
 
             // 若指令为文件或目录操作
@@ -506,7 +516,7 @@ public class myProcess {
             if (this.isInReadyQueue(pid)) {
                 this.queue.Ready_Queue.remove((Object) pid);
             } else {
-                this.queue.Second_Queue.remove((Object) pid);
+                this.queue.RemoveProcessFromSecondReady(pid);
             }
             this.queue.Swapped_Ready_Queue.add(new TTLItem(pid));
         }
@@ -527,7 +537,7 @@ public class myProcess {
         PCB p = this.ProcessMap.get(pid);
         if (p != null) {
             p.state = P_STATE.SWAPPED_READY;
-            this.queue.Swapped_Waiting_Queue.remove((Object) pid);
+            this.queue.RemoveProcessFromSwappedWaiting(pid);
             this.queue.Swapped_Waiting_Queue.add(new TTLItem(pid));
         }
     }
@@ -537,7 +547,7 @@ public class myProcess {
         PCB p = this.ProcessMap.get(pid);
         if (p != null) {
             p.state = P_STATE.READY;
-            this.queue.Swapped_Ready_Queue.remove((Object) pid);
+            this.queue.RemoveProcessFromSwappedReady(pid);
             this.queue.Ready_Queue.add(pid);
         }
     }
@@ -547,7 +557,7 @@ public class myProcess {
         PCB p = this.ProcessMap.get(pid);
         if (p != null) {
             p.state = P_STATE.WAITING;
-            this.queue.Swapped_Waiting_Queue.remove((Object) pid);
+            this.queue.RemoveProcessFromSwappedWaiting(pid);
             this.queue.Waiting_Queues.get(p.waiting_for).add(pid);
         }
     }
@@ -557,8 +567,13 @@ public class myProcess {
      */
 
     // 进程的文件打开表操作
-    public void addOpenFile(int pid, int fd) {
-        this.ProcessMap.get(pid).FileTable.add(fd);
+    public boolean addOpenFile(int pid, int fd) {
+        if (!this.ProcessMap.get(pid).FileTable.contains(fd)) {
+            this.ProcessMap.get(pid).FileTable.add(fd);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public void removeOpenFile(int pid, int fd) {
@@ -671,11 +686,13 @@ public class myProcess {
         int size = this.queue.Second_Queue.size();
         if (size > 0) {
             // 防止二级队列的进程饿死
-            for (TTLItem item : this.queue.Second_Queue) {
+            for (int i = 0; i < this.queue.Second_Queue.size(); i++) {
+                TTLItem item = this.queue.Second_Queue.get(i);
                 item.setTTL(item.getTTL() + 100);
                 if (item.getTTL() > this.Second_Queue_Threshold) {
                     this.queue.Ready_Queue.add(item.getPid());
                     this.queue.Second_Queue.remove(item);
+                    i--;
                 }
             }
         }
@@ -851,5 +868,9 @@ public class myProcess {
             }
         }
         return pcbList;
+    }
+
+    public ProcessQueue getQueue() {
+        return this.queue;
     }
 }

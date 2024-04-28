@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import com.example.hello.myInstrunction.Instruction;
 import com.example.hello.myProcess.PCB;
+import com.example.hello.myProcess.ProcessQueue;
 import com.example.hello.myProcess.PCB.P_STATE;
 import com.example.hello.myDevice.*;
 import com.example.hello.myFile.*;
@@ -72,6 +73,11 @@ public class hellocontroller {
         return this.kernel.getPm().getPCBs();
     }
 
+    @GetMapping("/process/queue")
+    public ProcessQueue getProcessQueue() {
+        return this.kernel.getPm().getQueue();
+    }
+
     @PostMapping("/filesystem")
     public List<Inode> getFilesystem(@RequestBody Location location) {
         location.setLocation(location.getLocation().substring(1));
@@ -85,7 +91,7 @@ public class hellocontroller {
 
     @GetMapping("/device/add")
     public void addDevice() {
-        this.kernel.getIo().addDevice("");
+        this.kernel.getIo().addDevice("", this.kernel.getIo().count++);
     }
 
     @GetMapping("/device/delete")
