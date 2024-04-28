@@ -52,6 +52,10 @@ public class SysData {
     // 页大小
     public int Page_Size;
 
+    // 测试相关
+    public int Test_Max_Line;
+    public int Test_Max_Time;
+
     public SysData() {
         sysConfig = new SysConfig();
         // fileSystem = new FileSystem();
@@ -80,5 +84,8 @@ public class SysData {
 
         Memory_Size = 4096;
         Page_Size = 256;
+
+        Test_Max_Line = 10;
+        Test_Max_Time = 10;
     }
 }
