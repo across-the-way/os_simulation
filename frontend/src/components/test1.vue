@@ -8,7 +8,7 @@
   />
 </template>
 
-<script lang="ts" setup>
+<script setup>
 const generateColumns = (length = 10, prefix = 'column-', props?: any) =>
   Array.from({ length }).map((_, columnIndex) => ({
     ...props,

@@ -1,6 +1,6 @@
 <script setup>
 import axios from 'axios'
-import { serverURL } from '@/components/ServerURL'
+import { serverURL } from '@/configjs/ServerURL'
 import routes from './router/routes'
 import { ElButton } from 'element-plus';
 import { 

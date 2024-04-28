@@ -46,7 +46,7 @@
 <script setup>
 
 import axios from 'axios';
-import { serverURL } from './ServerURL';
+import { serverURL } from '../configjs/ServerURL';
 
 </script>
 <script>
