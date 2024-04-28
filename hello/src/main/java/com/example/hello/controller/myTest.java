@@ -63,8 +63,8 @@ public class myTest {
                                 SystemCallType.ProcessNew,
                                 packProgram(
                                         generateRandomCalculate(
-                                                rand.nextInt(1, max_line_num),
-                                                rand.nextInt(1, max_time))
+                                                rand.nextInt(1, 1 + max_line_num),
+                                                rand.nextInt(2, 1 + max_time))
                                 )
                         )
                 );
