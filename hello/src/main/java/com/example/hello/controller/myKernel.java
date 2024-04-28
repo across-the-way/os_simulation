@@ -140,6 +140,14 @@ public class myKernel implements Runnable {
 
     private void finish(Object[] objects) {
         int pid = (int) objects[0];
+        String[] deviceMap = new String[5];
+        deviceMap[0] = "printer";
+        deviceMap[1] = "keyboard";
+        deviceMap[3] = deviceMap[4] = "file";
+        int DeviceNumber = pm.getPCB(pid).waiting_for;
+        pm.getPCB(pid).FreeResource(deviceMap[DeviceNumber]);
+        this.getSysData().FreeResource(deviceMap[DeviceNumber]);
+
         if (pm.getPCB(pid).state == P_STATE.WAITING)
             pm.waitToReady(pid);
         else
@@ -222,6 +230,7 @@ public class myKernel implements Runnable {
         // 将文件号添加到pid进程的打开文件表
         if (fd != -1) {
             pm.addOpenFile(pid, fd);
+            pm.getPCB(pid).AllocateResource("file");
         }
     }
 
@@ -230,6 +239,7 @@ public class myKernel implements Runnable {
         int fd = -1;
         // 将文件号从pid进程的打开文件表中移除
         pm.removeOpenFile(pid, fd);
+        pm.getPCB(pid).FreeResource("file");
         // 更新系统打开文件表
         fs.close(0, fd);
     }
@@ -237,6 +247,14 @@ public class myKernel implements Runnable {
     private void write(Object[] objects) {
         int pid = (int) objects[0];
         int fd = fs.open(pid, (String) objects[1]);
+        if (fd != -1) {
+            boolean first = pm.addOpenFile(pid, fd);
+            // 第一次打开该文件需要分配资源
+            if (first) {
+                pm.getPCB(pid).AllocateResource("file");
+                this.getSysData().AllocateResource("file");
+            }
+        }
         int usage_size = (int) objects[2];
         fs.write(pid, fd, usage_size);
     }
@@ -244,6 +262,14 @@ public class myKernel implements Runnable {
     private void read(Object[] objects) {
         int pid = (int) objects[0];
         int fd = fs.open(pid, (String) objects[1]);
+        if (fd != -1) {
+            boolean first = pm.addOpenFile(pid, fd);
+            // 第一次打开该文件需要分配资源
+            if (first) {
+                pm.getPCB(pid).AllocateResource("file");
+                this.getSysData().AllocateResource("file");
+            }
+        }
         int usage_time = (int) objects[2];
         fs.read(pid, fd, usage_time);
     }
@@ -316,6 +342,15 @@ public class myKernel implements Runnable {
     }
 
     private void request(Object[] objects) {
+        if ((int) objects[0] == 0) {
+            pm.getPCB((int) objects[1]).AllocateResource("printer");
+            this.getSysData().AllocateResource("printer");
+        } else if ((int) objects[0] == 1) {
+            pm.getPCB((int) objects[1]).AllocateResource("keyboard");
+            this.getSysData().AllocateResource("keyboard");
+        } else {
+            return;
+        }
         io.request((int) objects[0], (int) objects[1], (int) objects[2]);
     }
 

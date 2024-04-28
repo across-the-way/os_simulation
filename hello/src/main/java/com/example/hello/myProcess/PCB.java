@@ -65,8 +65,8 @@ public class PCB {
         // -1表示没有等待的设备
         waiting_for = -1;
 
-        maxresourceMap = new HashMap<>();
-        allocateresourceMap = new HashMap<>();
+        this.InitResourcemap();
+
         bursts = new ArrayList<Instruction>();
         c_id = new ArrayList<Integer>();
         FileTable = new ArrayList<Integer>();
@@ -103,8 +103,8 @@ public class PCB {
         // -1表示没有等待的设备
         waiting_for = -1;
 
-        maxresourceMap = new HashMap<>();
-        allocateresourceMap = new HashMap<>();
+        this.InitResourcemap();
+
         bursts = new ArrayList<>();
         c_id = new ArrayList<Integer>();
         FileTable = p.FileTable;
@@ -227,5 +227,40 @@ public class PCB {
 
     public void setBursts(List<Instruction> bursts) {
         this.bursts = bursts;
+    }
+
+    public void InitResourcemap() {
+        this.maxresourceMap = new HashMap<>();
+        this.allocateresourceMap = new HashMap<>();
+        this.maxresourceMap.put("printer", 1);
+        this.maxresourceMap.put("keyboard", 1);
+        this.maxresourceMap.put("file", 5);
+
+        this.allocateresourceMap.put("printer", 0);
+        this.allocateresourceMap.put("keyboard", 0);
+        this.allocateresourceMap.put("file", 0);
+    }
+
+    public boolean OverResource(String ResourceName) {
+        if (!this.maxresourceMap.containsKey(ResourceName))
+            return true;
+        if (this.maxresourceMap.get(ResourceName) <= this.allocateresourceMap.get(ResourceName))
+            return true;
+        else
+            return false;
+    }
+
+    public void AllocateResource(String ResourceName) {
+        if (!this.maxresourceMap.containsKey(ResourceName))
+            return;
+        this.allocateresourceMap.put(ResourceName, this.allocateresourceMap.get(ResourceName) + 1);
+    }
+
+    public void FreeResource(String ResourceName) {
+        if (!this.maxresourceMap.containsKey(ResourceName))
+            return;
+        if (this.allocateresourceMap.get(ResourceName) <= 0)
+            return;
+        this.allocateresourceMap.put(ResourceName, this.allocateresourceMap.get(ResourceName) - 1);
     }
 }

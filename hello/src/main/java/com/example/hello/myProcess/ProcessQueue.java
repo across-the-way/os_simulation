@@ -78,6 +78,33 @@ public class ProcessQueue {
             }
         }
     }
+
+    public void RemoveProcessFromSwappedReady(int pid) {
+        for (int i = 0; i < Swapped_Ready_Queue.size(); i++) {
+            if (Swapped_Ready_Queue.get(i).getPid() == pid) {
+                Swapped_Ready_Queue.remove(i);
+                return;
+            }
+        }
+    }
+
+    public void RemoveProcessFromSwappedWaiting(int pid) {
+        for (int i = 0; i < Swapped_Waiting_Queue.size(); i++) {
+            if (Swapped_Waiting_Queue.get(i).getPid() == pid) {
+                Swapped_Waiting_Queue.remove(i);
+                return;
+            }
+        }
+    }
+
+    public void RemoveProcessFromSecondReady(int pid) {
+        for (int i = 0; i < Second_Queue.size(); i++) {
+            if (Second_Queue.get(i).getPid() == pid) {
+                Second_Queue.remove(i);
+                return;
+            }
+        }
+    }
 }
 
 class TTLItem {

@@ -8,12 +8,15 @@ import java.util.*;
 public class myDevice {
     private myKernel kernel;
     private LinkedList<Device> devices;
-
+    public int count = 0;
     public myDevice(myKernel kernel) {
         this.kernel = kernel;
         devices = new LinkedList<>();
-        devices.add(new Device("keyboard"));
-        devices.add(new Device("printer"));
+
+        for (int i = 0; i < this.kernel.getSysData().Keyboard_Number; i++)
+            devices.add(new Device("keyboard", count++));
+        for (int i = 0; i < this.kernel.getSysData().Printer_Number; i++)
+            devices.add(new Device("printer", count++));
     }
 
     public void update() {
@@ -28,12 +31,13 @@ public class myDevice {
         // 更新所有被进程占用的IO设备
         for (Device device : devices) {
             if (device.isBusy()) {
-                int remain_IOburst = device.getWaitQueue().getFirst().getIotime() - 1;
+                int remain_IOburst = device.getWaitQueue().getFirst().getIotime()
+                        - this.kernel.getSysData().SystemPulse;
                 if (remain_IOburst > 0) {
                     device.getWaitQueue().getFirst().setIotime(remain_IOburst);
                     System.out.println(
                             device.getType() + " is occupied by process" + device.getWaitQueue().getFirst().getPid()
-                                    + ", remain burst :" + remain_IOburst * this.kernel.getSysData().SystemPulse
+                                    + ", remain burst :" + remain_IOburst
                                     + "ms!");
                 } else {
                     System.out.println(
@@ -74,13 +78,13 @@ public class myDevice {
             }
         }
         if (minDevice != null) {
-            minDevice.getWaitQueue().add(new ioRequest(pid, usage_time));
+            minDevice.getWaitQueue().add(new ioRequest(pid, usage_time * this.kernel.getSysData().SystemPulse));
             minDevice.setBusy(true);
         }
     }
 
-    public void addDevice(String type) {
-        devices.add(new Device(type));
+    public void addDevice(String type, int deviceid) {
+        devices.add(new Device(type, deviceid));
     }
 
     public boolean deleteDevice(int num) {

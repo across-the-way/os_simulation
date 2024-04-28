@@ -43,8 +43,8 @@ public class myMemory {
                 break;
         }
         this.MidtermCounter = 0;
-        this.midterm_lower_bound = (int) (memory_size * kernel.getSysData().MidTerm_CeilThreshold);
-        this.midterm_higher_bound = (int) (memory_size * kernel.getSysData().MidTerm_FloorThreshold);
+        this.midterm_lower_bound = (int) (memory_size * kernel.getSysData().MidTerm_FloorThreshold);
+        this.midterm_higher_bound = (int) (memory_size * kernel.getSysData().MidTerm_CeilThreshold);
     }
 
     // 按照分配方法分配内存
@@ -83,6 +83,7 @@ public class myMemory {
     }
 
     public void update() {
+        System.out.println("free memory size : " + allocator.free_memory_size);
         // 中期调度
         MidtermCounter = (MidtermCounter + 1) % kernel.getSysData().MidTermScale;
         if (MidtermCounter == 0) {
