@@ -59,6 +59,10 @@ public class SysData {
     // 可用资源数
     public Map<String, Integer> availableMap;
 
+    // 测试相关
+    public int Test_Max_Line;
+    public int Test_Max_Time;
+
     public SysData() {
         sysConfig = new SysConfig();
         // fileSystem = new FileSystem();
@@ -92,6 +96,9 @@ public class SysData {
         Keyboard_Number = 2;
 
         InitResourcemap();
+
+        Test_Max_Line = 10;
+        Test_Max_Time = 10;
     }
 
     public void InitResourcemap() {
