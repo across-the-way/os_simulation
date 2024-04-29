@@ -13,5 +13,6 @@ public enum InterruptType {
     StopSystem,
     StartSystem,
     SinglePause,
+    MountDevice,
     Exit,
 }

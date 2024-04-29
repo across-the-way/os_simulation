@@ -362,6 +362,7 @@ public class myProcess {
         if (this.strategy == scheduleStrategy.MLFQ) {
             load += this.queue.Second_Queue.size();
         }
+        load += this.queue.Swapped_Ready_Queue.size() + this.queue.Swapped_Waiting_Queue.size();
         return load;
     }
 
@@ -852,6 +853,15 @@ public class myProcess {
                 this.waitToReady(pid);
                 this.ProcessMap.get(pid).pc += this.kernel.getSysData().InstructionLength;
             }
+        }
+    }
+
+    /*
+     * 挂载设备
+     */
+    public void MountDevice(String ResourceName) {
+        for (PCB p : this.ProcessMap.values()) {
+            p.MountDevice(ResourceName);
         }
     }
 

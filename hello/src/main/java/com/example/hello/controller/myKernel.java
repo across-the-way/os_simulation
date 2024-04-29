@@ -3,6 +3,7 @@ package com.example.hello.controller;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import com.example.hello.myDevice.Device;
 import com.example.hello.myDevice.myDevice;
 import com.example.hello.myFile.myFile;
 import com.example.hello.myMemory.myMemory;
@@ -10,6 +11,8 @@ import com.example.hello.myProcess.PCB;
 import com.example.hello.myProcess.myProcess;
 import com.example.hello.myProcess.scheduleStrategy;
 import com.example.hello.myProcess.PCB.P_STATE;
+
+import jakarta.websocket.OnClose;
 
 public class myKernel implements Runnable {
     private static myKernel instance;
@@ -112,6 +115,9 @@ public class myKernel implements Runnable {
                         break;
                     case SinglePause:
                         SinglePause();
+                        break;
+                    case MountDevice:
+                        MountDevice(interrupt.getObjects());
                         break;
                     case Exit:
                     default:
@@ -412,6 +418,13 @@ public class myKernel implements Runnable {
                 return;
             }
         }
+    }
+
+    // 挂载新设备处理
+    private void MountDevice(Object[] objects) {
+        this.io.addDevice((String) objects[0], this.io.count++);
+        this.getSysData().MountDevice((String) objects[0]);
+        this.pm.MountDevice((String) objects[0]);
     }
 
     /*

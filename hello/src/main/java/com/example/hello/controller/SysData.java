@@ -66,7 +66,7 @@ public class SysData {
         Osmode = OSState.kernel;
 
         // 单位毫秒
-        SystemPulse = 1000;
+        SystemPulse = 100;
 
         InstructionLength = 4;
 
@@ -122,5 +122,12 @@ public class SysData {
         if (!this.availableMap.containsKey(ResourceName))
             return;
         this.availableMap.put(ResourceName, this.availableMap.get(ResourceName) + 1);
+    }
+
+    public void MountDevice(String ResourceName) {
+        if (!this.availableMap.containsKey(ResourceName))
+            this.availableMap.put(ResourceName, 5);
+        else
+            this.availableMap.put(ResourceName, this.availableMap.get(ResourceName) + 5);
     }
 }

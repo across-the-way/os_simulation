@@ -263,4 +263,11 @@ public class PCB {
             return;
         this.allocateresourceMap.put(ResourceName, this.allocateresourceMap.get(ResourceName) - 1);
     }
+
+    public void MountDevice(String ResourceName) {
+        if (!this.maxresourceMap.containsKey(ResourceName)) {
+            this.maxresourceMap.put(ResourceName, 1);
+            this.allocateresourceMap.put(ResourceName, 0);
+        }
+    }
 }
