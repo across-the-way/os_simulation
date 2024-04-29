@@ -23,7 +23,8 @@ const getData = ()=>{
     let srq = res.data.Swapped_Ready_Queue
     let swq = res.data.Swapped_Waiting_Queue
     wait.forEach(wa => {
-      temp.push('name',wa)
+      let index = wait.search(wa)
+      temp.push({'name':wa})
     })
     temp.push({'Ready_Queue': ready})
     temp.push({'Second_Queue':sq})
