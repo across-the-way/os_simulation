@@ -1,6 +1,8 @@
-package com.example.hello.controller;
+package com.example.hello.myTerminal;
 
 import java.nio.file.FileSystem;
+
+import com.example.hello.controller.myKernel;
 
 public class Terminalfunc {
     public static void Terminalpwd(myKernel kernel) {

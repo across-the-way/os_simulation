@@ -1,4 +1,4 @@
-package com.example.hello.controller;
+package com.example.hello.myInterrupt;
 
 public class myInterrupt {
     InterruptType type;

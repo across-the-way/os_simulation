@@ -61,7 +61,7 @@ export default {
           .catch(error => {
             console.error(error);
           });
-      }, 2000)
+      }, 1000)
     },
     stopfetchData() {
       clearInterval(this.timer);
@@ -74,18 +74,6 @@ export default {
   beforeUnmount() {
     this.stopfetchData();
   },
-  // updated() {
-  //     axios.post(serverURL + '/process/instructions',this.formData)
-  //         .then(response => {
-  //             // 处理响应结果
-  //             console.log(response.data);
-  //             this.responseData = response.data
-  //         })
-  //         .catch(error => {
-  //             // 处理错误
-  //             console.error(error);
-  //         });
-  // }
 }
 </script>
 <template>

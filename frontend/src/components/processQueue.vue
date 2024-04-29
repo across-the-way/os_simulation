@@ -1,136 +1,71 @@
-<script setup>
-import axios from 'axios'
-import { serverURL } from '@/configjs/ServerURL'
-
-</script>
-
-<script>
-export default {
-    data() {
-        return {
-            responseData:
-
-            {Waiting_Queues: [[1,2],[1,2]],
-            Ready_Queue: [1,2],
-            Second_Queue: [1,11,21],
-            Swapped_Ready_Queue: [],
-            Swapped_Waiting_Queue: [],}
-
-        }
-    },
-    created() {
-        axios.get(serverURL + '/process/queue')
-            .then(response => {
-                // 处理响应结果
-                console.log(response.data);
-                // this.responseData = response.data;
-
-            })
-            .catch(error => {
-                // 处理错误
-                console.error(error);
-            });
-    }
-}
-
-
-
-</script>
-
 <template>
-    <div><el-table :row-key="responseData.Waiting_Queues" style="width: 100%">
-        <!-- <el-table-column label="type" width="180">
-                <template #default="scope">
-                    <span>{{ item }}</span>
-                </template>
-            </el-table-column> -->
-        <el-table-column label="type" width="180" >
-                <template #default="scope">
-                    <el-table-column label="type" width="180" :prop="item" v-for="(item,i) in scope.row">
-                        <span>{{ scope.row[i] }}</span>
-                    </el-table-column>
-                </template>
-            </el-table-column>
-            
-        </el-table>
-        <el-table :data="responseData.Ready_Queue" style="width: 100%">
-            <el-table-column label="type" width="180" v-for="(item,i) in responseData.Ready_Queue">
-                <template #default="scope">
-                    {{ scope.row[i] }}
-                </template>
-            </el-table-column>
-            <!-- <el-table-column label="resourcetype" width="180">
-                <template #default="scope">
-                    <span>{{ scope.row }}</span>
-                </template>
-            </el-table-column> -->
-        </el-table>
-        <el-table :data="responseData.Second_Queue" style="width: 100%">
-            <el-table-column label="type" width="180">
-                <template #default="scope">
-                    <span>{{ scope.row }}</span>
-                </template>
-            </el-table-column>
-            <el-table-column label="resourcetype" width="180">
-                <template #default="scope">
-                    <span>{{ scope.row }}</span>
-                </template>
-            </el-table-column>
-        </el-table>
-        <el-table :data="Swapped_Ready_Queue" style="width: 100%">
-            <el-table-column label="type" width="180">
-                <template #default="scope">
-                    <span>{{ scope.row }}</span>
-                </template>
-            </el-table-column>
-            <el-table-column label="resourcetype" width="180">
-                <template #default="scope">
-                    <span>{{ scope.row }}</span>
-                </template>
-            </el-table-column>
-        </el-table>
-        <el-table :data="responseData.Swapped_Waiting_Queue" style="width: 100%">
-            <el-table-column label="type" width="180">
-                <template #default="scope">
-                    <span>{{ scope.row }}</span>
-                </template>
-            </el-table-column>
-            <el-table-column label="resourcetype" width="180">
-                <template #default="scope">
-                    <span>{{ scope.row }}</span>
-                </template>
-            </el-table-column>
-
-
-        </el-table>
-    </div>
+  <el-table-v2 :columns="columns" :data="data" :width="700" :height="400" fixed />
 </template>
 
-<style scoped>
-header {
-    line-height: 1.5;
+<script lang="ts" setup>
+import { serverURL } from '@/configjs/ServerURL';
+import axios from 'axios';
+
+
+
+const processQueue = [
+  { 'name1': [1, 2] },
+  { 'name2': [1, 2] },
+  { 'name3': [3, 4, 5] },
+];
+const getData = ()=>{
+  axios.get(serverURL + '/process/queue')
+  .then(res => {
+    let temp = []
+    let wait = res.data.Waiting_Queues
+    let ready = res.data.Ready_Queue
+    let sq = res.data.Second_Queue
+    let srq = res.data.Swapped_Ready_Queue
+    let swq = res.data.Swapped_Waiting_Queue
+    wait.forEach(wa => {
+      temp.push('name',wa)
+    })
+    temp.push({'Ready_Queue': ready})
+    temp.push({'Second_Queue':sq})
+    temp.push({'Swapped_Ready_Queue':srq})
+    temp.push({'Swapped_Waiting_Queue':swq})
+    return temp
+  })
+const processQueue = getData()
 }
+const generateColumns = (length = 10, prefix = 'column-', props?: any) =>
+  Array.from({ length }).map((_, columnIndex) => ({
+    ...props,
+    key: `${prefix}${columnIndex}`,
+    dataKey: `${prefix}${columnIndex}`,
+    title: columnIndex === 0 ? 'Name' : `Column ${columnIndex - 1}`,
+    width: columnIndex === 0 ? 200 : 150, // 给 name 列更多空间
+  }));
 
-.logo {
-    display: block;
-    margin: 0 auto 2rem;
-}
+// 确定需要的列数，加上 name 列
+const maxLength = processQueue.reduce((max, item) => {
+  const arr = Object.values(item)[0];
+  return Math.max(max, arr.length);
+}, 0) + 1; // 加 1 为 name 列
+const columns = generateColumns(maxLength, 'Queue-', { width: 100 });
 
-@media (min-width: 1024px) {
-    header {
-        display: flex;
-        place-items: center;
-        padding-right: calc(var(--section-gap) / 2);
-    }
+// 处理包含 name 的数据
+const generateQueueData = (processQueue: Array<{ [key: string]: number[] }>, columns: ReturnType<typeof generateColumns>, prefix = 'Queue-') =>
+  processQueue.map((item, rowIndex) => {
+    const name = Object.keys(item)[0];
+    const queue = item[name];
+    const rowData = columns.reduce((rowData, column, columnIndex) => {
+      if (columnIndex === 0) {
+        rowData[column.dataKey] = name; // 设置 name 列的数据
+      } else {
+        // 因为添加了 name 列，队列数据的索引需要减 1
+        rowData[column.dataKey] = queue[columnIndex - 1] !== undefined ? ` ${queue[columnIndex - 1]}` : '';
+      }
+      return rowData;
+    }, { id: `${prefix}${rowIndex}`, parentId: null });
 
-    .logo {
-        margin: 0 2rem 0 0;
-    }
+    return rowData;
+  });
 
-    header .wrapper {
-        display: flex;
-        place-items: flex-start;
-        flex-wrap: wrap;
-    }
-}
-</style>
+const data = generateQueueData(processQueue, columns);
+</script>

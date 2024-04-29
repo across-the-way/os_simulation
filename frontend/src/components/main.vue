@@ -12,7 +12,7 @@ export default {
     }
   },
   created() {
-    axios.get(serverURL + '/memory', {})
+    axios.get(serverURL + '/', {})
       .then(response => {
         // 处理响应结果
         console.log(response.data);

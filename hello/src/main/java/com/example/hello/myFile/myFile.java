@@ -1,8 +1,9 @@
 package com.example.hello.myFile;
 
-import com.example.hello.controller.InterruptType;
-import com.example.hello.controller.myInterrupt;
 import com.example.hello.controller.myKernel;
+import com.example.hello.myInterrupt.InterruptType;
+import com.example.hello.myInterrupt.myInterrupt;
+
 import java.util.*;
 
 public class myFile {

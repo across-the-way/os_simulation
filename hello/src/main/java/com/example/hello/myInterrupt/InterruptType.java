@@ -1,4 +1,4 @@
-package com.example.hello.controller;
+package com.example.hello.myInterrupt;
 
 public enum InterruptType {
     TimerInterrupt,
@@ -13,5 +13,6 @@ public enum InterruptType {
     StopSystem,
     StartSystem,
     SinglePause,
+    MountDevice,
     Exit,
 }

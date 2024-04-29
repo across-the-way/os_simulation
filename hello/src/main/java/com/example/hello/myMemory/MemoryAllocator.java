@@ -456,11 +456,8 @@ class DemandPageAllocator extends MemoryAllocator {
                 used_count--;
             }
         }
-        public boolean isFull() {
-            return used_count == page_count;
-        }
-        public boolean isEmpty() {
-            return used_count == 0;
+        public boolean isCompatible(int count) {
+            return used_count + count <= page_count;
         }
     }
     class PageTable {
@@ -499,14 +496,15 @@ class DemandPageAllocator extends MemoryAllocator {
                     }
                 }
             }
-            for (int i = cnt; i < page_count; i++) {
-                if (swap_partition.swapIn()) {
-                    pages.addDemandPage(i);
-                } else {
-                    return null;
+            if (swap_partition.isCompatible(page_count - cnt)) {
+                for (int i = cnt; i < page_count; i++) {
+                    if (swap_partition.swapIn()) {
+                        pages.addDemandPage(i);
+                    } else return null;
                 }
+                return pages;
             }
-            return pages;
+            return null;
         }
         
         public void allocate(int pid, DemandPages pages) {
