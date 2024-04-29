@@ -119,7 +119,7 @@ public class myFile {
 
     private int curMhead;// 当前的磁头位置
 
-    private String readCache = "";// 缓存读入的内容
+    private String readCache = "";//缓存读入的内容
 
     public void update() {
         ops_cur = 0;
@@ -133,7 +133,7 @@ public class myFile {
             // 若有文件读写任务完成，即有任务的剩余磁盘块归零
             if (isfinished != -1) {
                 sendInterrupt(InterruptType.FileFinish, isfinished, readCache);
-                readCache = ""; // 清空readCache
+                readCache = "";     //清空readCache
                 // 发送中断系统调用FileFinish
                 // 启动磁盘调度，进行下一个文件读写操作
             }
@@ -149,7 +149,6 @@ public class myFile {
             readCache += block[startBlock + i].toString();
         }
     }
-
     private int disk_read_write() {
         // 获得当前磁头位置
         // 磁头移向磁盘块读写队列中离磁头最近的磁盘块移动
@@ -411,6 +410,9 @@ public class myFile {
         // 加入文件读写待完成表
         // 将文件对应的所有磁盘块，加入磁盘块读写队列
         Iterator<Map.Entry<Integer, Integer>> it = file.getStorage().entrySet().iterator();
+        if (!it.hasNext()) {
+            rwqueue.offer(new queueEntry(file, 0, curMhead, 0, pid));
+        }
         while (it.hasNext()) {
             Map.Entry<Integer, Integer> curSpace = it.next();
             if (usage_size <= curSpace.getValue()) {
