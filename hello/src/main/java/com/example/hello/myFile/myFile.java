@@ -19,6 +19,14 @@ public class myFile {
         return curPath;
     }
 
+    public OpenFileTable getFtable() {
+        return ftable;
+    }
+
+    public void setFtable(OpenFileTable ftable) {
+        this.ftable = ftable;
+    }
+
     public void setCurPath(String curPath) {
         this.curPath = curPath;
     }
