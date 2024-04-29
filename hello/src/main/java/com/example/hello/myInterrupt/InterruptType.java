@@ -1,4 +1,4 @@
-package com.example.hello.controller;
+package com.example.hello.myInterrupt;
 
 public enum InterruptType {
     TimerInterrupt,

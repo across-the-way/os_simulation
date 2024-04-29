@@ -3,14 +3,20 @@ package com.example.hello.controller;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import com.example.hello.SysConfig.SysData;
 import com.example.hello.myDevice.Device;
 import com.example.hello.myDevice.myDevice;
 import com.example.hello.myFile.myFile;
+import com.example.hello.myInterrupt.SystemCallType;
+import com.example.hello.myInterrupt.myInterrupt;
 import com.example.hello.myMemory.myMemory;
 import com.example.hello.myProcess.PCB;
 import com.example.hello.myProcess.myProcess;
 import com.example.hello.myProcess.scheduleStrategy;
 import com.example.hello.myProcess.PCB.P_STATE;
+import com.example.hello.myTerminal.TerminalCallType;
+import com.example.hello.myTerminal.Terminalfunc;
+import com.example.hello.myTest.myTest;
 
 import jakarta.websocket.OnClose;
 
@@ -141,7 +147,7 @@ public class myKernel implements Runnable {
         fs.update();
         io.update();
 
-        // test.doTest();
+        test.doTest();
     }
 
     private void timeout(Object[] objects) {

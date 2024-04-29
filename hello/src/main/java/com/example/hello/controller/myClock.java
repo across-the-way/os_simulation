@@ -1,5 +1,8 @@
 package com.example.hello.controller;
 
+import com.example.hello.myInterrupt.InterruptType;
+import com.example.hello.myInterrupt.myInterrupt;
+
 public class myClock implements Runnable {
     private myKernel kernel;
     private int pulseCount;

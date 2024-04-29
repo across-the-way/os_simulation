@@ -5,12 +5,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.example.hello.controller.InterruptType;
-import com.example.hello.controller.SystemCallType;
-import com.example.hello.controller.myInterrupt;
 import com.example.hello.controller.myKernel;
 import com.example.hello.myInstrunction.Instruction;
 import com.example.hello.myInstrunction.InstructionType;
+import com.example.hello.myInterrupt.InterruptType;
+import com.example.hello.myInterrupt.SystemCallType;
+import com.example.hello.myInterrupt.myInterrupt;
 import com.example.hello.myProcess.PCB.P_STATE;
 
 public class myProcess {

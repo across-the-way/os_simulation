@@ -1,4 +1,4 @@
-package com.example.hello.controller;
+package com.example.hello.SysConfig;
 
 import com.example.hello.myFile.*;
 import com.example.hello.myMemory.*;
@@ -14,7 +14,6 @@ public class SysData {
 
     // public FileSystem fileSystem;
     // public Process ProcessController;
-    SysConfig sysConfig;
     OSState Osmode;
 
     // 系统时钟脉冲设置
@@ -64,7 +63,6 @@ public class SysData {
     public int Test_Max_Time;
 
     public SysData() {
-        sysConfig = new SysConfig();
         // fileSystem = new FileSystem();
         // ProcessController = new Process();
         Osmode = OSState.kernel;
@@ -93,7 +91,7 @@ public class SysData {
         Page_Size = 8;
 
         Printer_Number = 3;
-        Keyboard_Number = 2;
+        Keyboard_Number = 3;
 
         InitResourcemap();
 

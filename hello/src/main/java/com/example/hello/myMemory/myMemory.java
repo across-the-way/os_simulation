@@ -1,8 +1,8 @@
 package com.example.hello.myMemory;
 
-import com.example.hello.controller.InterruptType;
-import com.example.hello.controller.myInterrupt;
 import com.example.hello.controller.myKernel;
+import com.example.hello.myInterrupt.InterruptType;
+import com.example.hello.myInterrupt.myInterrupt;
 
 public class myMemory {
     private final myKernel kernel;
