@@ -402,6 +402,9 @@ public class myFile {
         // 加入文件读写待完成表
         // 将文件对应的所有磁盘块，加入磁盘块读写队列
         Iterator<Map.Entry<Integer, Integer>> it = file.getStorage().entrySet().iterator();
+        if (!it.hasNext()) {
+            rwqueue.offer(new queueEntry(file, 0, curMhead, 0, pid));
+        }
         while (it.hasNext()) {
             Map.Entry<Integer, Integer> curSpace = it.next();
             if (usage_size <= curSpace.getValue()) {
