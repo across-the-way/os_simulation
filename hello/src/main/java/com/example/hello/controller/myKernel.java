@@ -23,6 +23,8 @@ public class myKernel implements Runnable {
     private myFile fs;
     private myDevice io;
 
+    private myTest test;
+
     public myProcess getPm() {
         return this.pm;
     }
@@ -138,6 +140,8 @@ public class myKernel implements Runnable {
         mm.update();
         fs.update();
         io.update();
+
+        // test.doTest();
     }
 
     private void timeout(Object[] objects) {
@@ -497,6 +501,8 @@ public class myKernel implements Runnable {
         terminal_message = new String();
         terminal_update = false;
         System_stop = false;
+
+        test = new myTest(instance);
 
         timerThread.start();
 
