@@ -20,7 +20,7 @@ public enum InstructionType {
     CreateFile, // 参数：目录路径，文件名
     DeleteDir, // 参数：目录路径
     DeleteFile, // 参数：文件路径
-    WriteFile, // 参数：文件路径，写入时间
+    WriteFile, // 参数：文件路径，写入大小，内容
     ReadFile, // 参数：文件路径，读取时间
     OpenFile, // 参数：文件路径
     CloseFile, // 参数：文件路径

@@ -71,8 +71,10 @@ public class myDevice {
         Device minDevice = null;
         if (type == 0) {
             changedType = "printer";
-        } else {
+        } else if (type == 1) {
             changedType = "keyboard";
+        } else {
+            changedType = "device..";
         }
         for (Device device : devices) {
             int queueSize = device.getWaitQueue().size();

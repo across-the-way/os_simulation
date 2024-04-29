@@ -147,7 +147,7 @@ public class myKernel implements Runnable {
         fs.update();
         io.update();
 
-        // test.doTest();
+        test.doTest();
     }
 
     private void timeout(Object[] objects) {
@@ -170,6 +170,7 @@ public class myKernel implements Runnable {
         else
             pm.SwappedWaitingToSwappedReady(pid);
         pm.getPCB(pid).pc += this.getSysData().InstructionLength;
+
     }
 
     /*
@@ -253,7 +254,7 @@ public class myKernel implements Runnable {
 
     private void close(Object[] objects) {
         int pid = (int) objects[0];
-        int fd = fs.getFtable().findFdBypath((String) objects[1]);
+        int fd = fs.getFtable().findFdBypath(pid,(String) objects[1]);
         // 将文件号从pid进程的打开文件表中移除
         pm.removeOpenFile(pid, fd);
         pm.getPCB(pid).FreeResource("file");
@@ -272,9 +273,8 @@ public class myKernel implements Runnable {
                 this.getSysData().AllocateResource("file");
             }
         }
-        int usage_size = (int) objects[2];
-        String content = (String) objects[3];
-        // fs.write(pid, fd, usage_size, content);
+        String content = (String) objects[2];
+        fs.write(pid, fd, content);
     }
 
     private void read(Object[] objects) {

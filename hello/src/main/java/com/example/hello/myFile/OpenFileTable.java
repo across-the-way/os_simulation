@@ -18,6 +18,12 @@ public class OpenFileTable {
             this.mode = mode;
         }
 
+        
+        public int getPid() {
+            return pid;
+        }
+
+
         public String getPath() {
             return path;
         }
@@ -43,9 +49,9 @@ public class OpenFileTable {
         return fd;
     }
     
-    public int findFdBypath(String path) {
+    public int findFdBypath(int pid,String path) {
         for (Map.Entry<Integer, OpenFileEntry> entry : filetable.entrySet()) {
-            if (entry.getValue().getPath().equals(path)) {
+            if (entry.getValue().getPath().equals(path)&&entry.getValue().getPid()==pid) {
                 return (int)(entry.getKey());
             }
         }

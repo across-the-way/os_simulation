@@ -106,6 +106,7 @@ public class SysData {
         this.availableMap.put("printer", Printer_Number * 5);
         this.availableMap.put("keyboard", Keyboard_Number * 5);
         this.availableMap.put("file", 1000);
+        this.availableMap.put("device..", OtherDevice_Number * 5);
     }
 
     public boolean AvailableResource(String ResourceName) {

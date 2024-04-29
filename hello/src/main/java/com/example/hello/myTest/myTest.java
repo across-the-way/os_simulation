@@ -31,11 +31,18 @@ public class myTest {
     public Instruction[] generateRandomio(int line_num, int max_time) {
         Instruction[] program_part = new Instruction[line_num];
         for (int i = 0; i < line_num; i++) {
-            int randseed = rand.nextInt(1, 3);
-            if (randseed == 2) {
-                program_part[i] = new Instruction(InstructionType.Keyboard, rand.nextInt(1, max_time));
-            } else
-                program_part[i] = new Instruction(InstructionType.Printer, rand.nextInt(1, max_time));
+            int randseed = rand.nextInt(1, 4);
+            if (randseed == 1) {
+                program_part[i] = new Instruction(InstructionType.Keyboard, rand.nextInt(1,
+                        max_time));
+            } else if (randseed == 2) {
+                program_part[i] = new Instruction(InstructionType.Printer, rand.nextInt(1,
+                        max_time));
+            } else {
+                program_part[i] = new Instruction(InstructionType.Device, rand.nextInt(1,
+                        max_time));
+            }
+            // program_part[i] = new Instruction(InstructionType.Device, rand.nextInt(1, max_time));
 
         }
         return program_part;
@@ -57,7 +64,7 @@ public class myTest {
 
         int chosen_part = 0;
         for (int i = 0; i < program_line; i++) {
-            while(true) {
+            while (true) {
                 chosen_part = rand.nextInt(0, len);
                 if (index[chosen_part] < boundary[chosen_part]) {
                     break;
@@ -89,8 +96,8 @@ public class myTest {
                         SystemCallType.ProcessNew,
                         packProgram(
                                 // generateRandomCalculate(
-                                //         rand.nextInt(1, 1 + max_line_num),
-                                //         rand.nextInt(2, 1 + max_time)),
+                                // rand.nextInt(1, 1 + max_line_num),
+                                // rand.nextInt(2, 1 + max_time)),
                                 generateRandomio(
                                         rand.nextInt(1, 1 + max_line_num),
                                         100))));

@@ -5,9 +5,10 @@ public class Block {
     public Block() {
         data = new char[4];//一个块定义四个字节
     }
+    public int usedByte = 0;
     @Override
     public String toString() {
-        return new String(data);
+        return new String(data).substring(0, usedByte);
     }
 
 }

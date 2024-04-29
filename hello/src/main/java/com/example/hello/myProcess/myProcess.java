@@ -170,8 +170,7 @@ public class myProcess {
                     this.RunningtoWaiting(3);
                     this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileWrite, p.p_id,
                             p.ir.getArguments()[0],
-                            p.ir.getArguments()[1],
-                            p.ir.getArguments()[2]);
+                            p.ir.getArguments()[1]);
                 }
                 break;
 
