@@ -111,6 +111,8 @@ public class myFile {
 
     private int curMhead;// 当前的磁头位置
 
+    private String readCache = "";//缓存读入的内容
+
     public void update() {
         ops_cur = 0;
         // 检查当前是否有进程进行文件读写任务，若无，返回
@@ -122,7 +124,8 @@ public class myFile {
             int isfinished = disk_read_write();
             // 若有文件读写任务完成，即有任务的剩余磁盘块归零
             if (isfinished != -1) {
-                sendInterrupt(InterruptType.FileFinish, isfinished);
+                sendInterrupt(InterruptType.FileFinish, isfinished, readCache);
+                readCache = "";     //清空readCache
                 // 发送中断系统调用FileFinish
                 // 启动磁盘调度，进行下一个文件读写操作
             }
@@ -133,6 +136,11 @@ public class myFile {
         kernel.receiveInterrupt(new myInterrupt(interrupt, objs));
     }
 
+    private void changeReadCache(int startBlock, int blockSize) {
+        for (int i = 0; i < blockSize; i++) {
+            readCache += block[startBlock + i].toString();
+        }
+    }
     private int disk_read_write() {
         // 获得当前磁头位置
         // 磁头移向磁盘块读写队列中离磁头最近的磁盘块移动
@@ -153,6 +161,9 @@ public class myFile {
             ops_cur += ops_need;
             curMhead = nextEntry.startBlock + nextEntry.blockSize;
             queueEntry out = rwqueue.poll();
+            if (nextEntry.type == 0) {
+                changeReadCache(nextEntry.startBlock, nextEntry.blockSize);
+            }
             return out.isFinished;
         } else if (ops_remain > ops_move) {
             int rw = (ops_remain - ops_move) / 2;
@@ -160,6 +171,9 @@ public class myFile {
             nextEntry.startBlock += rw;
             nextEntry.blockSize -= rw;
             ops_cur = ops_max;
+            if (nextEntry.type == 0) {
+                changeReadCache(nextEntry.startBlock, rw);
+            }
             return -1;
         } else {
             // 最大操作数不满足移动
@@ -369,11 +383,13 @@ public class myFile {
             for (char c : data) {
                 if (i == 4) {
                     i = 0;
+                    block[curBlock].usedByte = 4;
                     curBlock++;
                 }
                 block[curBlock].data[i] = c;
                 i++;
             }
+            block[curBlock].usedByte = i;
         }
     }
 
@@ -393,7 +409,10 @@ public class myFile {
                 break;
             } else {
                 usage_size -= curSpace.getValue();
-                rwqueue.offer(new queueEntry(file, 0, curSpace.getKey(), curSpace.getValue(), -1));
+                if (it.hasNext())
+                    rwqueue.offer(new queueEntry(file, 0, curSpace.getKey(), curSpace.getValue(), -1));
+                else
+                    rwqueue.offer(new queueEntry(file, 0, curSpace.getKey(), curSpace.getValue(), pid));
             }
         }
     }
