@@ -23,6 +23,8 @@
 <script setup>
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
 import { Pie } from 'vue-chartjs'
+import axios from 'axios';
+import { serverURL } from '@/configjs/ServerURL';
 ChartJS.register(ArcElement, Tooltip, Legend)
 </script>
 

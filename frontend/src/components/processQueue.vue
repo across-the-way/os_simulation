@@ -3,7 +3,7 @@
 </template>
 
 <script setup>
-import { serverURL } from '@/configjs/ServerURL';
+import { serverURL } from '@/configjs/ServerURL.js';
 import axios from 'axios';
 </script>
 
@@ -143,4 +143,4 @@ export default {
 
   }
 }
-</style>
+</script>

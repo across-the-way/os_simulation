@@ -1,6 +1,6 @@
 <script setup>
 import axios from 'axios'
-import { serverURL } from '@/components/ServerURL'
+import { serverURL } from '@/configjs/ServerURL'
 </script>
 <script>
 export default {
