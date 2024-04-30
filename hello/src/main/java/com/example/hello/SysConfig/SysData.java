@@ -54,6 +54,7 @@ public class SysData {
     // 设备数量
     public int Printer_Number;
     public int Keyboard_Number;
+    public int OtherDevice_Number;
 
     // 可用资源数
     public Map<String, Integer> availableMap;
@@ -92,6 +93,7 @@ public class SysData {
 
         Printer_Number = 3;
         Keyboard_Number = 3;
+        OtherDevice_Number = 10;
 
         InitResourcemap();
 
@@ -104,6 +106,7 @@ public class SysData {
         this.availableMap.put("printer", Printer_Number * 5);
         this.availableMap.put("keyboard", Keyboard_Number * 5);
         this.availableMap.put("file", 1000);
+        this.availableMap.put("device..", OtherDevice_Number * 5);
     }
 
     public boolean AvailableResource(String ResourceName) {

@@ -2,8 +2,7 @@
   "compilerOptions": {
     "paths": {
       "@/*": ["./src/*"]
-    },
-    "lib": ["es2017"]
+    }
   },
   "exclude": ["node_modules", "dist"]
 }

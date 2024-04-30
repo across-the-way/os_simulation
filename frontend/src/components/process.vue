@@ -1,6 +1,6 @@
 <script setup>
 import axios from 'axios'
-import { serverURL } from '@/configjs/ServerURL'
+import { serverURL } from '@/components/ServerURL'
 </script>
 <script>
 export default {
@@ -63,7 +63,7 @@ export default {
           .catch(error => {
             console.error(error);
           });
-      }, 1000)
+      }, 2000)
     },
     stopfetchData() {
       clearInterval(this.timer);
@@ -80,6 +80,18 @@ export default {
   beforeUnmount() {
     this.stopfetchData();
   },
+  // updated() {
+  //     axios.post(serverURL + '/process/instructions',this.formData)
+  //         .then(response => {
+  //             // 处理响应结果
+  //             console.log(response.data);
+  //             this.responseData = response.data
+  //         })
+  //         .catch(error => {
+  //             // 处理错误
+  //             console.error(error);
+  //         });
+  // }
 }
 </script>
 <template>

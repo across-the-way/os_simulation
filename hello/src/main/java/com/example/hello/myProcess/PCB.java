@@ -234,11 +234,13 @@ public class PCB {
         this.allocateresourceMap = new HashMap<>();
         this.maxresourceMap.put("printer", 1);
         this.maxresourceMap.put("keyboard", 1);
+        this.maxresourceMap.put("device..", 1);
         this.maxresourceMap.put("file", 5);
 
         this.allocateresourceMap.put("printer", 0);
         this.allocateresourceMap.put("keyboard", 0);
         this.allocateresourceMap.put("file", 0);
+        this.allocateresourceMap.put("device..", 0);
     }
 
     public boolean OverResource(String ResourceName) {

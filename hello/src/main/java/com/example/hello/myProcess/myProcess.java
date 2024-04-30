@@ -12,6 +12,7 @@ import com.example.hello.myInterrupt.InterruptType;
 import com.example.hello.myInterrupt.SystemCallType;
 import com.example.hello.myInterrupt.myInterrupt;
 import com.example.hello.myProcess.PCB.P_STATE;
+import com.example.hello.myDevice.Device;
 
 public class myProcess {
     private myKernel kernel;
@@ -149,6 +150,13 @@ public class myProcess {
                             p.ir.getArguments()[0]);
                 }
                 break;
+            case InstructionType.Device:
+                if (!p.OverResource("device..") && kernel.getSysData().AvailableResource("device..")) {
+                    this.RunningtoWaiting(6);
+                    this.sendInterrupt(InterruptType.SystemCall, SystemCallType.IORequest, 6, p.p_id,
+                            p.ir.getArguments()[0]);
+                }
+                break;
             case InstructionType.ReadFile:
                 if (!p.OverResource("file") && kernel.getSysData().AvailableResource("file")) {
                     this.RunningtoWaiting(2);
@@ -193,10 +201,12 @@ public class myProcess {
             case InstructionType.OpenFile:
                 this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileOpen, p.p_id, p.ir.getArguments()[0]);
                 this.RunningtoReady();
+                p.pc += this.kernel.getSysData().InstructionLength;
                 break;
             case InstructionType.CloseFile:
                 this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileClose, p.p_id, p.ir.getArguments()[0]);
                 this.RunningtoReady();
+                p.pc += this.kernel.getSysData().InstructionLength;
                 break;
             // 若指令为cond系列操作
             // CondNew为进程和子进程们添加信号量
@@ -861,6 +871,8 @@ public class myProcess {
      */
     public void MountDevice(String ResourceName) {
         for (PCB p : this.ProcessMap.values()) {
+            if (p.p_id == 0)
+                continue;
             p.MountDevice(ResourceName);
         }
     }

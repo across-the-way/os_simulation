@@ -2,6 +2,7 @@ package com.example.hello.myFile;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class OpenFileTable {
@@ -17,9 +18,11 @@ public class OpenFileTable {
             this.mode = mode;
         }
 
+        
         public int getPid() {
             return pid;
         }
+
 
         public String getPath() {
             return path;
@@ -44,6 +47,16 @@ public class OpenFileTable {
         }
         filePidTable.get(path).add(pid);
         return fd;
+    }
+    
+    public int findFdBypath(int pid,String path) {
+        for (Map.Entry<Integer, OpenFileEntry> entry : filetable.entrySet()) {
+            if (entry.getValue().getPath().equals(path)&&entry.getValue().getPid()==pid) {
+                return (int)(entry.getKey());
+            }
+        }
+        System.out.println("findFdBypath:未找到fd,有问题");
+        return -1;
     }
 
     public void close(int pid, int fd) {

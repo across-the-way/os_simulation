@@ -1,6 +1,6 @@
 <script setup>
 import axios from 'axios'
-import { serverURL } from '@/configjs/ServerURL'
+import { serverURL } from '@/components/ServerURL'
 import { ref } from 'vue'
 
 </script>

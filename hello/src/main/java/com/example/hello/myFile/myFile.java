@@ -19,6 +19,14 @@ public class myFile {
         return curPath;
     }
 
+    public OpenFileTable getFtable() {
+        return ftable;
+    }
+
+    public void setFtable(OpenFileTable ftable) {
+        this.ftable = ftable;
+    }
+
     public void setCurPath(String curPath) {
         this.curPath = curPath;
     }
@@ -362,15 +370,15 @@ public class myFile {
         ftable.close(pid, fd);
     }
 
-    public void write(int pid, int fd, int usage_size) {
-        String path = ftable.findInodeByFd(fd);
-        Inode file = findInode(path);
-        if (file != null) {
-            allocate(file, usage_size, pid);
-        }
-    }
+    // public void write(int pid, int fd, int usage_size) {
+    //     String path = ftable.findInodeByFd(fd);
+    //     Inode file = findInode(path);
+    //     if (file != null) {
+    //         allocate(file, usage_size, pid);
+    //     }
+    // }
 
-    public void write1(int pid, int fd, String s) {
+    public void write(int pid, int fd, String s) {
         String path = ftable.findInodeByFd(fd);
         Inode file = findInode(path);
         int usage_size = (s.length() + 3) / 4;

@@ -11,7 +11,7 @@ import Terminal from "vue-web-terminal"
 import 'vue-web-terminal/lib/theme/dark.css'
 
 import axios from "axios"
-import { serverURL } from "@/configjs/ServerURL"
+import { serverURL } from "./ServerURL"
 export default {
   data() {
     return {
@@ -27,23 +27,23 @@ export default {
     }
   },
   created() {
-    // axios.post(serverURL + '/terminal', ['pwd'])
-    //   .then(res => {
-    //     this.content = res.data
-    //     console.log(this.content)
-    //   })
-    //   .catch(err => {
-    //     console.log(err)
-    //   })
+    axios.post(serverURL + '/terminal', ['pwd'])
+      .then(res => {
+        this.content = res.data
+        console.log(this.content)
+      })
+      .catch(err => {
+        console.log(err)
+      })
   },
   updated() {
-    // axios.post(serverURL + '/terminal', ['pwd'])
-    //   .then(res => {
-    //     this.content = res.data
-    //   })
-    //   .catch(err => {
-    //     console.log(err)
-    //   })
+    axios.post(serverURL + '/terminal', ['pwd'])
+      .then(res => {
+        this.content = res.data
+      })
+      .catch(err => {
+        console.log(err)
+      })
   },
   components: { Terminal },
   methods: {
@@ -69,21 +69,21 @@ export default {
               content: res
             })
           })
-          axios.post(serverURL + '/terminal', ['pwd'])
-            .then(res => {
-              this.content = res.data
-            })
-            .catch(err => {
-              console.log(err)
-            })
-          console.log(this.responseData)
+
 
           console.log(this.responseData)
         })
         .catch(error => {
           console.log(error)
         })
-
+      axios.post(serverURL + '/terminal', ['pwd'])
+        .then(res => {
+          this.content = res.data
+        })
+        .catch(err => {
+          console.log(err)
+        })
+      console.log(this.responseData)
       if (key === 'fail') {
         failed('Something wrong!!!')
       } else {

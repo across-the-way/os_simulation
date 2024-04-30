@@ -16,6 +16,7 @@ public class ProcessQueue {
      * 3 --> FileWrite
      * 4 --> ForkWait
      * 5 --> Semaphore
+     * 6 --> Otherdevice
      */
     public List<List<Integer>> Waiting_Queues;
 

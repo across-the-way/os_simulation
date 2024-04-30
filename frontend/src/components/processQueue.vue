@@ -6,6 +6,7 @@
 import { serverURL } from '@/configjs/ServerURL';
 import axios from 'axios';
 </script>
+
 <script>
 export default {
   data() {
@@ -142,4 +143,4 @@ export default {
 
   }
 }
-</script>
+</style>
