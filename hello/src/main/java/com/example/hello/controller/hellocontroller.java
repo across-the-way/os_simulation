@@ -94,9 +94,10 @@ public class hellocontroller {
         return this.kernel.getIo().get();
     }
 
-    @GetMapping("/device/add")
-    public void addDevice() {
-        this.kernel.getIo().addDevice("", this.kernel.getIo().count++);
+    @PostMapping("/device/add")
+    public String addDevice(@RequestBody String name) {
+        this.kernel.receiveInterrupt(new myInterrupt(InterruptType.MountDevice, name));
+        return "hello! " + name;
     }
 
     @GetMapping("/device/delete")

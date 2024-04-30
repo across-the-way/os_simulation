@@ -19,6 +19,14 @@ public class myFile {
         return curPath;
     }
 
+    public OpenFileTable getFtable() {
+        return ftable;
+    }
+
+    public void setFtable(OpenFileTable ftable) {
+        this.ftable = ftable;
+    }
+
     public void setCurPath(String curPath) {
         this.curPath = curPath;
     }
@@ -362,15 +370,15 @@ public class myFile {
         ftable.close(pid, fd);
     }
 
-    public void write(int pid, int fd, int usage_size) {
-        String path = ftable.findInodeByFd(fd);
-        Inode file = findInode(path);
-        if (file != null) {
-            allocate(file, usage_size, pid);
-        }
-    }
+    // public void write(int pid, int fd, int usage_size) {
+    //     String path = ftable.findInodeByFd(fd);
+    //     Inode file = findInode(path);
+    //     if (file != null) {
+    //         allocate(file, usage_size, pid);
+    //     }
+    // }
 
-    public void write1(int pid, int fd, String s) {
+    public void write(int pid, int fd, String s) {
         String path = ftable.findInodeByFd(fd);
         Inode file = findInode(path);
         int usage_size = (s.length() + 3) / 4;
@@ -402,6 +410,9 @@ public class myFile {
         // 加入文件读写待完成表
         // 将文件对应的所有磁盘块，加入磁盘块读写队列
         Iterator<Map.Entry<Integer, Integer>> it = file.getStorage().entrySet().iterator();
+        if (!it.hasNext()) {
+            rwqueue.offer(new queueEntry(file, 0, curMhead, 0, pid));
+        }
         while (it.hasNext()) {
             Map.Entry<Integer, Integer> curSpace = it.next();
             if (usage_size <= curSpace.getValue()) {

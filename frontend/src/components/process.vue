@@ -44,7 +44,9 @@ export default {
         { props: 'fileTable', label: 'FileTable' },
         { props: 'holdresourceMap', label: 'holdresourceMap' },
       ],
-      form: []
+      form: [],
+      dialogTableVisible: false,
+      displayList: [],
     };
   },
 
@@ -61,11 +63,15 @@ export default {
           .catch(error => {
             console.error(error);
           });
-      }, 1000)
+      }, 2000)
     },
     stopfetchData() {
       clearInterval(this.timer);
-    }
+    },
+    handleSet(data) {
+      this.dialogTableVisible = true
+      this.displayList = data
+    },
   },
   
   mounted() {
@@ -74,10 +80,23 @@ export default {
   beforeUnmount() {
     this.stopfetchData();
   },
+  // updated() {
+  //     axios.post(serverURL + '/process/instructions',this.formData)
+  //         .then(response => {
+  //             // 处理响应结果
+  //             console.log(response.data);
+  //             this.responseData = response.data
+  //         })
+  //         .catch(error => {
+  //             // 处理错误
+  //             console.error(error);
+  //         });
+  // }
 }
 </script>
 <template>
   <div style="display:inline-block ;">
+    
     <el-table :data="pcb" style="width: 100%">
 
       <el-table-column label="p_id" width="100">
@@ -118,7 +137,20 @@ export default {
           <div>{{ scope.row.state }}</div>
         </template>
       </el-table-column>
+      <el-table-column label="detail" width="180">
+        <template #default="scope">
+          <el-button size="small" @click="handleSet(scope.row)">display</el-button>
+
+        </template>
+
+      </el-table-column>
     </el-table>
+    <el-dialog v-model="dialogTableVisible" title="memory" width="400" align-center>
+    <el-table :data="displayList">
+      <el-table-column property="memory_allocate" label="p_id" />
+      <el-table-column property="memory_start" label="iotime" />
+    </el-table>
+  </el-dialog>
   </div>
 </template>
 <style></style>

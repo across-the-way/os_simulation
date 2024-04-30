@@ -1,4 +1,3 @@
-
 <template>
   <el-table-v2 :columns="columns" :data="rowData" :width="700" :height="400" fixed />
 </template>
@@ -18,7 +17,11 @@ export default {
         2: 'FileRead',
         3: 'FileWrite',
         4: 'ForkWait',
-        5: 'Semaphore'
+        5: 'Semaphore',
+        6: 'NewDevice',
+        7: 'NewDevice',
+        8: 'NewDevice',
+        9: 'NewDevice',
       },
       processQueues: [
         { 'name1': [1, 2] },
@@ -99,7 +102,6 @@ export default {
         width: columnIndex === 0 ? 200 : 150,
       }));
     },
-
   }
-}
-</script>
+  }
+  </script>

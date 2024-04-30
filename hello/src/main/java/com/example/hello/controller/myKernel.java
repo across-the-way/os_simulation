@@ -156,9 +156,10 @@ public class myKernel implements Runnable {
 
     private void finish(Object[] objects) {
         int pid = (int) objects[0];
-        String[] deviceMap = new String[5];
+        String[] deviceMap = new String[7];
         deviceMap[0] = "printer";
         deviceMap[1] = "keyboard";
+        deviceMap[6] = "device..";
         deviceMap[3] = deviceMap[4] = "file";
         int DeviceNumber = pm.getPCB(pid).waiting_for;
         pm.getPCB(pid).FreeResource(deviceMap[DeviceNumber]);
@@ -169,6 +170,7 @@ public class myKernel implements Runnable {
         else
             pm.SwappedWaitingToSwappedReady(pid);
         pm.getPCB(pid).pc += this.getSysData().InstructionLength;
+
     }
 
     /*
@@ -240,9 +242,9 @@ public class myKernel implements Runnable {
     }
 
     private void open(Object[] objects) {
-        int pid = 0;
+        int pid = (int) objects[0];
         // 获得文件号
-        int fd = fs.open(pid, null);
+        int fd = fs.open(pid, (String) objects[1]);
         // 将文件号添加到pid进程的打开文件表
         if (fd != -1) {
             pm.addOpenFile(pid, fd);
@@ -251,13 +253,13 @@ public class myKernel implements Runnable {
     }
 
     private void close(Object[] objects) {
-        int pid = 0;
-        int fd = -1;
+        int pid = (int) objects[0];
+        int fd = fs.getFtable().findFdBypath(pid,(String) objects[1]);
         // 将文件号从pid进程的打开文件表中移除
         pm.removeOpenFile(pid, fd);
         pm.getPCB(pid).FreeResource("file");
         // 更新系统打开文件表
-        fs.close(0, fd);
+        fs.close(pid, fd);
     }
 
     private void write(Object[] objects) {
@@ -271,8 +273,8 @@ public class myKernel implements Runnable {
                 this.getSysData().AllocateResource("file");
             }
         }
-        int usage_size = (int) objects[2];
-        fs.write(pid, fd, usage_size);
+        String content = objects[2].toString();
+        fs.write(pid, fd, content);
     }
 
     private void read(Object[] objects) {
@@ -364,6 +366,9 @@ public class myKernel implements Runnable {
         } else if ((int) objects[0] == 1) {
             pm.getPCB((int) objects[1]).AllocateResource("keyboard");
             this.getSysData().AllocateResource("keyboard");
+        } else if ((int) objects[0] == 6) {
+            pm.getPCB((int) objects[1]).AllocateResource("device..");
+            this.getSysData().AllocateResource("device..");
         } else {
             return;
         }

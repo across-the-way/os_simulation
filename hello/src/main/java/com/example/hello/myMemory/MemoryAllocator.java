@@ -498,9 +498,8 @@ class DemandPageAllocator extends MemoryAllocator {
             }
             if (swap_partition.isCompatible(page_count - cnt)) {
                 for (int i = cnt; i < page_count; i++) {
-                    if (swap_partition.swapIn()) {
-                        pages.addDemandPage(i);
-                    } else return null;
+                    swap_partition.swapIn();
+                    pages.addDemandPage(i);
                 }
                 return pages;
             }
@@ -524,6 +523,7 @@ class DemandPageAllocator extends MemoryAllocator {
                     int physical_page = virtual_physical_page.getRight();
                     free_pages.set(physical_page);
                     cache.remove(physical_page);
+                    free_memory_size += page_size;
                 }
                 for (int i = 0; i < pages.getVirtualPageCount(); i++) {
                     swap_partition.remove();
@@ -540,6 +540,7 @@ class DemandPageAllocator extends MemoryAllocator {
                     cache.remove(physical_page);
                     swap_partition.swapIn();
                     used_pages.get(pid).swapPageOut(virtual_physical_page.getLeft());
+                    free_memory_size += page_size;
                 }
             }
         }
@@ -554,6 +555,7 @@ class DemandPageAllocator extends MemoryAllocator {
                         used_pages.get(cache.getTailPid()).swapPageOut(cache.getTailPageVirtual());
                     }
                 } else {
+                    free_pages.clear(page_num_physical);
                     free_memory_size -= page_size;
                     swap_partition.swapOut();
                 }
@@ -603,17 +605,14 @@ class DemandPageAllocator extends MemoryAllocator {
 
     @Override
     void release(int pid) {
-        free_memory_size += page_table.used_pages.get(pid).getPhysicalPageCount() * page_size;
         page_table.release(pid);
     }
 
     public void swapIn(int pid, int pc) {
         isPageFault(pid, pc);
-        page_table.swap_partition.swapOut();
     }
 
     public void swapOut(int pid) {
-        free_memory_size += page_table.used_pages.get(pid).getPhysicalPageCount() * page_size;
         page_table.swapOut(pid);
     }
 

@@ -1,7 +1,7 @@
 <script setup>
 import axios from 'axios'
 import { serverURL } from '@/configjs/ServerURL'
-import routes from './router/routes'
+import routes from './router/routes.js'
 import { ElButton } from 'element-plus';
 import { 
   TurnOff,

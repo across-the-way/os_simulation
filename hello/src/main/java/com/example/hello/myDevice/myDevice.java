@@ -10,6 +10,7 @@ public class myDevice {
     private myKernel kernel;
     private LinkedList<Device> devices;
     public int count = 0;
+
     public myDevice(myKernel kernel) {
         this.kernel = kernel;
         devices = new LinkedList<>();
@@ -18,6 +19,8 @@ public class myDevice {
             devices.add(new Device("keyboard", count++));
         for (int i = 0; i < this.kernel.getSysData().Printer_Number; i++)
             devices.add(new Device("printer", count++));
+        for (int i = 0; i < this.kernel.getSysData().OtherDevice_Number; i++)
+            devices.add(new Device("device..", count++));
     }
 
     public void update() {
@@ -68,8 +71,10 @@ public class myDevice {
         Device minDevice = null;
         if (type == 0) {
             changedType = "printer";
-        } else {
+        } else if (type == 1) {
             changedType = "keyboard";
+        } else {
+            changedType = "device..";
         }
         for (Device device : devices) {
             int queueSize = device.getWaitQueue().size();
