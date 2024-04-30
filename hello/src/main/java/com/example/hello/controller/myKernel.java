@@ -273,7 +273,7 @@ public class myKernel implements Runnable {
                 this.getSysData().AllocateResource("file");
             }
         }
-        String content = (String) objects[2];
+        String content = objects[2].toString();
         fs.write(pid, fd, content);
     }
 
