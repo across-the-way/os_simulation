@@ -2,6 +2,7 @@ package com.example.hello.controller;
 
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.Semaphore;
 
 import com.example.hello.SysConfig.SysData;
 import com.example.hello.myDevice.Device;
@@ -70,6 +71,7 @@ public class myKernel implements Runnable {
     ConcurrentLinkedQueue<myInterrupt> queue = new ConcurrentLinkedQueue<>();
     public String terminal_message;
     public Boolean terminal_update;
+    public Semaphore terminal_mutex;
     public Boolean System_stop;
 
     public void receiveInterrupt(myInterrupt interrupt) {
@@ -147,7 +149,7 @@ public class myKernel implements Runnable {
         fs.update();
         io.update();
 
-        test.doTest();
+        // test.doTest();
     }
 
     private void timeout(Object[] objects) {
@@ -160,7 +162,7 @@ public class myKernel implements Runnable {
         deviceMap[0] = "printer";
         deviceMap[1] = "keyboard";
         deviceMap[6] = "device..";
-        deviceMap[3] = deviceMap[4] = "file";
+        deviceMap[2] = deviceMap[3] = "file";
         int DeviceNumber = pm.getPCB(pid).waiting_for;
         pm.getPCB(pid).FreeResource(deviceMap[DeviceNumber]);
         this.getSysData().FreeResource(deviceMap[DeviceNumber]);
@@ -170,7 +172,11 @@ public class myKernel implements Runnable {
         else
             pm.SwappedWaitingToSwappedReady(pid);
         pm.getPCB(pid).pc += this.getSysData().InstructionLength;
-
+        if (objects.length > 1) {
+            String reader = (String) objects[1];
+            if (!reader.equals(""))
+                System.out.println("Reader:" + reader);
+        }
     }
 
     /*
@@ -254,7 +260,7 @@ public class myKernel implements Runnable {
 
     private void close(Object[] objects) {
         int pid = (int) objects[0];
-        int fd = fs.getFtable().findFdBypath(pid,(String) objects[1]);
+        int fd = fs.getFtable().findFdBypath(pid, (String) objects[1]);
         // 将文件号从pid进程的打开文件表中移除
         pm.removeOpenFile(pid, fd);
         pm.getPCB(pid).FreeResource("file");
@@ -468,7 +474,7 @@ public class myKernel implements Runnable {
                 Terminalfunc.Terminalls(objects, this);
                 break;
             case TerminalCallType.cat:
-                Terminalfunc.Terminalcat(objects);
+                Terminalfunc.Terminalcat(objects, this);
                 break;
             default:
                 Terminalfunc.TerminalErr(this);
@@ -511,6 +517,7 @@ public class myKernel implements Runnable {
         Thread timerThread = new Thread(timer);
         terminal_message = new String();
         terminal_update = false;
+        terminal_mutex = new Semaphore(1);
         System_stop = false;
 
         test = new myTest(instance);

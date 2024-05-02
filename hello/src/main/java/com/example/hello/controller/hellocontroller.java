@@ -106,7 +106,7 @@ public class hellocontroller {
     }
 
     @PostMapping("/terminal")
-    public String CreateProcess(@RequestBody Object[] instruction) {
+    public String CreateProcess(@RequestBody Object[] instruction) throws InterruptedException {
         TerminalCallType type;
         try {
             type = TerminalCallType.valueOf((String) instruction[0]);
@@ -114,13 +114,20 @@ public class hellocontroller {
             type = TerminalCallType.err;
         }
         instruction = Arrays.copyOfRange(instruction, 1, instruction.length);
+
+        this.kernel.terminal_mutex.acquire();
+
+        this.kernel.terminal_update = false;
         this.kernel
                 .receiveInterrupt(new myInterrupt(InterruptType.TerminalCall, type, instruction));
+        Thread.sleep(this.kernel.getSysData().SystemPulse + 50);
         while (!this.kernel.terminal_update)
             ;
         this.kernel.terminal_update = false;
         String msg = this.kernel.terminal_message;
         this.kernel.terminal_message = null;
+
+        this.kernel.terminal_mutex.release();
         return msg;
     }
 

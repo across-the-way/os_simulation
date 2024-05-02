@@ -119,7 +119,7 @@ public class myFile {
 
     private int curMhead;// 当前的磁头位置
 
-    private String readCache = "";//缓存读入的内容
+    private String readCache = "";// 缓存读入的内容
 
     public void update() {
         ops_cur = 0;
@@ -133,7 +133,7 @@ public class myFile {
             // 若有文件读写任务完成，即有任务的剩余磁盘块归零
             if (isfinished != -1) {
                 sendInterrupt(InterruptType.FileFinish, isfinished, readCache);
-                readCache = "";     //清空readCache
+                readCache = ""; // 清空readCache
                 // 发送中断系统调用FileFinish
                 // 启动磁盘调度，进行下一个文件读写操作
             }
@@ -149,6 +149,7 @@ public class myFile {
             readCache += block[startBlock + i].toString();
         }
     }
+
     private int disk_read_write() {
         // 获得当前磁头位置
         // 磁头移向磁盘块读写队列中离磁头最近的磁盘块移动
@@ -371,11 +372,11 @@ public class myFile {
     }
 
     // public void write(int pid, int fd, int usage_size) {
-    //     String path = ftable.findInodeByFd(fd);
-    //     Inode file = findInode(path);
-    //     if (file != null) {
-    //         allocate(file, usage_size, pid);
-    //     }
+    // String path = ftable.findInodeByFd(fd);
+    // Inode file = findInode(path);
+    // if (file != null) {
+    // allocate(file, usage_size, pid);
+    // }
     // }
 
     public void write(int pid, int fd, String s) {
@@ -490,8 +491,15 @@ public class myFile {
     public String cat(String path, String filename) {
         String res = "";
         Inode inode = findInode(path).getDirectoryEntries().get(filename);
-        if (inode == null || inode.getType() == 0 || inode.getStorage().size() == 0)
-            return res;
+        if (inode == null) {
+            return "没有该文件";
+        } else if (inode.getType() == 0) {
+            return "访问的是文件夹,无法显示内容";
+        } else if (inode.getStorage().size() == 0) {
+            return "该文件内容为空";
+        } // if (inode == null || inode.getType() == 0 || inode.getStorage().size() == 0)
+        //     return res;
+       
         for (Map.Entry<Integer, Integer> entry : inode.getStorage().entrySet()) {
             int start = entry.getKey();
             int bsize = entry.getValue();
