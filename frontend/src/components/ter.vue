@@ -11,7 +11,7 @@ import Terminal from "vue-web-terminal"
 import 'vue-web-terminal/lib/theme/dark.css'
 
 import axios from "axios"
-import { serverURL } from "./ServerURL"
+import { serverURL } from "@/configjs/ServerURL"
 export default {
   data() {
     return {

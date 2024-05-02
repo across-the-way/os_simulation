@@ -46,11 +46,12 @@
 <script setup>
 
 import axios from 'axios';
-import { serverURL } from './ServerURL';
-
+import { serverURL } from '@/configjs/ServerURL';
+import { ElMessage } from 'element-plus';
 </script>
 <script>
 export default {
+
     data() {
         return {
             city: [
@@ -147,7 +148,17 @@ export default {
             });
             temp.push({type: 'Exit',arguments:[]})
             axios.post(serverURL + '/process', temp)
-            
+            .then(res => {
+                let msg = res.data
+                if(msg === 'success'){
+                    //success
+                    ElMessage({message:'success',type: 'sucess'})
+                }
+                else{
+                    //error
+                    ElMessage({message:'error',type: 'error'})
+                }
+            })
             console.log(temp)
             console.log(this.instructionQueue)
             //reset

@@ -1,6 +1,6 @@
 <script setup>
 import axios from 'axios'
-import { serverURL } from '@/components/ServerURL'
+import { serverURL } from '@/configjs/ServerURL'
 import { ref } from 'vue'
 
 </script>
@@ -38,10 +38,17 @@ export default {
                     // 处理响应结果
                     console.log(response.data);
                     this.responseData = response.data
+                    if(response.data==='success'){
+                        ElMessage({message:'success', type: 'success'})
+                    }
+                    else{
+                        ElMessage({message:'error',type:'error'})
+                    }
                 })
                 .catch(error => {
                     // 处理错误
                     console.error(error);
+                    ElMessage({message:'This is a message.',type: 'danger'})
                 });
             this.instructions = []
         }
