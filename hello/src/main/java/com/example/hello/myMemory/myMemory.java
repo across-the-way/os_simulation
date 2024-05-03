@@ -138,6 +138,8 @@ public class myMemory {
                 memoryStatus.addDetail("used_pages", ((DemandPageAllocator) allocator).page_table.used_pages);
                 memoryStatus.addDetail("swapped_page_count", ((DemandPageAllocator) allocator).page_table.swap_partition.page_count);
                 memoryStatus.addDetail("swapped_used_count", ((DemandPageAllocator) allocator).page_table.swap_partition.used_count);
+                memoryStatus.addDetail("pages", ((DemandPageAllocator) allocator).pages);
+                memoryStatus.addDetail("faults", ((DemandPageAllocator) allocator).faults);
                 break;
         }
         return memoryStatus;
