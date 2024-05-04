@@ -51,10 +51,10 @@ class Block extends Memory {
 }
 
 class Pages extends Memory {
-    private Set<Integer> pages;
+    private List<Integer> pages;
     public Pages(int size) {
         super(size);
-        this.pages = new HashSet<>();
+        this.pages = new ArrayList<>();
     }
     public void addPage(int page_num) {
         pages.add(page_num);
@@ -62,7 +62,7 @@ class Pages extends Memory {
     public void removePage(int page_num) {
         pages.remove(Integer.valueOf(page_num));
     }
-    public Set<Integer> getPages() {
+    public List<Integer> getPages() {
         return pages;
     }
     @Override

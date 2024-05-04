@@ -78,6 +78,20 @@ public class myKernel implements Runnable {
         queue.offer(interrupt);
     }
 
+    private Thread kernelThread;
+
+    public void start() {
+        kernelThread = new Thread(this);
+        kernelThread.start();
+    }
+
+    public void stop() {
+        if (kernelThread != null) {
+            kernelThread.interrupt();
+            kernelThread = null;
+        }
+    }
+
     /*
      * 中断处理
      */
@@ -149,7 +163,7 @@ public class myKernel implements Runnable {
         fs.update();
         io.update();
 
-        // test.doTest();
+        test.doTest();
     }
 
     private void timeout(Object[] objects) {

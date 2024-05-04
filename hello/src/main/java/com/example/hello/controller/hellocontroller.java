@@ -1,6 +1,8 @@
 package com.example.hello.controller;
 
 import com.example.hello.myMemory.MemoryStatus;
+import com.example.hello.myMemory.allocateStrategy;
+import com.example.hello.myProcess.scheduleStrategy;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,8 +38,30 @@ public class hellocontroller {
         // 运行
         kernel = myKernel.getInstance();
         kernel.setConfig(this.sysData);
-        Thread kernelThread = new Thread(kernel);
-        kernelThread.start();
+        kernel.start();
+    }
+
+    @GetMapping("/restart")
+    public Boolean restartSystem() {
+        kernel.stop();
+        kernel.start();
+        return true;
+    }
+
+    @PostMapping("/resetMemoryStrategy")
+    public Boolean rebootSystem(@RequestBody allocateStrategy strategy) {
+        kernel.stop();
+        this.sysData.MMstrategy = strategy;
+        kernel.start();
+        return true;
+    }
+
+    @PostMapping("/resetCPUStrategy")
+    public Boolean rebootSystem(@RequestBody scheduleStrategy strategy) {
+        kernel.stop();
+        this.sysData.CPUstrategy = strategy;
+        kernel.start();
+        return true;
     }
 
     // @PostMapping("testfolder")
@@ -152,6 +176,16 @@ public class hellocontroller {
     public String singlepause() {
         this.kernel.receiveInterrupt(new myInterrupt(InterruptType.SinglePause));
         return "singlepause success";
+    }
+
+    @GetMapping("/BurstInfo")
+    public List<BurstInfo> getBurstInfo(@RequestParam int pid) {
+        return BurstInfo.getBurstInfos(kernel.getPm().getPCB(pid), kernel);
+    }
+
+    @GetMapping("/ProcessResource")
+    public Map<String, Integer> getProcessResource(@RequestParam int pid) {
+        return kernel.getPm().getResourceMap(pid);
     }
 
 }

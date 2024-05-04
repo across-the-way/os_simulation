@@ -124,16 +124,17 @@ public class myTest {
                         packProgram(
                                 // generateRandomCalculate(
                                 // rand.nextInt(1, 1 + max_line_num),
-                                // rand.nextInt(2, 1 + max_time)),
-//                                generateRandomio(
-//                                        rand.nextInt(1, 1 + max_line_num),
-//                                        100)),
-                                generateRandomFile(
-                                        100,
-                                        1000,
-                                        10,
-                                        100
-                                )
-                    )));
+                                // rand.nextInt(2, 1 + max_time)) ,
+                               generateRandomio(
+                                       rand.nextInt(1, 1 + max_line_num),
+                                       100))
+                                    //    ,
+                                // generateRandomFile(
+                                //         100,
+                                //         1000,
+                                //         10,
+                                //         100
+                                // )
+                    ));
     }
 }

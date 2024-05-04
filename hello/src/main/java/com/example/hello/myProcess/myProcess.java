@@ -895,4 +895,8 @@ public class myProcess {
     public ProcessQueue getQueue() {
         return this.queue;
     }
+
+    public Map<String, Integer> getResourceMap(int pid) {
+        return this.ProcessMap.get(pid).getAvailable();
+    }
 }

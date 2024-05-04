@@ -561,6 +561,7 @@ class DemandPageAllocator extends MemoryAllocator {
                 }
                 used_pages.get(pid).swapPageIn(page_num, page_num_physical);
                 cache.put(page_num_physical, pid, page_num);
+                faults++;
                 return true;
             }
             cache.visit(page_num_physical);
@@ -576,6 +577,9 @@ class DemandPageAllocator extends MemoryAllocator {
     private int page_capacity;
     public PageTable page_table;
 
+    public int faults;
+    public int pages;
+
     public DemandPageAllocator(int total_memory_size, int page_size, allocateStrategy strategy) {
         super(total_memory_size);
         this.page_size = page_size;
@@ -590,6 +594,8 @@ class DemandPageAllocator extends MemoryAllocator {
             default:
                 break;
         }
+        this.faults = 0;
+        this.pages = 0;
     }
 
     @Override
@@ -618,6 +624,7 @@ class DemandPageAllocator extends MemoryAllocator {
 
     boolean isPageFault(int pid, int pc) {
         int page_num = pc / page_size;
+        pages++;
         return page_table.isPageFault(pid, page_num);
     }
 
