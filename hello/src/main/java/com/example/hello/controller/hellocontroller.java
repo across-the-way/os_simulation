@@ -154,4 +154,14 @@ public class hellocontroller {
         return "singlepause success";
     }
 
+    @GetMapping("/BurstInfo")
+    public List<BurstInfo> getBurstInfo(@RequestParam int pid) {
+        return BurstInfo.getBurstInfos(kernel.getPm().getPCB(pid), kernel.getSysData().InstructionLength);
+    }
+
+    @GetMapping("/ProcessResource")
+    public Map<String, Integer> getProcessResource(@RequestParam int pid) {
+        return kernel.getPm().getResourceMap(pid);
+    }
+
 }

@@ -272,4 +272,12 @@ public class PCB {
             this.allocateresourceMap.put(ResourceName, 0);
         }
     }
+
+    public Map<String, Integer> getAvailable() {
+        Map<String, Integer> availableMap = new HashMap<>();
+        for (String key : maxresourceMap.keySet()) {
+            availableMap.put(key, maxresourceMap.get(key) - allocateresourceMap.get(key));
+        }
+        return availableMap;
+    }
 }

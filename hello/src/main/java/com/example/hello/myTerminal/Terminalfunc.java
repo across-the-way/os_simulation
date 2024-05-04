@@ -53,7 +53,7 @@ public class Terminalfunc {
 
     public static void Terminalrm(Object[] objects, myKernel kernel) {
         if (objects.length == 2) {
-            if ((String) objects[0] == "-r") {
+            if (((String) objects[0]).equals("-r")) {
                 if (kernel.getFs().rmdir(kernel.getFs().getCurPath(), (String) objects[1])) {
                     kernel.terminal_message = "ok";
                 } else {

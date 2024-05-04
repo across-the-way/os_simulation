@@ -4,6 +4,8 @@ import com.example.hello.controller.myKernel;
 import com.example.hello.myInterrupt.InterruptType;
 import com.example.hello.myInterrupt.myInterrupt;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 public class myFile {
@@ -103,12 +105,11 @@ public class myFile {
         }
         rwqueue = new LinkedList<queueEntry>();
         Arrays.fill(bitmap, false);
+
         root = new Inode("filesystem", 0, 1);
-        root.insertFileInDir("dev", new Inode("dev", 0, 1));
-        root.insertFileInDir("taotao", new Inode("taotao", 0, 0));
-        root.insertFileInDir("bupt", new Inode("bupt", 0, 1));
-        root.insertFileInDir("lib", new Inode("lib", 0, 1));
-        root.insertFileInDir("dada.txt", new Inode("dada.txt", 1, 1));
+
+        String currentpath = "./filesystem/";
+        recursive_open(root, currentpath);
     }
 
     private int move_need = 1;// 假设移动一格磁盘块需要一个操作数
@@ -120,6 +121,21 @@ public class myFile {
     private int curMhead;// 当前的磁头位置
 
     private String readCache = "";// 缓存读入的内容
+
+    public void recursive_open(Inode node, String currentpath) {
+        File directory = new File(currentpath);
+        File[] files = directory.listFiles();
+
+        for (File file : files) {
+            if (file.isDirectory()) {
+                Inode sub_directory = new Inode(file.getName(), 0, 1);
+                node.insertFileInDir(file.getName(), sub_directory);
+                recursive_open(sub_directory, file.getPath() + "/");
+            } else {
+                node.insertFileInDir(file.getName(), new Inode(file.getName(), 1, 1));
+            }
+        }
+    }
 
     public void update() {
         ops_cur = 0;
@@ -283,6 +299,14 @@ public class myFile {
         }
         Inode newInode = new Inode(file_name, 1, 1);
         pInode.insertFileInDir(file_name, newInode);
+
+        String path = "./" + parent_name + "/" + file_name;
+        File newfile = new File(path);
+        try {
+            newfile.createNewFile();
+        } catch (IOException e) {
+            ;
+        }
         return true;
     }
 
@@ -318,6 +342,10 @@ public class myFile {
         // 释放文件磁盘空间
         freeUp(pInode.findChild(file_name));
         pInode.deleteFileInDir(file_name);
+
+        File file = new File("./" + parent_name + "/" + file_name);
+        file.delete();
+
         return true;
     }
 
@@ -339,6 +367,15 @@ public class myFile {
         }
         Inode newInode = new Inode(dir_name, 0, 1);
         pInode.insertFileInDir(dir_name, newInode);
+
+        String path = "./" + parent_name + "/" + dir_name;
+        File newfile = new File(path);
+        try {
+            newfile.mkdir();
+        } catch (SecurityException e) {
+            ;
+        }
+
         return true;
     }
 
@@ -351,7 +388,7 @@ public class myFile {
         Inode pInode = findInode(parent_name);
 
         if (pInode == null) {
-            // 路径错误触发中断
+            
             return false;
         }
         // 递归释放文件夹中所有文件的磁盘空间
@@ -359,6 +396,32 @@ public class myFile {
         // 删除目录
         pInode.deleteFileInDir(dir_name);
         // 删除所有
+        File file = new File("./" + parent_name + "/" + dir_name);
+        deleteFile(file);
+
+        return true;
+    }
+
+    public static Boolean deleteFile(File file) {
+        // 判断文件不为null或文件目录存在
+        if (file == null || !file.exists()) {
+            return false;
+        }
+        // 获取目录下子文件
+        File[] files = file.listFiles();
+        // 遍历该目录下的文件对象
+        for (File f : files) {
+            // 判断子目录是否存在子目录,如果是文件则删除
+            if (f.isDirectory()) {
+                // 递归删除目录下的文件
+                deleteFile(f);
+            } else {
+                // 文件删除
+                f.delete();
+            }
+        }
+        // 文件夹删除
+        file.delete();
         return true;
     }
 
@@ -498,8 +561,8 @@ public class myFile {
         } else if (inode.getStorage().size() == 0) {
             return "该文件内容为空";
         } // if (inode == null || inode.getType() == 0 || inode.getStorage().size() == 0)
-        //     return res;
-       
+          // return res;
+
         for (Map.Entry<Integer, Integer> entry : inode.getStorage().entrySet()) {
             int start = entry.getKey();
             int bsize = entry.getValue();
