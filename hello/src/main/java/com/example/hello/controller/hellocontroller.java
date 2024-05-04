@@ -180,7 +180,7 @@ public class hellocontroller {
 
     @GetMapping("/BurstInfo")
     public List<BurstInfo> getBurstInfo(@RequestParam int pid) {
-        return BurstInfo.getBurstInfos(kernel.getPm().getPCB(pid), kernel.getSysData().InstructionLength);
+        return BurstInfo.getBurstInfos(kernel.getPm().getPCB(pid), kernel);
     }
 
     @GetMapping("/ProcessResource")

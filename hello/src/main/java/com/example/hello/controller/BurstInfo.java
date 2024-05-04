@@ -13,19 +13,25 @@ public class BurstInfo {
     private int page_number;
     private int frame_number;
 
-    public BurstInfo(PCB p, int logic_address, int InstructionLength) {
-        int index = (logic_address - p.memory_start) / InstructionLength;
+    public BurstInfo(PCB p, int logic_address, myKernel kernel) {
+        int index = (logic_address - p.memory_start) / kernel.getSysData().InstructionLength;
         this.instruction = new Instruction(p.bursts.get(index).getType(), p.bursts.get(index).getArguments());
         this.logic_address = logic_address;
 
         // 调用内存模块初始化物理地址,页号，帧号
+        int[] res = kernel.getMm().getPhysicalMemory(p.p_id, logic_address);
+        physical_address = res[0];
+        page_number = res[1];
+        frame_number = res[2];
+
     }
 
-    public static List<BurstInfo> getBurstInfos(PCB p, int InstructionLength) {
+    public static List<BurstInfo> getBurstInfos(PCB p, myKernel kernel) {
         int pc = p.pc;
         List<BurstInfo> burstInfos = new ArrayList<>();
+        int InstructionLength = kernel.getSysData().InstructionLength;
         while (pc < p.memory_start + p.bursts.size() * InstructionLength) {
-            burstInfos.add(new BurstInfo(p, pc, InstructionLength));
+            burstInfos.add(new BurstInfo(p, pc, kernel));
             pc += InstructionLength;
         }
         return burstInfos;

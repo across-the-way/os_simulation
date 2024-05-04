@@ -91,6 +91,7 @@ public class myKernel implements Runnable {
             kernelThread = null;
         }
     }
+
     /*
      * 中断处理
      */
@@ -162,7 +163,7 @@ public class myKernel implements Runnable {
         fs.update();
         io.update();
 
-        // test.doTest(0, 0);
+        test.doTest();
     }
 
     private void timeout(Object[] objects) {
