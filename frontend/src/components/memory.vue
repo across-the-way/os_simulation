@@ -38,6 +38,14 @@ export default {
     return {
       data: {
         labels: ['VueJs', 'EmberJs', 'ReactJs', 'AngularJs', 'JavaScript'],
+        memory:{
+          strategy: 'LRU',
+          free_pages: {},
+          lru_caches: [],
+          swaped_page_count: 0,
+          swaped_used_count: 0,
+          used_pages: [{}],
+        },
         datasets: [
           {
             backgroundColor: ['#41B883', '#E46651', '#00D8FF', '#DD1B16', '#6a3f9b'],
@@ -76,17 +84,19 @@ export default {
           address: 'No. 189, Grove St, Los Angeles',
           zip: 'CA 90036',
           tag: 'Home',
-        },
-        {
-          date: '2016-05-01',
-          name: 'Tom',
-          state: 'California',
-          city: 'Los Angeles',
-          address: 'No. 189, Grove St, Los Angeles',
-          zip: 'CA 90036',
-          tag: 'Office',
         },],
     }
-  }
+  },
+  created(){
+    this.fetchdata()
+  },
+  methods: {
+    fetchdata(){
+      axios.get(serverURL+'/memory')
+      .then(response => {
+        console.log(response.data)
+      })
+    }
+  },
 }
 </script>
