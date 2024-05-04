@@ -117,6 +117,35 @@ public class myMemory {
         System.out.println("Pid: " + pid + " PC: " + pc + " page fault");
     }
 
+    public int[] getPhysicalMemory(int pid, int logical_address) {
+        int physical_address = -1, frame_number = -1;
+        int page_number = -1, page_offset = -1;
+        switch (strategy) {
+            case FirstFit:
+            case NextFit:
+            case BestFit:
+            case WorstFit:
+                physical_address = ((ContiguousAllocator) allocator).used_memory.get(pid).getStart() + logical_address;
+                break;
+            case Page:
+                page_number = logical_address / kernel.getSysData().Page_Size;
+                page_offset = logical_address % kernel.getSysData().Page_Size;
+                frame_number = ((PageAllocator) allocator).page_table.used_pages.get(pid).getPages().get(page_number);
+                physical_address = frame_number * kernel.getSysData().Page_Size + page_offset;
+                break;
+            case LRU:
+            case FIFO:
+                page_number = logical_address / kernel.getSysData().Page_Size;
+                page_offset = logical_address % kernel.getSysData().Page_Size;
+                frame_number = ((DemandPageAllocator) allocator).page_table.getPhysicalPage(pid, page_number);
+                if (frame_number != -1) {
+                    physical_address = frame_number * kernel.getSysData().Page_Size + page_offset;
+                }
+                break;
+        }
+        return new int[]{physical_address, page_number, frame_number};
+    }
+
     public MemoryStatus getMemoryStatus() {
         MemoryStatus memoryStatus = new MemoryStatus(strategy.toString());
 
@@ -129,7 +158,8 @@ public class myMemory {
                 memoryStatus.addDetail("used_memory", ((ContiguousAllocator) allocator).used_memory);
                 break;
             case Page:
-                memoryStatus.addDetail("page_table", ((PageAllocator) allocator).page_table);
+                memoryStatus.addDetail("free_pages", ((PageAllocator) allocator).page_table.free_pages);
+                memoryStatus.addDetail("used_pages", ((PageAllocator) allocator).page_table.used_pages);
                 break;
             case LRU:
             case FIFO:
@@ -138,6 +168,8 @@ public class myMemory {
                 memoryStatus.addDetail("used_pages", ((DemandPageAllocator) allocator).page_table.used_pages);
                 memoryStatus.addDetail("swapped_page_count", ((DemandPageAllocator) allocator).page_table.swap_partition.page_count);
                 memoryStatus.addDetail("swapped_used_count", ((DemandPageAllocator) allocator).page_table.swap_partition.used_count);
+                memoryStatus.addDetail("pages", ((DemandPageAllocator) allocator).pages);
+                memoryStatus.addDetail("faults", ((DemandPageAllocator) allocator).faults);
                 break;
         }
         return memoryStatus;
