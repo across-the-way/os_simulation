@@ -126,13 +126,15 @@ public class myFile {
         File directory = new File(currentpath);
         File[] files = directory.listFiles();
 
-        for (File file : files) {
-            if (file.isDirectory()) {
-                Inode sub_directory = new Inode(file.getName(), 0, 1);
-                node.insertFileInDir(file.getName(), sub_directory);
-                recursive_open(sub_directory, file.getPath() + "/");
-            } else {
-                node.insertFileInDir(file.getName(), new Inode(file.getName(), 1, 1));
+        if (files != null) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    Inode sub_directory = new Inode(file.getName(), 0, 1);
+                    node.insertFileInDir(file.getName(), sub_directory);
+                    recursive_open(sub_directory, file.getPath() + "/");
+                } else {
+                    node.insertFileInDir(file.getName(), new Inode(file.getName(), 1, 1));
+                }
             }
         }
     }

@@ -8,14 +8,6 @@ import java.util.*;
 import java.util.concurrent.Semaphore;
 
 public class SysData {
-    public enum OSState {
-        kernel, user
-    }
-
-    // public FileSystem fileSystem;
-    // public Process ProcessController;
-    OSState Osmode;
-
     // 系统时钟脉冲设置
     public int SystemPulse;
 
@@ -64,12 +56,8 @@ public class SysData {
     public int Test_Max_Time;
 
     public SysData() {
-        // fileSystem = new FileSystem();
-        // ProcessController = new Process();
-        Osmode = OSState.kernel;
-
         // 单位毫秒
-        SystemPulse = 100;
+        SystemPulse = 1000;
 
         InstructionLength = 4;
 
