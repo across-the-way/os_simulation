@@ -9,24 +9,25 @@ export default {
       instructions: [],//指令队列
       FormData: '',//待处理的指令队列
       timer: null,
-      pcb: [{
-        state: '1',
-        p_id: 2,
-        pp_id: 2,
-        priority: 10,
-        maxresourceMap: [],
-        allocateresourceMap: [],
-        bursts: [],
-        pc: 2,
-        waiting_time: 2,
-        lastready_time: 5,
-        memory_allocate: 43,
-        memory_start: 0,
-        waiting_for: -1,
-        fileTable: [22, 12],
-        holdresourceMap: [],
-      },
-      ],
+      pcb: [],
+      // pcb: [{
+      //   state: '1',
+      //   p_id: 2,
+      //   pp_id: 2,
+      //   priority: 10,
+      //   maxresourceMap: [],
+      //   allocateresourceMap: [],
+      //   bursts: [],
+      //   pc: 2,
+      //   waiting_time: 2,
+      //   lastready_time: 5,
+      //   memory_allocate: 43,
+      //   memory_start: 0,
+      //   waiting_for: -1,
+      //   fileTable: [22, 12],
+      //   holdresourceMap: [],
+      // },
+      // ],
       columns: [
         { props: 'state', label: 'state' },
         { props: 'p_id', label: 'p_id' },
@@ -44,8 +45,11 @@ export default {
         { props: 'fileTable', label: 'FileTable' },
         { props: 'holdresourceMap', label: 'holdresourceMap' },
       ],
+      device: [],
+      burst: null,
       form: [],
-      dialogTableVisible: false,
+      burstTableVisible: false,
+      deviceTableVisible: false,
       displayList: [],
     };
   },
@@ -72,6 +76,25 @@ export default {
       this.dialogTableVisible = true
       this.displayList = data
     },
+    handleSet1(pid){
+      axios.get(serverURL + '/BurstInfo'+'?pid='+pid)
+      .then((res) => {
+          // console.log(res.data);
+          this.burst = res.data
+          console.log(this.burst);
+          this.burstTableVisible = true
+      })
+    },
+    handleSet2(pid){
+      axios.get(serverURL + '/ProcessResource'+'?pid='+pid)
+      .then((res) => {
+          // console.log(res.data);
+          this.device = []
+          this.device.push(res.data) 
+          console.log(this.device)
+          this.deviceTableVisible = true
+      })
+    }
   },
   
   mounted() {
@@ -137,19 +160,43 @@ export default {
           <div>{{ scope.row.state }}</div>
         </template>
       </el-table-column>
-      <el-table-column label="detail" width="180">
+      <el-table-column label="burst" width="120">
         <template #default="scope">
-          <el-button size="small" @click="handleSet(scope.row)">display</el-button>
+          <el-button size="small" @click="handleSet1(scope.row.p_id)">display</el-button>
+
+        </template>
+
+      </el-table-column>
+      <el-table-column label="device" width="120">
+        <template #default="scope">
+          <el-button size="small" @click="handleSet2(scope.row.p_id)">display</el-button>
 
         </template>
 
       </el-table-column>
     </el-table>
-    <el-dialog v-model="dialogTableVisible" title="memory" width="400" align-center>
-    <el-table :data="displayList">
-      <el-table-column property="memory_allocate" label="p_id" />
-      <el-table-column property="memory_start" label="iotime" />
+    <el-dialog v-model="burstTableVisible" title="burst" width="600" align-center>
+    <el-table :data="burst">
+      <el-table-column property="frame_number" label="frame_number" />
+      <el-table-column property="instruction.type" label="ins_type" />
+      <el-table-column property="instruction.arguments" label="ins_args" />
+      <el-table-column property="logic_address" label="logc_addr" />
+      <el-table-column property="page_number" label="pg_num" />
+      <el-table-column property="physical_address" label="phy_addr" />
+
+      <!-- <div>{{ burst[0].page_number }}</div> -->
     </el-table>
+  </el-dialog>
+  <el-dialog v-model="deviceTableVisible" title="device" width="400" align-center>
+    <el-table :data="device">
+      <el-table-column property="keyboard" label="keyboard" />
+      <el-table-column property="file" label="file" />
+      <el-table-column property="printer" label="printer" />
+      <el-table-column property="device" label="device" />
+      
+    </el-table>
+    
+    <!-- <div >{{ device }}</div> -->
   </el-dialog>
   </div>
 </template>

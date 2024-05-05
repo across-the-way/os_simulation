@@ -244,19 +244,7 @@ export default {
             {{ buttonText }}</el-button>
         </Transition>
 
-        <el-select v-model="value" placeholder="Select" style="width: 105px;padding-left: 12px;">
-          <el-option v-for="item in city" :key="item.value" :label="item.label" :value="item.value"
-            style="width: 120px;">
-            <el-icon>
-              <Menu />
-            </el-icon>
-            <span style="
-          float: right;
-          color: var(--el-text-color-secondary);
-          font-size: 12px;
-        ">{{ item.value }}</span>
-          </el-option>
-        </el-select>
+        
       </div>
 
     </div>

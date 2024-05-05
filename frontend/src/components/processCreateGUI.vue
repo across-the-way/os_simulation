@@ -146,19 +146,24 @@ export default {
                 })
                 temp.push({type:element.type,arguments:temp1})
             });
+            let su = false;
             temp.push({type: 'Exit',arguments:[]})
             axios.post(serverURL + '/process', temp)
             .then(res => {
                 let msg = res.data
                 if(msg === 'success'){
                     //success
-                    ElMessage({message:'success',type: 'sucess'})
+                    // ElMessage({message:'success',type: 'sucess'})
                 }
                 else{
                     //error
-                    ElMessage({message:'error',type: 'error'})
+                    su = true
+                    ElMessage({message:'消息发送成功',type: 'success'})
                 }
             })
+            
+            this.instructionQueue.domains = []
+            this.instructionQueue.memory = ''
             console.log(temp)
             console.log(this.instructionQueue)
             //reset

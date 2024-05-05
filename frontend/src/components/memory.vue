@@ -38,13 +38,18 @@ export default {
     return {
       data: {
         labels: ['VueJs', 'EmberJs', 'ReactJs', 'AngularJs', 'JavaScript'],
-        memory:{
-          strategy: 'LRU',
-          free_pages: {},
-          lru_caches: [],
-          swaped_page_count: 0,
-          swaped_used_count: 0,
-          used_pages: [{}],
+        memory: {
+          strategy: '',
+          free_blocks: [{
+            start: 0,
+            end: 1,
+            size: 1,
+          }],
+          used_memory: [{
+            start: 0,
+            end: 1,
+            size: 1,
+          }],
         },
         datasets: [
           {
@@ -53,6 +58,28 @@ export default {
           }
         ]
       },
+      details: {
+        faults: 0,
+        strategy: '',
+        free_pages: {
+          empty: false,
+        },
+        lru_cache: [{
+          page_num_physical: 2,
+          pid: 0,
+          page_num_virtual: 0,
+        }],
+        pages: 0,
+        swaped_page_count: 0,
+        swaped_used_count: 0,
+        used_pages: [{
+          size: 0,
+          allPhysicalPages: [{ 1: 1 }],
+          virtualPageCount: 0,
+        }],
+
+      },
+
       options: {
         responsive: true,
         maintainAspectRatio: false
@@ -87,15 +114,15 @@ export default {
         },],
     }
   },
-  created(){
+  created() {
     this.fetchdata()
   },
   methods: {
-    fetchdata(){
-      axios.get(serverURL+'/memory')
-      .then(response => {
-        console.log(response.data)
-      })
+    fetchdata() {
+      axios.get(serverURL + '/memory')
+        .then(response => {
+          console.log(response.data)
+        })
     }
   },
 }

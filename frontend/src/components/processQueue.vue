@@ -1,5 +1,5 @@
 <template>
-  <el-table-v2 :columns="columns" :data="rowData" :width="700" :height="400" fixed />
+  <el-table-v2 :columns="columns" :data="rowData" :width="700" :height="600" fixed />
 </template>
 
 <script setup>
@@ -65,9 +65,10 @@ export default {
     },
     transformData(data) {
       let temp = [];
-      
+      let filteredQueues = data.Waiting_Queues.slice(0, 6)
       // 添加设备名称行
-      data.Waiting_Queues.forEach((queue, index) => {
+      // data.Waiting_Queues.forEach((queue, index) => {
+        filteredQueues.forEach((queue, index) => {
         let deviceName = this.deviceMapping[index];
         temp.push({ [deviceName]: queue });
       });
