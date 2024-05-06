@@ -38,7 +38,7 @@ export default {
     return {
       componentkey: 0,
       data: {
-        labels: ['VueJs', 'EmberJs', 'ReactJs', 'AngularJs'],
+        labels: ['VueJs'],
 
         datasets:
           [{
@@ -132,7 +132,7 @@ export default {
   created() {
     this.fetchdata()
     console.log(this.temp)
-    this.paintcon()
+    // this.paintcon()
     // .then()
     
   },
