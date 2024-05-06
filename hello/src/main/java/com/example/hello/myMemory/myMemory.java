@@ -158,12 +158,12 @@ public class myMemory {
                 memoryStatus.addDetail("used_memory", ((ContiguousAllocator) allocator).used_memory);
                 break;
             case Page:
-                memoryStatus.addDetail("free_pages", ((PageAllocator) allocator).page_table.free_pages);
+                memoryStatus.addDetail("free_pages", ((PageAllocator) allocator).page_table.free_pages.toString());
                 memoryStatus.addDetail("used_pages", ((PageAllocator) allocator).page_table.used_pages);
                 break;
             case LRU:
             case FIFO:
-                memoryStatus.addDetail("free_pages", ((DemandPageAllocator) allocator).page_table.free_pages);
+                memoryStatus.addDetail("free_pages", ((DemandPageAllocator) allocator).page_table.free_pages.toString());
                 memoryStatus.addDetail("lru_cache", ((DemandPageAllocator) allocator).page_table.cache.cache);
                 memoryStatus.addDetail("used_pages", ((DemandPageAllocator) allocator).page_table.used_pages);
                 memoryStatus.addDetail("swapped_page_count", ((DemandPageAllocator) allocator).page_table.swap_partition.page_count);

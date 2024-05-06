@@ -22,6 +22,7 @@ export default {
       memory: '',
       type1: [
         { label: 'FirstFit', value: 'FirstFit' },
+        {label: 'NextFit', value: 'NextFit'},
         { label: 'BestFit', value: 'BestFit' },
         { label: 'WorstFit', value: 'WorstFit' },
         { label: 'Page', value: 'Page' },
