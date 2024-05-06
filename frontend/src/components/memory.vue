@@ -31,14 +31,14 @@ ChartJS.register(ArcElement, Tooltip, Legend)
 <script>
 export default {
 
-  components: {
-    Pie
-  },
+  // components: {
+  //   Pie
+  // },
   data() {
     return {
       componentkey: 0,
       data: {
-        labels: ['VueJs'],
+        labels: [],
 
         datasets:
           [{
@@ -131,32 +131,51 @@ export default {
   },
   created() {
     this.fetchdata()
-    console.log(this.temp)
+    // console.log(this.temp)
     // this.paintcon()
     // .then()
     
   },
-  computed: {
-    mappedItems() {
-      return Object.entries(this.mapper).map(([key, value]) => ({
-        key,
-        value
-      }));
-    }
-  },
+  
   methods: {
     fetchdata() {
       axios.get(serverURL + '/memory')
         .then(response => {
           console.log(response.data)
           if (this.continueallocate.includes(response.data.strategy)) {
-            this.memory = response.data
-            this.memory.used_memory.forEach(memory => {
-              this.data.datasets[0].data.push(memory.size)
-              this.data.labels.push('pid-' + memory.key)
-              // console.log(this.data.datasets[0].data)
+            console.log(response.data)
+            this.memory = response.data.details
+            this.temp = Object.entries(this.memory.used_memory).map(([key, value]) => ({
+              key,
+              value
+            }))
+            // this.temp = []
+            let temp = []
+            this.memory.free_blocks.forEach((block)=>{
+              this.temp.push({key:'free',value:block})
             })
-            this.data.datasets[0].data.push(this.memory.free_blocks[0].size)
+            this.temp.sort((a, b) =>a.value.start - b.value.start)
+            this.temp.forEach(item=>{
+              console.log(item.key)
+              console.log(item.value.size)
+              temp.push(item.value.size)
+              let data = item.key
+              if(item.key === 'free'){
+                this.data.labels.push(data)
+              }
+              else
+              this.data.labels.push('pid-'+data)
+            })
+            console.log(temp)
+            this.data.datasets[0].data = temp
+            
+            this.componentkey++
+            // this.memory.used_memory.forEach(memory => {
+            //   this.data.datasets[0].data.push(memory.size)
+            //   this.data.labels.push('pid-' + memory.key)
+            //   // console.log(this.data.datasets[0].data)
+            // })
+            // this.data.datasets[0].data.push(this.memory.free_blocks[0].size)
             //将数据处理好塞到data中
             //
           }
@@ -169,27 +188,21 @@ export default {
             }))
             console.log(this.temp)
             console.log(this.data)
+            let sum = 0
             this.temp.forEach(item=>{
               console.log(item.key)
               console.log(item.value.size)
               temp.push(item.value.size)
               let data = item.key
-              
+              sum += item.value.size
               this.data.labels.push('pid-'+data)
             })
             console.log(temp)
+            temp.push(4096-sum)
+            this.data.labels.push('free')
             this.data.datasets[0].data = temp
             console.log(this.data,'a')
             this.componentkey++
-            // console.log(this.details.used_pages[1].size)
-            // this.data.label.push("data")
-            // this.data.datasets.data.push(1)
-            // this.details.used_pages.forEach(page => 
-            // {
-            // this.data.labels.push('page-' + page.key)
-            // this.data.datasets[0].data.push(page.size)
-            // console.log(page)
-            // })
             //将数据处理好塞入data中
           }
         })
