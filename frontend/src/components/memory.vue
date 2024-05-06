@@ -1,6 +1,6 @@
 <template>
   <div style="height: 50vh;width: 50vw;margin: auto;align-items: center;">
-    <Doughnut :data="data" :options="options" />
+    <Doughnut :data="data" :options="options" :key="componentkey"/>
   </div>
   <el-table :data="tableData" style="width: 100%;margin-top: 20px;">
     <el-table-column fixed prop="date" label="Date" width="150" />
@@ -36,6 +36,7 @@ export default {
   },
   data() {
     return {
+      componentkey: 0,
       data: {
         labels: ['VueJs', 'EmberJs', 'ReactJs', 'AngularJs'],
 
@@ -131,6 +132,7 @@ export default {
   created() {
     this.fetchdata()
     console.log(this.temp)
+    this.paintcon()
     // .then()
     
   },
@@ -160,7 +162,7 @@ export default {
           }
           else {
             this.details = response.data.details
-            
+            let temp =[]
             this.temp = Object.entries(this.details.used_pages).map(([key, value]) => ({
               key,
               value
@@ -170,14 +172,15 @@ export default {
             this.temp.forEach(item=>{
               console.log(item.key)
               console.log(item.value.size)
-              // temp.push()
+              temp.push(item.value.size)
               let data = item.key
               
-              this.data.labels.push(data)
+              this.data.labels.push('pid-'+data)
             })
-            // console.log(temp)
-            // this.data.datasets[0].data = temp
-            
+            console.log(temp)
+            this.data.datasets[0].data = temp
+            console.log(this.data,'a')
+            this.componentkey++
             // console.log(this.details.used_pages[1].size)
             // this.data.label.push("data")
             // this.data.datasets.data.push(1)
@@ -198,7 +201,7 @@ export default {
         // console.log(this.data.datasets[0].data)
       })
       this.data.datasets[0].data.push(this.memory.free_blocks[0].size)
-      this.data.datasets[0].data.push(this.temp[0].value.size)
+      // this.data.datasets[0].data.push(this.temp[0].value.size)
     }
   },
 }
