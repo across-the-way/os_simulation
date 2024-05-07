@@ -23,6 +23,9 @@ public enum TerminalCallType {
     // 输出当前文件内容
     cat,
 
+    // 修改文件的读写权限
+    chmod,
+
     // 其他消息
     err
 }

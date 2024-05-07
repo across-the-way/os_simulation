@@ -163,7 +163,7 @@ public class myKernel implements Runnable {
         fs.update();
         io.update();
 
-        test.doTest();
+        // test.doTest();
     }
 
     private void timeout(Object[] objects) {

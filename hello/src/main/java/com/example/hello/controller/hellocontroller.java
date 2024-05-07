@@ -48,8 +48,8 @@ public class hellocontroller {
         return true;
     }
 
-    @PostMapping("/resetMemoryStrategy")
-    public Boolean rebootSystem(@RequestBody allocateStrategy strategy) {
+    @GetMapping("/resetMemoryStrategy")
+    public Boolean rebootSystem(allocateStrategy strategy) {
         kernel.stop();
         this.sysData.MMstrategy = strategy;
         kernel.start();
@@ -111,7 +111,7 @@ public class hellocontroller {
     public List<Inode> getFilesystem(@RequestBody Location location) {
         location.setLocation(location.getLocation().substring(1));
         return this.kernel.getFs().filelist(location.getLocation());
-    }// 把这里的string改成List<Inode>应该就可以用了
+    }
 
     @GetMapping("/device")
     public List<Device> getDevice() {

@@ -4,7 +4,7 @@ import com.example.hello.controller.myKernel;
 import com.example.hello.myInterrupt.InterruptType;
 import com.example.hello.myInterrupt.myInterrupt;
 
-import java.io.File;
+import java.io.*;
 import java.io.IOException;
 import java.util.*;
 
@@ -51,7 +51,7 @@ public class myFile {
 
     private Queue<queueEntry> rwqueue;
 
-    public boolean allocate(Inode file, int fileSize, int pid) {
+    public int allocate(Inode file, int fileSize) {
         for (int key : spaceTable.keySet()) {
             int freeSize = spaceTable.get(key);
             if (freeSize >= fileSize) {
@@ -63,12 +63,10 @@ public class myFile {
                 Arrays.fill(bitmap, key, key + fileSize, true);
                 // 更新Inode的storage
                 file.putStorage(key, fileSize);
-                // 加入读写队列
-                rwqueue.offer(new queueEntry(file, 1, key, fileSize, pid));
-                return true;
+                return key;
             }
         }
-        return false;
+        return -1;
     }
 
     public int allocate1(Inode file, int fileSize, int pid) {
@@ -110,6 +108,8 @@ public class myFile {
 
         String currentpath = "./filesystem/";
         recursive_open(root, currentpath);
+        currentpath= "./filesystem";
+        InitFileContent(root, currentpath);
     }
 
     private int move_need = 1;// 假设移动一格磁盘块需要一个操作数
@@ -285,6 +285,7 @@ public class myFile {
     public boolean touch(String parent_name, String file_name) {
         if (parent_name.isEmpty()) {
             // 路径为空
+            System.out.println("touch:路径为空");
             return false;
         }
         // 寻找父目录
@@ -292,6 +293,7 @@ public class myFile {
         // 创建文件
         if (pInode == null) {
             // 路径错误
+            System.out.println("touch:路径错误");
             return false;
         }
         if (checkRenameError(parent_name, file_name, 1)) {
@@ -352,7 +354,7 @@ public class myFile {
     public boolean mkdir(String parent_name, String dir_name) {
         if (parent_name.isEmpty()) {
             // 路径为空
-            System.out.println("路径为空");
+            System.out.println("mkdir:路径为空");
             return false;
         }
         // 寻找父目录
@@ -360,6 +362,7 @@ public class myFile {
         // 创建目录
         if (pInode == null) {
             // 路径错误
+            System.out.println("mkdir:路径错误");
             return false;
         }
         if (checkRenameError(parent_name, dir_name, 0)) {
@@ -381,14 +384,16 @@ public class myFile {
 
     public boolean rmdir(String parent_name, String dir_name) {
         if (parent_name.isEmpty()) {
-            // 路径为空触发中断
+            // 路径为空
+            System.out.println("rmdir:路径为空");
             return false;
         }
         // 寻找父目录
         Inode pInode = findInode(parent_name);
 
         if (pInode == null) {
-            
+            // 路径错误
+            System.out.println("rmdir:路径错误");
             return false;
         }
         // 递归释放文件夹中所有文件的磁盘空间
@@ -426,7 +431,7 @@ public class myFile {
     }
 
     public int open(int pid, String path) {
-        // 先默认都是读写模式打开
+        // 默认都是读写模式打开
         return ftable.open(pid, path, 2);
     }
 
@@ -434,21 +439,19 @@ public class myFile {
         ftable.close(pid, fd);
     }
 
-    // public void write(int pid, int fd, int usage_size) {
-    // String path = ftable.findInodeByFd(fd);
-    // Inode file = findInode(path);
-    // if (file != null) {
-    // allocate(file, usage_size, pid);
-    // }
-    // }
-
     public void write(int pid, int fd, String s) {
         String path = ftable.findInodeByFd(fd);
         Inode file = findInode(path);
+        if (file.getImode() == 0) {
+            // 文件为只读文件,不予写入
+            System.out.println("write:权限不足,File-" + file.getName() + "写入失败");
+            return;
+        }
         int usage_size = (s.length() + 3) / 4;
         int startBlock;
         char[] data;
         if (file != null) {
+            writeFile("./" + path, s);
             startBlock = allocate1(file, usage_size, pid);
             data = s.toCharArray();
             int i = 0, curBlock = startBlock;
@@ -573,5 +576,77 @@ public class myFile {
             }
         }
         return res;
+    }
+
+    public void writeFile(String name, String content) {
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(name, true));
+            writer.write(content);
+            // writer.newLine();//换行
+            writer.close();
+            System.out.println("写入文件成功:" + name);
+        } catch (IOException e) {
+            System.out.println("写入文件错误:" + name);
+        }
+    }
+
+    public String changeImode(String path, String filename) {
+        Inode inode = findInode(path).getDirectoryEntries().get(filename);
+        if (inode == null) {
+            return "没有该文件";
+        } else if (inode.getType() == 0) {
+            return "无法修改权限";
+        }
+
+        int currentImode = inode.getImode();
+        inode.setImode(currentImode == 0 ? 1 : 0);
+
+        StringBuilder message = new StringBuilder(inode.getName() + ": ");
+        message.append("文件权限已改为");
+        message.append(currentImode == 0 ? "读写!!!" : "只读!!!");
+        return message.toString();
+    }
+
+    public void InitFileContent(Inode node, String currentpath) {
+        for (Inode child : node.getDirectoryEntries().values()) {
+            if (child.getType() == 1) {
+                String filePath = currentpath + "/" + child.getName();
+                StringBuilder content = new StringBuilder();
+                try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        content.append(line);
+                    }
+                } catch (IOException e) {
+                    System.out.println("InitFileContent:尝试打开文件时出错");
+                }
+
+                int usage_size;
+                int startBlock;
+                char[] data = content.toString().toCharArray();
+                if (data.length != 0) {
+                    // 文件内容不为空
+                    usage_size = (data.length + 1) / 4;
+                    if ((startBlock = allocate(child, usage_size)) != -1) {
+                        int i = 0, curBlock = startBlock;
+                        for (char c : data) {
+                            if (i == 4) {
+                                i = 0;
+                                block[curBlock].usedByte = 4;
+                                curBlock++;
+                            }
+                            block[curBlock].data[i] = c;
+                            i++;
+                        }
+                        block[curBlock].usedByte = i;
+
+                    } else {
+                        System.out.println("剩余磁盘空间不足,无法分配");
+                    }
+                }
+            } else {
+                InitFileContent(child, currentpath + "/" + child.getName());
+            }
+        }
     }
 }

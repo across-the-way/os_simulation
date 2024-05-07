@@ -50,6 +50,19 @@ public class Terminalfunc {
         }
         kernel.terminal_update = true;
     }
+    
+    public static void Terminalchmod(Object[] objects, myKernel kernel) {
+        if (objects.length != 1) {
+            kernel.terminal_message = "参数不符合要求!";
+            kernel.terminal_update = true;
+            return;
+        }
+        String curpath = kernel.getFs().getCurPath();
+        String fileName = (String) objects[0];
+        String content = kernel.getFs().cat(curpath, fileName);
+        kernel.terminal_message = content;
+        kernel.terminal_update = true;
+    }
 
     public static void Terminalrm(Object[] objects, myKernel kernel) {
         if (objects.length == 2) {

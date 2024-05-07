@@ -49,13 +49,7 @@ public class Inode {
         directoryEntries.remove(name);
     }
 
-    // public int getStartBlock() {
-    // return startBlock;
-    // }
-    //
-    // public int getBlockSize() {
-    // return blockSize;
-    // }
+
     public void putStorage(int startBlock, int blockSize) {
         storage.put(startBlock, blockSize);
     }
@@ -75,4 +69,9 @@ public class Inode {
     public int getType() {
         return type;
     }
+
+    public void setImode(int imode) {
+        this.imode = imode;
+    }
+    
 }
