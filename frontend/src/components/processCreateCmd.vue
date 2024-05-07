@@ -39,10 +39,10 @@ export default {
                     console.log(response.data);
                     this.responseData = response.data
                     if(response.data==='success'){
-                        ElMessage({message:'success', type: 'success'})
+                        // ElMessage({message:'success', type: 'success'})
                     }
                     else{
-                        ElMessage({message:'error',type:'error'})
+                        ElMessage({message:'消息发送成功',type:'success'})
                     }
                 })
                 .catch(error => {

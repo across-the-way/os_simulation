@@ -313,10 +313,10 @@ class DemandPageAllocator extends MemoryAllocator {
             tail.prev = head;
         }
         class Node {
-            int page_num_physical;
-            int pid;
-            int page_num_virtual;
-            LRUCache.Node prev, next;
+            public int page_num_physical;
+            public int pid;
+            public int page_num_virtual;
+            public transient LRUCache.Node prev, next;
             Node() {}
             Node(int page_num_physical, int pid, int page_num_virtual) {
                 this.page_num_physical = page_num_physical;

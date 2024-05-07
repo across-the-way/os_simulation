@@ -129,8 +129,13 @@ public class myProcess {
                     p.pc += this.kernel.getSysData().InstructionLength;
                 }
                 p.ir.ModifyArgument(0, remain_burst);
-                System.out.println("Process" + p.p_id + "is running !CPU burst: remain"
+                System.out.println("Process " + p.p_id + " is running !CPU burst: remain "
                         + remain_burst * this.kernel.getSysData().SystemPulse + "ms");
+                break;
+            case InstructionType.AccessMemory:
+                int virtual_address = (int) p.ir.getArguments()[0];
+                this.kernel.getMm().accessMemory(p.p_id, virtual_address);
+                p.pc += this.kernel.getSysData().InstructionLength;
                 break;
             // 若指令为文件读写或IO读写
             // 转换当前进程状态从running为waiting，移入等待队列

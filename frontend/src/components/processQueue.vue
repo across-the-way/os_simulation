@@ -1,5 +1,9 @@
 <template>
-  <el-table-v2 :columns="columns" :data="rowData" :width="700" :height="400" fixed />
+  <el-auto-resizer>
+    <template #default="{ height, width }">
+  <el-table-v2 :columns="columns" :data="rowData" :width="width" :height="height" fixed />
+</template>
+</el-auto-resizer>
 </template>
 
 <script setup>
@@ -18,24 +22,10 @@ export default {
         3: 'FileWrite',
         4: 'ForkWait',
         5: 'Semaphore',
-        6: 'NewDevice',
-        7: 'NewDevice',
-        8: 'NewDevice',
-        9: 'NewDevice',
       },
-      processQueues: [
-        { 'name1': [1, 2] },
-        { 'name2': [1, 2] },
-        { 'name3': [3, 4, 5] },
-      ],
-      columns: [1,1,2,3],
-      res: {
-        Waiting_Queues: [[1,2,3],[1,8],[1,3],[1,4,3],[],[1,8]],
-        Second_Queue: [1,3,4],
-        Swapped_Ready_Queue: [2,7,5],
-        Swapped_Waiting_Queue:[3,5],
-        Ready_Queue: [5,1],
-        },
+      processQueues: [],
+      columns: [],
+      res: {},
       rowData: [],
     }
   },
@@ -65,9 +55,10 @@ export default {
     },
     transformData(data) {
       let temp = [];
-      
+      let filteredQueues = data.Waiting_Queues.slice(0, 6)
       // 添加设备名称行
-      data.Waiting_Queues.forEach((queue, index) => {
+      // data.Waiting_Queues.forEach((queue, index) => {
+        filteredQueues.forEach((queue, index) => {
         let deviceName = this.deviceMapping[index];
         temp.push({ [deviceName]: queue });
       });
@@ -99,7 +90,7 @@ export default {
         ...props,
         dataKey: `${prefix}${columnIndex}`,
         title: columnIndex === 0 ? 'Queue Name' : `pid`,
-        width: columnIndex === 0 ? 200 : 150,
+        width: columnIndex == 0 ? 250 : 150,
       }));
     },
   }

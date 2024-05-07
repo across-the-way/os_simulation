@@ -49,15 +49,15 @@ public class hellocontroller {
     }
 
     @GetMapping("/resetMemoryStrategy")
-    public Boolean rebootSystem(allocateStrategy strategy) {
+    public Boolean rebootSystem(@RequestParam allocateStrategy strategy) {
         kernel.stop();
         this.sysData.MMstrategy = strategy;
         kernel.start();
         return true;
     }
 
-    @PostMapping("/resetCPUStrategy")
-    public Boolean rebootSystem(@RequestBody scheduleStrategy strategy) {
+    @GetMapping("/resetCPUStrategy")
+    public Boolean rebootSystem(@RequestParam scheduleStrategy strategy) {
         kernel.stop();
         this.sysData.CPUstrategy = strategy;
         kernel.start();
@@ -187,5 +187,4 @@ public class hellocontroller {
     public Map<String, Integer> getProcessResource(@RequestParam int pid) {
         return kernel.getPm().getResourceMap(pid);
     }
-
 }
