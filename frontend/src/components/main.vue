@@ -70,30 +70,9 @@ export default {
 </script>
 
 <template>
-  <el-form :model="form" label-width="auto" style="max-width: 600px;margin: auto;">
-
-    <el-form-item label="memory distributing method" >
-      <el-select v-model="form.memory" placeholder="please select your memory method">
-        <el-option label="FCFS" value="shanghai" />
-        <el-option label="Zone two" value="beijing" />
-
-      </el-select>
-      
-    </el-form-item>
-<el-button type="primary" @click="handSubmit1" class="button">Create</el-button>
-    <el-form-item label="process dealing method">
-      <el-select v-model="form.cpu" placeholder="please select your process method">
-        <el-option label="Zone one" value="shanghai" />
-        <el-option label="Zone two" value="beijing" />
-      </el-select>
-    </el-form-item>
-
-    <el-form-item class="button">
-      <el-button type="primary" @click="handleSubmit2">Create</el-button>
-      <el-button @click="handleSubmit3">restart</el-button>
-    </el-form-item>
-  </el-form>
-  <el-button type="primary" @click="ondelete">clear</el-button>
+  <div>
+    欢迎
+  </div>
 
 </template>
 

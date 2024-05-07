@@ -18,19 +18,7 @@ export default {
         name: '',
         type: '',
       },
-      fileLists: [
-        
-      ],
-      city: [
-        {
-          value: '文件',
-          label: '文件',
-        },
-        {
-          value: '文件夹',
-          label: '文件夹',
-        },
-      ],
+      fileLists: [],
       isSortedByDate: false,  //跟踪是否按时间排序
     }
   },
@@ -44,10 +32,7 @@ export default {
         console.log(response.data);
         this.fileLists = response.data
         this.sortFileLists();
-        fileLists1 = fileLists
-        fileLists1.forEach(item => {
-
-        })
+        
         // this.responseData = response.data
       })
       .catch(error => {
@@ -62,6 +47,9 @@ export default {
     },
     buttonText() {
       return this.operation == 'delete' ? 'cancel' : 'option';
+    },
+    perText(imode){
+      return imode == 1 ? 'read and write' : 'read only';
     }
   },
   mounted() {
@@ -267,7 +255,7 @@ export default {
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="Date" width="180">
+      <el-table-column label="Permission" width="180">
         <template #default="scope">
           <el-popover effect="light" trigger="hover" placement="top" width="190">
             <template #default>
@@ -275,7 +263,8 @@ export default {
               <div>{{ scope.row.imode }}</div>
             </template>
             <template #reference>
-              <el-tag>{{ scope.row.imode }}</el-tag>
+              <el-tag v-if="scope.row.imode == 1">read and write</el-tag>
+              <el-tag v-else>read only</el-tag>
             </template>
           </el-popover>
         </template>

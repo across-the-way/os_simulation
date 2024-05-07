@@ -2,22 +2,55 @@
   <div style="height: 50vh;width: 50vw;margin: auto;align-items: center;">
     <Doughnut :data="data" :options="options" :key="componentkey"/>
   </div>
-  <el-table :data="tableData" style="width: 100%;margin-top: 20px;">
-    <el-table-column fixed prop="date" label="Date" width="150" />
-    <el-table-column prop="name" label="Name" width="120" />
-    <el-table-column prop="state" label="State" width="120" />
-    <el-table-column prop="city" label="City" width="120" />
-    <el-table-column prop="address" label="Address" width="200" />
-    <el-table-column prop="zip" label="Zip" width="120" />
-    <el-table-column fixed="right" label="Operations" width="120">
-      <template #default>
-        <el-button link type="primary" size="small" @click="handleClick">
-          Detail
-        </el-button>
-        <el-button link type="primary" size="small">Edit</el-button>
-      </template>
-    </el-table-column>
-  </el-table>
+  
+  <el-descriptions title="User Info" style="max-width: 800px;margin: auto;background-color: white;padding: 20px;margin-top: 20px;" v-if="ioperation == 2 && strategy != 'Page'">
+    <!-- <el-descriptions-item label="Username">{{ details }}</el-descriptions-item> -->
+    <el-descriptions-item label="Telephone">{{ details.free_pages }}</el-descriptions-item>
+    <el-descriptions-item label="Place">{{ details.lru_cache }}</el-descriptions-item>
+    <el-descriptions-item label="Remarks">
+      <el-tag size="used_page">{{ temp }}</el-tag>
+    </el-descriptions-item>
+    <el-descriptions-item label="Address">
+      {{ strategy }}
+    </el-descriptions-item>
+    <el-descriptions-item label="Address">
+      {{ details.pages }}
+    </el-descriptions-item>
+    <el-descriptions-item label="Address">
+      {{ details.faults }}
+    </el-descriptions-item>
+    <el-descriptions-item label="Address">
+      {{ details.swaped_page_count }}
+
+    </el-descriptions-item>
+    <el-descriptions-item label="Address">
+      {{ details.swaped_used_count }}
+    </el-descriptions-item>
+  </el-descriptions>
+  <el-descriptions title="User Info" style="max-width: 800px;margin: auto;background-color: white;padding: 20px;margin-top: 20px;" v-else-if=" strategy == 'Page'">
+    <!-- <el-descriptions-item label="Username1">{{ this.details.used_pages }}</el-descriptions-item> -->
+    <el-descriptions-item label="Telephone">{{ this.details.free_pages }}</el-descriptions-item>
+    <el-descriptions-item label="Remarks">
+      <el-tag size="small">{{ temp }}</el-tag>
+    </el-descriptions-item>
+    <el-descriptions-item label="Address">
+      {{ strategy }}
+    </el-descriptions-item>
+  </el-descriptions>
+  <el-descriptions title="User Info2" style="max-width: 800px;margin: auto;background-color: white;padding: 20px;margin-top: 20px;" v-else>
+    <el-descriptions-item label="Username">{{ memory }}</el-descriptions-item>
+    <el-descriptions-item label="Telephone">{{ this.memory.free_blocks }}</el-descriptions-item>
+    <!-- <el-descriptions-item label="Place">{{ this.memory.free_pages }}</el-descriptions-item> -->
+    <el-descriptions-item label="Remarks">
+      <el-tag size="small">{{ memory.used_memory }}</el-tag>
+    </el-descriptions-item>
+    <el-descriptions-item label="Remarks">
+      <el-tag size="small">{{ temp }}</el-tag>
+    </el-descriptions-item>
+    <el-descriptions-item label="Address">
+      {{ strategy }}
+    </el-descriptions-item>
+  </el-descriptions>
 </template>
 
 <script setup>
@@ -39,14 +72,13 @@ export default {
       componentkey: 0,
       data: {
         labels: [],
-
         datasets:
           [{
             backgroundColor: ['#41B883', '#E46651', '#00D8FF', '#DD1B16', '#6a3f9b'],
             data: []
           }]
-
       },
+      strategy: '',
       page: false,
       memory: {
         strategy: '',
@@ -69,7 +101,7 @@ export default {
       },
       details: {
         faults: 0,
-        strategy: '',
+        // strategy: '',
         free_pages: {
           empty: false,
         },
@@ -99,6 +131,7 @@ export default {
         maintainAspectRatio: false
       },
       temp: null,
+      ioperation: 0,
       tableData: [
         {
           date: '2016-05-03',
@@ -143,8 +176,10 @@ export default {
         .then(response => {
           console.log(response.data)
           if (this.continueallocate.includes(response.data.strategy)) {
+            this.ioperation = 1
             console.log(response.data)
             this.memory = response.data.details
+            this.strategy = response.data.strategy
             this.temp = Object.entries(this.memory.used_memory).map(([key, value]) => ({
               key,
               value
@@ -180,7 +215,9 @@ export default {
             //
           }
           else {
+            this.ioperation = 2
             this.details = response.data.details
+            this.strategy = response.data.strategy
             let temp =[]
             this.temp = Object.entries(this.details.used_pages).map(([key, value]) => ({
               key,

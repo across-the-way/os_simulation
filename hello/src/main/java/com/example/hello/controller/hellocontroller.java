@@ -187,5 +187,4 @@ public class hellocontroller {
     public Map<String, Integer> getProcessResource(@RequestParam int pid) {
         return kernel.getPm().getResourceMap(pid);
     }
-
 }
