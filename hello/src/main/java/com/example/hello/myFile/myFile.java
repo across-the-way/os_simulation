@@ -24,6 +24,10 @@ public class myFile {
     public OpenFileTable getFtable() {
         return ftable;
     }
+    
+    public boolean[] getBitmap() {
+        return bitmap;
+    }
 
     public void setFtable(OpenFileTable ftable) {
         this.ftable = ftable;
@@ -628,7 +632,7 @@ public class myFile {
                 char[] data = content.toString().toCharArray();
                 if (data.length != 0) {
                     // 文件内容不为空
-                    usage_size = (data.length + 1) / 4;
+                    usage_size = (data.length + 3) / 4;
                     if ((startBlock = allocate(child, usage_size)) != -1) {
                         int i = 0, curBlock = startBlock;
                         for (char c : data) {

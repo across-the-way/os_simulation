@@ -487,6 +487,9 @@ public class myKernel implements Runnable {
             case TerminalCallType.ls:
                 Terminalfunc.Terminalls(objects, this);
                 break;
+            case TerminalCallType.chmod:
+                Terminalfunc.Terminalchmod(objects, this);
+                break;
             case TerminalCallType.cat:
                 Terminalfunc.Terminalcat(objects, this);
                 break;

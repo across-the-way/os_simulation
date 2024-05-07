@@ -59,7 +59,7 @@ public class Terminalfunc {
         }
         String curpath = kernel.getFs().getCurPath();
         String fileName = (String) objects[0];
-        String content = kernel.getFs().cat(curpath, fileName);
+        String content = kernel.getFs().changeImode(curpath, fileName);
         kernel.terminal_message = content;
         kernel.terminal_update = true;
     }
