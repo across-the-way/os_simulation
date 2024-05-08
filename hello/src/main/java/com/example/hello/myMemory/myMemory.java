@@ -172,7 +172,7 @@ public class myMemory {
                 break;
             case Page:
                 memoryStatus.addDetail("free_pages", ((PageAllocator) allocator).page_table.free_pages.toString());
-                memoryStatus.addDetail("used_pages", ((PageAllocator) allocator).page_table.used_pages.entrySet());
+                memoryStatus.addDetail("used_pages", ((PageAllocator) allocator).page_table.used_pages);
                 break;
             case LRU:
             case FIFO:

@@ -65,11 +65,10 @@ export default {
                 },
             ],
             instructiontype: [
-                    {label:'Memory',value:'Memory' }, // 参数：内存大小
+                    
                     {label:'AccessMemory',value:'AccessMemory'},  // 参数：内存地址
 
                     // 进程管理
-                    {label:'Priority',value:'Priority'},  // 参数：进程优先级
                     {label:'Calculate',value:'Calculate'},  // 参数：计算时间
                     {label:'Fork',value:'Fork'}, // 参数：子进程的入口
                     {label:'Exit',value:'Exit'},   // 参数：无

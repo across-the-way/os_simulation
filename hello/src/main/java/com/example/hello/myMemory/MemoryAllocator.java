@@ -218,8 +218,8 @@ class ContiguousAllocator extends MemoryAllocator {
 
 class PageAllocator extends MemoryAllocator{
     class PageTable {
-        Map<Integer, Pages> used_pages;
-        BitSet free_pages;
+        public Map<Integer, Pages> used_pages;
+        public BitSet free_pages;
         public PageTable(int page_count) {
             used_pages = new HashMap<>();
             free_pages = new BitSet(page_count);
