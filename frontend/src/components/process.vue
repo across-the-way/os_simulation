@@ -72,7 +72,7 @@ export default {
           // console.log(res.data);
           this.device = []
           this.device.push(res.data) 
-          console.log(this.device)
+          console.log(this.device,'a')
           this.deviceTableVisible = true
       })
     }
@@ -131,7 +131,7 @@ export default {
           <el-button size="small" @click="handleSet1(scope.row.p_id)">display</el-button>
         </template>
       </el-table-column>
-      <el-table-column label="device" width="120">
+      <el-table-column label="resource" width="120">
         <template #default="scope">
           <el-button size="small" @click="handleSet2(scope.row.p_id)">display</el-button>
         </template>
@@ -147,12 +147,12 @@ export default {
       <el-table-column property="physical_address" label="phy_addr" />
     </el-table>
   </el-dialog>
-  <el-dialog v-model="deviceTableVisible" title="device" width="400" align-center>
+  <el-dialog v-model="deviceTableVisible" title="resource" width="400" align-center>
     <el-table :data="device">
       <el-table-column property="keyboard" label="keyboard" />
       <el-table-column property="file" label="file" />
       <el-table-column property="printer" label="printer" />
-      <el-table-column property="device" label="device" />  
+      <el-table-column property="device.." label="device" />  
     </el-table>
   </el-dialog>
   </div>

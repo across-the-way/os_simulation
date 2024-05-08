@@ -1,8 +1,16 @@
 <template>
-  <div style="height: 50vh; width: 50vw; margin: auto; align-items: center">
+  <div style="height: 60vh; width: 60vw; margin: auto; align-items: center">
     <Doughnut :data="data" :options="options" :key="componentkey" />
   </div>
-
+  <el-dialog v-model="detail" title="详情" width="500" align-center>
+    <!-- {{tmp}} -->
+    <el-table :data="tmp">
+      <el-table-column property="page_num_physical" label="物理页号" />
+      <el-table-column property="pid" label="p_id" />
+      <el-table-column property="page_num_virtual" label="虚拟页号" />
+    </el-table>
+   <!-- {{ details.lru_cache}} -->
+  </el-dialog>
   <el-descriptions title="页式分配" style="
       max-width: 800px;
       margin: auto;
@@ -10,13 +18,16 @@
       padding: 20px;
       margin-top: 20px;
     " v-if="ioperation == 2 && strategy != 'Page'">
-    <el-descriptions-item label="详情">{{ visualpage }}</el-descriptions-item>
+    <el-descriptions-item label="详情">
+      <el-button @click="showdetail">展示</el-button>
+      <!-- {{ visualpage }} -->
+    </el-descriptions-item>
     
     <el-descriptions-item label="Strategy">
       {{ strategy }}
     </el-descriptions-item>
     <el-descriptions-item label="Faults">
-      {{ details.faults }}
+      {{ details.faults/details.pages }}
     </el-descriptions-item>
     <el-descriptions-item label="交换页数">
       {{ details.swapped_page_count }}
@@ -33,9 +44,6 @@
       margin-top: 20px;
     " v-else-if="strategy == 'Page'">
     <!-- <el-descriptions-item label="Username1">{{ this.details.used_pages }}</el-descriptions-item> -->
-    <el-descriptions-item label="详情">{{
-      details.free_pages
-    }}</el-descriptions-item>
     <el-descriptions-item label="Strategy">
       {{ strategy }}
     </el-descriptions-item>
@@ -125,6 +133,8 @@ export default {
       },
       temp: null,
       ioperation: 0,
+      tmp: [],
+      detail: false,
     };
   },
   created() {
@@ -141,6 +151,9 @@ export default {
   },
 
   methods: {
+    showdetail(){
+      this.detail = true
+    },
     stopfetchData() {
       clearInterval(this.timer);
     },
@@ -152,7 +165,7 @@ export default {
           console.log(response.data);
           if (this.continueallocate.includes(response.data.strategy)) {
             this.ioperation = 1;
-            console.log(response.data);
+            console.log(response.data,'test');
             this.memory = response.data.details;
             this.strategy = response.data.strategy;
             this.temp = Object.entries(this.memory.used_memory).map(
@@ -168,22 +181,20 @@ export default {
             });
             this.temp.sort((a, b) => a.value.start - b.value.start);
             this.temp.forEach((item) => {
-              console.log(item.key);
-              console.log(item.value.size);
               temp.push(item.value.size);
               let data = item.key;
               if (item.key === "free") {
                 this.data.labels.push(data);
               } else this.data.labels.push("pid-" + data);
             });
-            console.log(temp);
+            // console.log(temp);
             this.data.datasets[0].data = temp;
 
             this.componentkey++;
             //将数据处理好塞到data中
           }
           else if(response.data.strategy == 'Page'){
-            // console.log(response.data.details)
+            console.log(response.data.details)
             this.details = response.data.details
             this.strategy = 'Page'
             let temp = []
@@ -198,25 +209,14 @@ export default {
               })
             );
             up.forEach(item => {
-              // console.log(typeof(item))
               temp.push(item.value.size);
               this.data.labels.push('pid-'+ item.key)
               sum += item.value.size
-              // map.set(item.keys(),item.values())
-              // console.log(tmp[1])
-              // console.log(Object.entries(item)[1])
-              // temp.push(tmp[1].size)
-              // this.data.labels.push('pid-'+tmp[0])
-              // console.log(Object.entries(item),'a')
             })
-            // tmp.forEach(item =>{
-            //   console.log(item.keys())
-            // })
-            console.log(map, 'a')
             temp.push(4096-sum)
             this.data.datasets[0].data = temp
             this.data.labels.push('free')
-            console.log(temp)
+            // console.log(temp)
             this.componentkey++
           } 
           else {
@@ -234,6 +234,10 @@ export default {
             let addressMap = new Map();
             let virtualPageMap = new Map();
             let lastPid = null; //////////////////////////////
+            lruCache.forEach(item => {
+              // console.log(item.value)
+              this.tmp.push(item.value);
+            })
             lruCache.forEach((item) => {
               //处理物理地址和大小
               const physicalAddress = item.value.page_num_physical * 8; // 乘以8得到物理地址
@@ -288,7 +292,7 @@ export default {
               pages: pages,
             }));
 
-            console.log(this.temp, "aa");
+            // console.log(this.temp, "aa");
 
             //处理temp
             this.temp = Array.from(addressMap, ([pid, segments]) => {
@@ -308,26 +312,18 @@ export default {
               this.data.labels.push(`pid-${segment.pid}`);
               temp.push(segment.size);
             });
-            console.log(temp);
+            // console.log(temp);
             temp.push(4096 - sum);
             this.data.labels.push("free");
+            
             this.data.datasets[0].data = temp;
-            console.log(this.data, "a");
+            // console.log(this.data, "a");
             this.componentkey++;
             //将数据处理好塞入data中
           }
         });
       }, 5000)
 
-    },
-    paintcon() {
-      this.memory.used_memory.forEach((memory) => {
-        this.data.datasets[0].data.push(memory.size);
-        this.data.labels.push("memory.key");
-        // console.log(this.data.datasets[0].data)
-      });
-      this.data.datasets[0].data.push(this.memory.free_blocks[0].size);
-      // this.data.datasets[0].data.push(this.temp[0].value.size)
     },
   },
 };

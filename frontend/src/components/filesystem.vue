@@ -120,14 +120,25 @@ export default {
       }
     },
     handleDelete(index, data) {
-      
-      axios.post(serverURL + '/terminal',['rm',data.name])
+      if(data.type ==1){
+        axios.post(serverURL + '/terminal',['rm',data.name])
       .then((response)=>{
         console.log(response.data)
       })
       .catch(error => {
           console.log(error)
         })
+      }
+      else{
+        axios.post(serverURL + '/terminal',['rm','-r',data.name])
+      .then((response)=>{
+        console.log(response.data)
+      })
+      .catch(error => {
+          console.log(error)
+        })
+      }
+      
       this.fileLists.splice(index, 1)
     },
     handleReset(){
