@@ -68,21 +68,17 @@ export const tercmd = [
         "key": "rm",
         "title": "Help",
         "group": "filesystem",
-        "usage": "help [pattern]",
-        "description": "Show command document.",
+        "usage": "rm [pattern]",
+        "description": "Delete sth.",
         "example": [
           {
-            "des": "Get help documentation for exact match commands.",
-            "cmd": "help open"
+            "des": "Delete the file.",
+            "cmd": "rm file.txt"
           },
           {
-            "des": "Get help documentation for fuzzy matching commands.",
-            "cmd": "help *e*"
+            "des": "Delete the folder.",
+            "cmd": "rm -r folder"
           },
-          {
-            "des": "Get help documentation for specified group, match key must start with ':'.",
-            "cmd": "help :groupA"
-          }
         ]
       },
       {
