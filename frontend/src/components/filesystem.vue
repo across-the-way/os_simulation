@@ -212,7 +212,7 @@ export default {
       </div>
     </template>
   </el-dialog>
-  <div style="padding: 10rem;padding-bottom: 20px;">
+  <div style="padding: 1rem;padding-bottom: 20px;">
   
     <div class="fileheader">
       <el-breadcrumb separator="/" class="left-aligned" style="display: inline-flex;margin-left: 8px;">
