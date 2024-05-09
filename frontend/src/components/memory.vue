@@ -233,6 +233,7 @@ export default {
             let sum = 0;
             let addressMap = new Map();
             let virtualPageMap = new Map();
+            this.tmp = []
             let lastPid = null; //////////////////////////////
             lruCache.forEach(item => {
               // console.log(item.value)
