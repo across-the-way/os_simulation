@@ -9,15 +9,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import com.example.hello.myInstrunction.Instruction;
 import com.example.hello.myInterrupt.InterruptType;
 import com.example.hello.myInterrupt.SystemCallType;
 import com.example.hello.myInterrupt.myInterrupt;
 import com.example.hello.myProcess.PCB;
 import com.example.hello.myProcess.ProcessQueue;
-import com.example.hello.myProcess.PCB.P_STATE;
 import com.example.hello.myTerminal.TerminalCallType;
 import com.example.hello.SysConfig.SysData;
 import com.example.hello.myDevice.*;
@@ -34,6 +31,16 @@ public class hellocontroller {
     public hellocontroller() {
         // 系统数据初始化
         this.sysData = new SysData();
+
+        // 运行
+        kernel = myKernel.getInstance();
+        kernel.setConfig(this.sysData);
+        kernel.start();
+    }
+
+    public void initialize(String configFilePath) {
+        // 系统数据初始化
+        this.sysData = new SysData(configFilePath);
 
         // 运行
         kernel = myKernel.getInstance();

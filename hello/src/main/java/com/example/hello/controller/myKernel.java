@@ -102,6 +102,7 @@ public class myKernel implements Runnable {
             while (!queue.isEmpty()) {
                 // System.out.println(queue.size());
                 myInterrupt interrupt = queue.poll();
+                if (interrupt == null) break;
                 switch (interrupt.getType()) {
                     // 需要对objects具体化，待完善
                     case TimerInterrupt:
@@ -162,7 +163,7 @@ public class myKernel implements Runnable {
         mm.update();
         fs.update();
         io.update();
-
+        System.out.println(sysData.CPUstrategy.toString() + " " + sysData.MMstrategy.toString());
         // test.doTest();
     }
 

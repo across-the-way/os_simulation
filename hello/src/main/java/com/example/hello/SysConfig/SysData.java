@@ -4,6 +4,9 @@ import com.example.hello.myFile.*;
 import com.example.hello.myMemory.*;
 import com.example.hello.myProcess.*;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.Semaphore;
 
@@ -64,7 +67,7 @@ public class SysData {
         Second_Queue_Threshold = 1000;
 
         LongTermScale = 100;
-        MidTermScale = 10;
+        MidTermScale = 100;
 
         CPUstrategy = scheduleStrategy.MLFQ;
 
@@ -76,8 +79,8 @@ public class SysData {
 
         MMstrategy = allocateStrategy.LRU;
 
-        Memory_Size = 4096;
-        Page_Size = 8;
+        Memory_Size = 1536;
+        Page_Size = 512;
 
         Printer_Number = 3;
         Keyboard_Number = 3;
@@ -87,6 +90,76 @@ public class SysData {
 
         Test_Max_Line = 10;
         Test_Max_Time = 10;
+    }
+
+    public SysData(String configFilePath) {
+        SystemPulse = 1000;
+
+        InstructionLength = 4;
+
+        Second_Queue_Threshold = 1000;
+
+        LongTermScale = 100;
+        MidTermScale = 100;
+
+        CPUstrategy = scheduleStrategy.MLFQ;
+
+        LongTerm_CeilThreshold = 20;
+        LongTerm_FloorThreshold = 3;
+
+        MidTerm_CeilThreshold = 0.8;
+        MidTerm_FloorThreshold = 0.3;
+
+        MMstrategy = allocateStrategy.LRU;
+
+        Memory_Size = 1536;
+        Page_Size = 512;
+
+        Printer_Number = 3;
+        Keyboard_Number = 3;
+        OtherDevice_Number = 10;
+
+        if (!configFilePath.isEmpty()) {
+            loadConfigFromFile(configFilePath);
+        }
+
+        InitResourcemap();
+
+        Test_Max_Line = 10;
+        Test_Max_Time = 10;
+    }
+
+    private void loadConfigFromFile(String configFilePath) {
+        try (BufferedReader br = new BufferedReader(new FileReader(configFilePath))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split("=");
+                if (parts.length != 2) {
+                    continue;
+                }
+                String key = parts[0].trim();
+                String value = parts[1].trim();
+                switch (key) {
+                    case "SystemPulse": SystemPulse = Integer.parseInt(value);break;
+                    case "InstructionLength": InstructionLength = Integer.parseInt(value);break;
+                    case "Second_Queue_Threshold": Second_Queue_Threshold = Integer.parseInt(value);break;
+                    case "LongTermScale": LongTermScale = Integer.parseInt(value);break;
+                    case "MidTermScale": MidTermScale = Integer.parseInt(value);break;
+                    case "LongTerm_CeilThreshold": LongTerm_CeilThreshold = Integer.parseInt(value);break;
+                    case "LongTerm_FloorThreshold": LongTerm_FloorThreshold = Integer.parseInt(value);break;
+                    case "MidTerm_CeilThreshold": MidTerm_CeilThreshold = Double.parseDouble(value);break;
+                    case "MidTerm_FloorThreshold": MidTerm_FloorThreshold = Double.parseDouble(value);break;
+                    case "Memory_Size": Memory_Size = Integer.parseInt(value);break;
+                    case "Page_Size": Page_Size = Integer.parseInt(value);break;
+                    case "Printer_Number": Printer_Number = Integer.parseInt(value);break;
+                    case "Keyboard_Number": Keyboard_Number = Integer.parseInt(value);break;
+                    case "OtherDevice_Number": OtherDevice_Number = Integer.parseInt(value);break;
+                    default: System.out.println("invalid config keyword : " + key);break;
+                }
+            }
+        } catch (IOException | NumberFormatException e) {
+            e.printStackTrace();
+        }
     }
 
     public void InitResourcemap() {
