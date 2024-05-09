@@ -1,6 +1,6 @@
 package com.example.hello.myDevice;
 
-import java.util.*;
+import java.util.LinkedList;
 
 public class Device {
     private String type;

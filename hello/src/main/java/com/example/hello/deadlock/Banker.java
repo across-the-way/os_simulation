@@ -1,8 +1,8 @@
 package com.example.hello.deadlock;
 
-import java.util.*;
+import com.example.hello.myProcess.PCB;
 
-import com.example.hello.myProcess.*;
+import java.util.*;
 
 public class Banker {
     public Map<String, Integer> available;

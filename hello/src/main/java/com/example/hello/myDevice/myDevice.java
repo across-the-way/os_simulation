@@ -4,7 +4,8 @@ import com.example.hello.controller.myKernel;
 import com.example.hello.myInterrupt.InterruptType;
 import com.example.hello.myInterrupt.myInterrupt;
 
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
 
 public class myDevice {
     private myKernel kernel;

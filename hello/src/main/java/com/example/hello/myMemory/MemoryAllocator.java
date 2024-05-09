@@ -1,8 +1,8 @@
 package com.example.hello.myMemory;
 
-import java.util.*;
-
 import org.apache.commons.lang3.tuple.Pair;
+
+import java.util.*;
 
 public abstract class MemoryAllocator {
     protected int total_memory_size;

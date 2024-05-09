@@ -1,10 +1,5 @@
 package com.example.hello.myProcess;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
 import com.example.hello.controller.myKernel;
 import com.example.hello.myInstrunction.Instruction;
 import com.example.hello.myInstrunction.InstructionType;
@@ -12,7 +7,11 @@ import com.example.hello.myInterrupt.InterruptType;
 import com.example.hello.myInterrupt.SystemCallType;
 import com.example.hello.myInterrupt.myInterrupt;
 import com.example.hello.myProcess.PCB.P_STATE;
-import com.example.hello.myDevice.Device;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class myProcess {
     private myKernel kernel;
