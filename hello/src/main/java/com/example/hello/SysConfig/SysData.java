@@ -1,14 +1,13 @@
 package com.example.hello.SysConfig;
 
-import com.example.hello.myFile.*;
-import com.example.hello.myMemory.*;
-import com.example.hello.myProcess.*;
+import com.example.hello.myMemory.allocateStrategy;
+import com.example.hello.myProcess.scheduleStrategy;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.Semaphore;
+import java.util.HashMap;
+import java.util.Map;
 
 public class SysData {
     // 系统时钟脉冲设置

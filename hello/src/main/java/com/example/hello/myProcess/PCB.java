@@ -1,8 +1,12 @@
 package com.example.hello.myProcess;
 
-import java.util.*;
+import com.example.hello.myInstrunction.Instruction;
+import com.example.hello.myInstrunction.InstructionType;
 
-import com.example.hello.myInstrunction.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class PCB {
     public enum P_STATE {
