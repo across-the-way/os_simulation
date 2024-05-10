@@ -1,10 +1,7 @@
 package com.example.hello.myFile;
 
-import javax.swing.*;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Queue;
 
 public class Inode {
     private String name;

@@ -9,25 +9,19 @@
 import Terminal from "vue-web-terminal"
 //  3.2.0 及 2.1.13 以后版本需要引入此样式，之前版本无需引入主题样式
 import 'vue-web-terminal/lib/theme/dark.css'
-
+import { tercmd } from "@/configjs/tercmd"
 import axios from "axios"
 import { serverURL } from "@/configjs/ServerURL"
 export default {
   data() {
     return {
-      com: [
-        'cd',
-        'git',
-        'ls',
-        'cat',
-        'rf'
-      ],
+      com: tercmd,
       content: '/root/data',
       responseData: [],
     }
   },
   created() {
-    axios.post(serverURL + '/terminal', ['pwd'])
+    axios.post(serverURL + '/api/terminal', ['pwd'])
       .then(res => {
         this.content = res.data
         console.log(this.content)
@@ -37,7 +31,7 @@ export default {
       })
   },
   updated() {
-    axios.post(serverURL + '/terminal', ['pwd'])
+    axios.post(serverURL + '/api/terminal', ['pwd'])
       .then(res => {
         this.content = res.data
       })
@@ -59,7 +53,7 @@ export default {
           temp1.push(str) // 否则就直接添加
       })
       console.log(temp1)
-      axios.post(serverURL + '/terminal', temp1)
+      axios.post(serverURL + '/api/terminal', temp1)
         .then(response => {
           console.log(response.data)
           this.responseData = response.data.split('\n')
@@ -76,7 +70,7 @@ export default {
         .catch(error => {
           console.log(error)
         })
-      axios.post(serverURL + '/terminal', ['pwd'])
+      axios.post(serverURL + '/api/terminal', ['pwd'])
         .then(res => {
           this.content = res.data
         })
@@ -88,16 +82,7 @@ export default {
         failed('Something wrong!!!')
       } else {
         let allClass = ['success', 'error', 'system', 'info', 'warning'];
-
         let clazz = allClass[2];
-
-
-        // failed({
-        //   type: 'normal',
-        //   class: 'success',
-        //   tag: 'success',
-        //   content: command
-        // })
       }
     }
   }

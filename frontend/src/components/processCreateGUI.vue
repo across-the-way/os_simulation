@@ -65,11 +65,10 @@ export default {
                 },
             ],
             instructiontype: [
-                    {label:'Memory',value:'Memory' }, // 参数：内存大小
+                    
                     {label:'AccessMemory',value:'AccessMemory'},  // 参数：内存地址
 
                     // 进程管理
-                    {label:'Priority',value:'Priority'},  // 参数：进程优先级
                     {label:'Calculate',value:'Calculate'},  // 参数：计算时间
                     {label:'Fork',value:'Fork'}, // 参数：子进程的入口
                     {label:'Exit',value:'Exit'},   // 参数：无
@@ -127,8 +126,6 @@ export default {
             }
         },
         submitForm() {
-            //ifvalid()
-            //axios
             let temp = []
             temp.push({type: 'Memory',arguments: [parseInt(this.instructionQueue.memory)]})
             temp.push({type: 'Priority',arguments: [this.instructionQueue.priority]})
@@ -148,7 +145,7 @@ export default {
             });
             let su = false;
             temp.push({type: 'Exit',arguments:[]})
-            axios.post(serverURL + '/process', temp)
+            axios.post(serverURL + '/api/process', temp)
             .then(res => {
                 let msg = res.data
                 if(msg === 'success'){

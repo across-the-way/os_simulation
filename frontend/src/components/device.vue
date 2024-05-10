@@ -13,11 +13,13 @@ export default {
       displayList: [],
       operation: 'default',
       dialogTableVisible: false,
-      
+      ioperation: false,
+      name: '',
+      mainkey: 1,
     }
   },
   created() {
-    axios.get(serverURL + '/device', {})
+    axios.get(serverURL + '/api/device', {})
       .then(response => {
         // 处理响应结果
         console.log(response.data);
@@ -37,6 +39,19 @@ export default {
     }
   },
   methods: {
+    newdevice(name){
+      console.log(name)
+      axios.post(serverURL+'/device/add',name)
+      .then(res=>{
+        console.log(res.data)
+      })
+      .catch(err=>{
+        console.log(err)
+      })
+      this.ioperation = false
+      this.name = ''
+      this.mainkey++
+    },
     handleSet(data) {
       this.dialogTableVisible = true
       this.displayList = data
@@ -86,7 +101,7 @@ export default {
       </div>
 
     </div>
-  <div><el-table :data="responseData" style="width: 100%">
+  <div><el-table :data="responseData" style="width: 100%" :key="mainkey">
       <el-table-column label="device_id" width="180">
         <template #default="scope">
           
@@ -123,6 +138,22 @@ export default {
         </template>
       </el-table-column>
     </el-table></div>
+    <el-dialog v-model="ioperation" title="apply device" width="500" align-center>
+    <el-form :model="form">
+      <el-form-item label="device name" label-width="140px">
+        <el-input v-model="name" autocomplete="off" />
+      </el-form-item>
+      
+    </el-form>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="ioperation = false">Cancel</el-button>
+        <el-button type="primary" @click="newdevice(name)">
+          Confirm
+        </el-button>
+      </div>
+    </template>
+  </el-dialog>
   <el-dialog v-model="dialogTableVisible" title="waiting Queue" width="400" align-center>
     <el-table :data="displayList">
       <el-table-column property="pid" label="p_id" />

@@ -5,7 +5,6 @@ import com.example.hello.myInterrupt.InterruptType;
 import com.example.hello.myInterrupt.myInterrupt;
 
 import java.io.*;
-import java.io.IOException;
 import java.util.*;
 
 public class myFile {

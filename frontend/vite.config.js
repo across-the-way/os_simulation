@@ -8,14 +8,14 @@ export default defineConfig({
   plugins: [
     vue(),
   ],
-  build: {
-    rollupOptions: {
-      input: {
+  // build: {
+  //   rollupOptions: {
+  //     input: {
         
-        index: 'src/main.js'
-      },
-    },
-  },
+  //       index: 'src/main.js'
+  //     },
+  //   },
+  // },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))

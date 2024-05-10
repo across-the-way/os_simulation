@@ -1,25 +1,22 @@
 package com.example.hello.controller;
 
-import java.util.Arrays;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.Semaphore;
-
 import com.example.hello.SysConfig.SysData;
-import com.example.hello.myDevice.Device;
 import com.example.hello.myDevice.myDevice;
 import com.example.hello.myFile.myFile;
 import com.example.hello.myInterrupt.SystemCallType;
 import com.example.hello.myInterrupt.myInterrupt;
 import com.example.hello.myMemory.myMemory;
 import com.example.hello.myProcess.PCB;
+import com.example.hello.myProcess.PCB.P_STATE;
 import com.example.hello.myProcess.myProcess;
 import com.example.hello.myProcess.scheduleStrategy;
-import com.example.hello.myProcess.PCB.P_STATE;
 import com.example.hello.myTerminal.TerminalCallType;
 import com.example.hello.myTerminal.Terminalfunc;
 import com.example.hello.myTest.myTest;
 
-import jakarta.websocket.OnClose;
+import java.util.Arrays;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.Semaphore;
 
 public class myKernel implements Runnable {
     private static myKernel instance;
@@ -102,6 +99,7 @@ public class myKernel implements Runnable {
             while (!queue.isEmpty()) {
                 // System.out.println(queue.size());
                 myInterrupt interrupt = queue.poll();
+                if (interrupt == null) break;
                 switch (interrupt.getType()) {
                     // 需要对objects具体化，待完善
                     case TimerInterrupt:
@@ -162,7 +160,7 @@ public class myKernel implements Runnable {
         mm.update();
         fs.update();
         io.update();
-
+        System.out.println(sysData.CPUstrategy.toString() + " " + sysData.MMstrategy.toString());
         // test.doTest();
     }
 

@@ -1,11 +1,6 @@
 package com.example.hello.myTerminal;
 
-import java.nio.file.FileSystem;
-
 import com.example.hello.controller.myKernel;
-import com.example.hello.myInterrupt.InterruptType;
-import com.example.hello.myInterrupt.SystemCallType;
-import com.example.hello.myInterrupt.myInterrupt;
 
 public class Terminalfunc {
     public static void Terminalpwd(myKernel kernel) {

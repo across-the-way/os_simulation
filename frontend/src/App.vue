@@ -82,18 +82,6 @@ export default {
       axios.get(serverURL + '/resetMemoryStrategy'+ '?strategy=' +type)
     },
   },
-  created() {
-
-    //   .then(response => {
-    //     // 处理响应结果
-    //     console.log(response.data);
-    //     this.responseData = response.data
-    //   })
-    //   .catch(error => {
-    //     // 处理错误
-    //     console.error(error);
-    //   });
-  }
 }
 
 
@@ -132,35 +120,42 @@ export default {
         <el-sub-menu index="/process">
           <template #title>
             <el-icon>
-              <location />
+              <Files />
             </el-icon>
             <span>进程</span>
           </template>
-          <el-menu-item-group title="分类">
+          
             <el-menu-item><router-link to="/process">进程详情</router-link></el-menu-item>
             <el-menu-item><router-link to="/process/queue">进程队列</router-link></el-menu-item>
             <el-menu-item index="/find"><router-link to="/process/create/cmd">创建进程（命令行）</router-link></el-menu-item>
             <el-menu-item index="1-2"><router-link to="/process/create/gui">创建进程（图形化）</router-link></el-menu-item>
-          </el-menu-item-group>
-          <el-menu-item-group title="Group Two">
-            <el-menu-item index="1-3"><router-link to="/device">设备管理</router-link></el-menu-item>
-          </el-menu-item-group>
-
-          <el-menu-item index="1-4"><router-link to="/memory">内存情况</router-link></el-menu-item>
+          
 
         </el-sub-menu>
         <el-menu-item index="1">
+          <el-icon>
+            <monitor />
+          </el-icon>
+          <router-link to="/memory">内存情况</router-link>
+        </el-menu-item>
+        <el-menu-item index="2">
+          <el-icon>
+            <SetUp />
+          </el-icon>
+          <router-link to="/device">设备管理</router-link>
+        </el-menu-item>
+        <el-menu-item index="3">
           <el-icon>
             <document />
           </el-icon>
           <router-link to="/filesystem">文件系统</router-link>
         </el-menu-item>
-        <el-menu-item index="3">
+        <!-- <el-menu-item index="3">
           <el-icon>
             <Operation />
           </el-icon>
           <router-link to="/test">测试</router-link>
-        </el-menu-item>
+        </el-menu-item> -->
         <el-menu-item index="4">
           <el-icon>
             <Switch />

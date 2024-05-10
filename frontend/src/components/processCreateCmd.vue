@@ -33,7 +33,7 @@ export default {
                 this.instructions.push(tempdir) //将处理好的指令加入数组中
             })
             console.log(this.instructions)
-            axios.post(serverURL + '/process', this.instructions)//发送指令队列
+            axios.post(serverURL + '/api/process', this.instructions)//发送指令队列
                 .then(response => {
                     // 处理响应结果
                     console.log(response.data);
@@ -63,11 +63,15 @@ export default {
         <form @submit.prevent="handleSubmit" style="margin:auto">
             <label for="name">instruction</label>
             <br>
-            <el-input v-model="formData" style="width: 240px" :rows="2" type="textarea" placeholder="Please input" />
+            <el-input v-model="formData" style="width: 440px" :rows="8" type="textarea" placeholder="Please input" />
             <div class="md4"><el-button type="primary" round @click = handleSubmit>submit</el-button></div>
 
             <br>
         </form>
     </div>
 </template>
-<style></style>
+<style>
+.md4{
+    margin-top: 20px;
+}
+</style>

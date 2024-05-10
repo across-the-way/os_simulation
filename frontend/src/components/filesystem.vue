@@ -26,7 +26,7 @@ export default {
     console.log(window.location.pathname)
     name = window.location.pathname.split('/')
     console.log(name)
-    axios.post(serverURL + '/filesystem', { location: window.location.pathname })
+    axios.post(serverURL + '/api/filesystem', { location: window.location.pathname })
       .then(response => {
         // 处理响应结果
         console.log(response.data);
@@ -120,14 +120,25 @@ export default {
       }
     },
     handleDelete(index, data) {
-      
-      axios.post(serverURL + '/terminal',['rm',data.name])
+      if(data.type ==1){
+        axios.post(serverURL + '/terminal',['rm',data.name])
       .then((response)=>{
         console.log(response.data)
       })
       .catch(error => {
           console.log(error)
         })
+      }
+      else{
+        axios.post(serverURL + '/terminal',['rm','-r',data.name])
+      .then((response)=>{
+        console.log(response.data)
+      })
+      .catch(error => {
+          console.log(error)
+        })
+      }
+      
       this.fileLists.splice(index, 1)
     },
     handleReset(){
@@ -201,7 +212,7 @@ export default {
       </div>
     </template>
   </el-dialog>
-  <div style="padding: 10rem;padding-bottom: 20px;">
+  <div style="padding: 1rem;padding-bottom: 20px;">
   
     <div class="fileheader">
       <el-breadcrumb separator="/" class="left-aligned" style="display: inline-flex;margin-left: 8px;">

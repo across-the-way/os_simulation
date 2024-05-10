@@ -1,8 +1,8 @@
 package com.example.hello.myMemory;
 
-import java.util.*;
-
 import org.apache.commons.lang3.tuple.Pair;
+
+import java.util.*;
 
 public abstract class MemoryAllocator {
     protected int total_memory_size;
@@ -218,8 +218,8 @@ class ContiguousAllocator extends MemoryAllocator {
 
 class PageAllocator extends MemoryAllocator{
     class PageTable {
-        Map<Integer, Pages> used_pages;
-        BitSet free_pages;
+        public Map<Integer, Pages> used_pages;
+        public BitSet free_pages;
         public PageTable(int page_count) {
             used_pages = new HashMap<>();
             free_pages = new BitSet(page_count);

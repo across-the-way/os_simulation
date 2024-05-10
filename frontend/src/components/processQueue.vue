@@ -22,6 +22,7 @@ export default {
         3: 'FileWrite',
         4: 'ForkWait',
         5: 'Semaphore',
+        6: 'device',
       },
       processQueues: [],
       columns: [],
@@ -55,7 +56,7 @@ export default {
     },
     transformData(data) {
       let temp = [];
-      let filteredQueues = data.Waiting_Queues.slice(0, 6)
+      let filteredQueues = data.Waiting_Queues.slice(0, 7)
       // 添加设备名称行
       // data.Waiting_Queues.forEach((queue, index) => {
         filteredQueues.forEach((queue, index) => {
@@ -65,14 +66,27 @@ export default {
       
       // 添加其他队列名称行
       temp.push({ 'Ready_Queue': data.Ready_Queue });
-      temp.push({ 'Second_Queue': data.Second_Queue });
-      temp.push({ 'Swapped_Ready_Queue': data.Swapped_Ready_Queue });
-      temp.push({ 'Swapped_Waiting_Queue': data.Swapped_Waiting_Queue });
+      let tmp1 = []
+      let tmp2 = []
+      let tmp3 = []
+      data.Second_Queue.forEach(item => {
+        tmp1.push(item.pid)
+      })
+      data.Swapped_Ready_Queue.forEach(item => {
+        tmp2.push(item.pid)
+      })
+      data.Swapped_Waiting_Queue.forEach(item => {
+        tmp3.push(item.pid)
+      })
 
+      temp.push({ 'Second_Queue': tmp1 });
+      temp.push({ 'Swapped_Ready_Queue': tmp2 });
+      temp.push({ 'Swapped_Waiting_Queue': tmp3 });
+      console.log(temp);
       return temp;
     },
     getData() {
-      axios.get(serverURL + '/process/queue')
+      axios.get(serverURL + '/api/process/queue')
         .then(res => {
           this.res = res.data;
           this.processQueues = this.transformData(this.res); // 使用新数据更新 processQueues
