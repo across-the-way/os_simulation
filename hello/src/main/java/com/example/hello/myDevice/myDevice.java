@@ -90,7 +90,10 @@ public class myDevice {
     }
 
     public void addDevice(String type, int deviceid) {
-        devices.add(new Device(type, deviceid));
+        if (!type.equals("keyboard") && !type.equals("printer") && !type.equals("device.."))
+            devices.add(new Device("device..", deviceid));
+        else
+            devices.add(new Device(type, deviceid));
     }
 
     public boolean deleteDevice(int num) {

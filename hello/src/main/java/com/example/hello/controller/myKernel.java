@@ -347,7 +347,7 @@ public class myKernel implements Runnable {
         }
 
         int pid = this.pm.ForkPCB(pp_id, index);
-        if (mm.allocate(pid, 0)) {
+        if (mm.allocate(pid, this.getPm().getPCB(pid).memory_allocate)) {
             pm.addToLongTermQueue(pid);
         } else {
             pm.deletePCB(pid);

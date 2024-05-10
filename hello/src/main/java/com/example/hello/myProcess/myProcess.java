@@ -3,7 +3,9 @@ package com.example.hello.myProcess;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Random;
 
 import com.example.hello.controller.myKernel;
 import com.example.hello.myInstrunction.Instruction;
@@ -27,6 +29,7 @@ public class myProcess {
     private int LongTermCounter;
     private int ShortTermCounter;
     private int Second_Queue_Threshold;
+    private List<Integer> buffer;
 
     Map<String, mySemaphore> SemaphoreMap;
 
@@ -38,6 +41,7 @@ public class myProcess {
         queue = new ProcessQueue();
         LongTermQueue = new ArrayList<>();
         SemaphoreMap = new HashMap<>();
+        buffer = new ArrayList<>();
 
         LongTermCounter = 0;
         ShortTermCounter = 0;
@@ -244,6 +248,30 @@ public class myProcess {
             case InstructionType.Wait:
                 break;
 
+            case InstructionType.Jump:
+                p.pc = (int) p.ir.getArguments()[0];
+                break;
+            case InstructionType.Put:
+                Random rand = new Random();
+                int randnum = rand.nextInt(1, 100);
+                this.buffer.add(randnum);
+                String msg1 = "producer " + p.p_id + ":" + randnum;
+                System.out.println(msg1);
+                // p.pc += this.kernel.getSysData().InstructionLength;
+                this.RunningtoWaiting(3);
+                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileWrite, p.p_id,
+                        "filesystem/log.txt",
+                        msg1 + "\n");
+                break;
+            case InstructionType.Get:
+                String msg2 = "consumer " + p.p_id + ":" + this.buffer.removeFirst();
+                System.out.println(msg2);
+                // p.pc += this.kernel.getSysData().InstructionLength;
+                this.RunningtoWaiting(3);
+                this.sendInterrupt(InterruptType.SystemCall, SystemCallType.FileWrite, p.p_id,
+                        "filesystem/log.txt",
+                        msg2 + "\n");
+                break;
             case InstructionType.Exit:
                 System.out.println("Process" + p.p_id + " is Exiting safely");
                 p.pc += this.kernel.getSysData().InstructionLength;
@@ -756,7 +784,7 @@ public class myProcess {
         for (PCB p : this.ProcessMap.values()) {
             // 换出进程条件：不是init进程/不是当前正在执行的进程/选择的进程不能已经处于Swapped Space
             if (p.p_id != 0 && p.p_id != this.current_pid) {
-                if (p.state != P_STATE.SWAPPED_READY && p.state != P_STATE.SWAPPED_WAITING) {
+                if (p.state == P_STATE.READY || p.state == P_STATE.WAITING) {
                     if (choose_pid == -1) {
                         choose_pid = p.p_id;
                     }
@@ -838,22 +866,32 @@ public class myProcess {
 
     void Semaphore_update() {
 
+        List<String> Remove_Name = new ArrayList<>();
+
         for (mySemaphore semaphore : this.SemaphoreMap.values()) {
             // 清空没有引用的semaphore
             if (semaphore.isClear()) {
-                this.SemaphoreMap.remove(semaphore.name);
+                Remove_Name.add(semaphore.name);
                 continue;
             }
 
             // 对于有资源的semaphore,唤醒wait的进程
-            if (semaphore.resource >= 0) {
+            if (semaphore.getCurrentUsing() == 0) {
                 int pid = semaphore.WakeProcess();
                 if (pid != -1)
                     this.waitToReady(pid);
             }
 
-            semaphore.ttl--;
+            if (semaphore.Process.isEmpty()) {
+                semaphore.ttl--;
+            } else {
+                semaphore.ttl = 120;
+            }
 
+        }
+
+        for (String name : Remove_Name) {
+            this.SemaphoreMap.remove(name);
         }
 
     }

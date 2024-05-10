@@ -49,6 +49,8 @@ public class myMemory {
 
     // 按照分配方法分配内存
     public boolean allocate(int pid, int size) {
+        if (size <= 0)
+            return false;
         // 寻找内存中满足要求空闲空间
         Memory memory = allocator.findFreeSpace(size);
         // 若能找到，
@@ -63,7 +65,6 @@ public class myMemory {
         allocator.release(pid);
     }
 
-    
     public void accessMemory(int pid, int virtual_address) {
         if (strategy != allocateStrategy.LRU && strategy != allocateStrategy.FIFO)
             return;
@@ -100,13 +101,13 @@ public class myMemory {
             return;
         MidtermCounter = (MidtermCounter + 1) % kernel.getSysData().MidTermScale;
         if (MidtermCounter == 0) {
-            //检查当前内存负载情况，
+            // 检查当前内存负载情况，
             if (isUpper()) {
-                //如果太大了，发送SWAPPEDOUT中断
+                // 如果太大了，发送SWAPPEDOUT中断
                 this.sendInterrupt(InterruptType.SwappedOut);
             }
             if (isLower()) {
-                //如果太小了，发送SWAPPEDIN中断
+                // 如果太小了，发送SWAPPEDIN中断
                 this.sendInterrupt(InterruptType.SwappedIn);
             }
         }
@@ -156,7 +157,7 @@ public class myMemory {
                 }
                 break;
         }
-        return new int[]{physical_address, page_number, frame_number};
+        return new int[] { physical_address, page_number, frame_number };
     }
 
     public MemoryStatus getMemoryStatus() {
@@ -168,19 +169,23 @@ public class myMemory {
             case BestFit:
             case WorstFit:
                 memoryStatus.addDetail("free_blocks", ((ContiguousAllocator) allocator).free_blocks);
-                memoryStatus.addDetail("used_memory", ((ContiguousAllocator) allocator).used_memory.entrySet());
+                memoryStatus.addDetail("used_memory", ((ContiguousAllocator) allocator).used_memory);
                 break;
             case Page:
                 memoryStatus.addDetail("free_pages", ((PageAllocator) allocator).page_table.free_pages.toString());
-                memoryStatus.addDetail("used_pages", ((PageAllocator) allocator).page_table.used_pages.entrySet());
+                memoryStatus.addDetail("used_pages", ((PageAllocator) allocator).page_table.used_pages);
                 break;
             case LRU:
             case FIFO:
-                memoryStatus.addDetail("free_pages", ((DemandPageAllocator) allocator).page_table.free_pages.toString());
+                memoryStatus.addDetail("free_pages",
+                        ((DemandPageAllocator) allocator).page_table.free_pages.toString());
                 memoryStatus.addDetail("lru_cache", ((DemandPageAllocator) allocator).page_table.cache.cache);
-                memoryStatus.addDetail("used_pages", ((DemandPageAllocator) allocator).page_table.used_pages.entrySet());
-                memoryStatus.addDetail("swapped_page_count", ((DemandPageAllocator) allocator).page_table.swap_partition.page_count);
-                memoryStatus.addDetail("swapped_used_count", ((DemandPageAllocator) allocator).page_table.swap_partition.used_count);
+                memoryStatus.addDetail("used_pages",
+                        ((DemandPageAllocator) allocator).page_table.used_pages.entrySet());
+                memoryStatus.addDetail("swapped_page_count",
+                        ((DemandPageAllocator) allocator).page_table.swap_partition.page_count);
+                memoryStatus.addDetail("swapped_used_count",
+                        ((DemandPageAllocator) allocator).page_table.swap_partition.used_count);
                 memoryStatus.addDetail("pages", ((DemandPageAllocator) allocator).pages);
                 memoryStatus.addDetail("faults", ((DemandPageAllocator) allocator).faults);
                 break;

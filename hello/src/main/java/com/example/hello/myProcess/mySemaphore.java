@@ -29,7 +29,20 @@ public class mySemaphore {
             }
         } else {
             // 已经获取该信号量的不再占用更多资源
-            return true;
+            if (findItemById(pid).awaken == false && findItemById(pid).label == 2) {
+                this.resource--;
+                if (this.resource >= 0) {
+                    return true;
+                } else {
+                    findItemById(pid).label = 1;
+                    return false;
+                }
+            } else if (findItemById(pid).awaken == true) {
+                findItemById(pid).awaken = false;
+                return true;
+            } else {
+                return false;
+            }
         }
 
     }
@@ -37,7 +50,13 @@ public class mySemaphore {
     // 模拟对pid的进程对该信号量的signal操作
     public boolean signal(int pid) {
         Item item = findItemById(pid);
-        if (item == null || item.label == 1) {
+        if (item == null) {
+            this.resource++;
+            return true;
+        }
+
+        item.awaken = false;
+        if (item.label == 1) {
             return false;
         }
 
@@ -58,9 +77,9 @@ public class mySemaphore {
                 // 2说明当前pid的进程不在Waiting队列,而是在正常执行
                 continue;
             }
-            this.resource--;
             // 将选中进程的标签更新
             item.label = 2;
+            item.awaken = true;
             return item.pid;
         }
 
@@ -69,7 +88,7 @@ public class mySemaphore {
     }
 
     public boolean isClear() {
-        return this.Process.isEmpty() && this.ttl < 100;
+        return this.Process.isEmpty() && this.ttl < 0;
     }
 
     public Item findItemById(int pid) {
@@ -81,6 +100,14 @@ public class mySemaphore {
         return null;
     }
 
+    public int getCurrentUsing() {
+        int resource = 0;
+        for (Item item : Process) {
+            if (item.label == 2)
+                resource++;
+        }
+        return resource;
+    }
 }
 
 class Item {
@@ -92,9 +119,13 @@ class Item {
     public int pid;
     public int label;
 
+    // 该字段true表示item从wait被唤醒的状态
+    public boolean awaken;
+
     public Item(int pid, int label) {
         this.pid = pid;
         this.label = label;
+        this.awaken = false;
     }
 
 }

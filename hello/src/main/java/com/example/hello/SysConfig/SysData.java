@@ -57,7 +57,7 @@ public class SysData {
 
     public SysData() {
         // 单位毫秒
-        SystemPulse = 1000;
+        SystemPulse = 100;
 
         InstructionLength = 4;
 
@@ -122,7 +122,7 @@ public class SysData {
 
     public void MountDevice(String ResourceName) {
         if (!this.availableMap.containsKey(ResourceName))
-            this.availableMap.put(ResourceName, 5);
+            this.availableMap.put("device..", this.availableMap.get("device..") + 5);
         else
             this.availableMap.put(ResourceName, this.availableMap.get(ResourceName) + 5);
     }

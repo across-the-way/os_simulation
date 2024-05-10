@@ -14,6 +14,9 @@ public enum InstructionType {
     CondNew, // 参数：信号量名，初始值
     CondWait, // 参数：信号量名
     CondSignal, // 参数：信号量名
+    Jump, // 参数：跳转的pc
+    Put , // 参数：放入的数据
+    Get , // 无参数
 
     // 文件系统
     CreateDir, // 参数：父目录路径，目录名

@@ -107,13 +107,13 @@ public class myTest {
     }
 
     public void doTest() {
-//        if (rand.nextBoolean())
-//            return;
-//
-//        count = count % 4 + 1;
-//        if (count > 1) {
-//            return;
-//        }
+       if (rand.nextBoolean())
+           return;
+
+       count = count % 4 + 1;
+       if (count > 1) {
+           return;
+       }
         int max_line_num = kernel.getSysData().Test_Max_Line;
         int max_time = kernel.getSysData().Test_Max_Time;
 
