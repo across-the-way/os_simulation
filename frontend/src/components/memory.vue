@@ -120,6 +120,7 @@ export default {
           },
         ],
         pages: 0,
+        page_size: 8,
         swaped_page_count: 0,
         swaped_used_count: 0,
         used_pages: [],
@@ -226,6 +227,7 @@ export default {
             );
             let sum = 0;
             let addressMap = new Map();
+
             let virtualPageMap = new Map();
             this.tmp = []
             let lastPid = null; //////////////////////////////
@@ -235,7 +237,7 @@ export default {
             })
             lruCache.forEach((item) => {
               //处理物理地址和大小
-              const physicalAddress = item.value.page_num_physical * 8; // 乘以8得到物理地址
+              const physicalAddress = item.value.page_num_physical * this.details.page_size; // 乘以8得到物理地址
               let newSegment = true;
 
               if (item.value.pid === lastPid) {
@@ -243,7 +245,7 @@ export default {
                 let lastSegment = segments[segments.length - 1];
                 if (lastSegment.end + 1 === physicalAddress) {
                   // 如果地址连续，更新最后一段
-                  lastSegment.end = physicalAddress + 7;
+                  lastSegment.end = physicalAddress + this.page_size-1;
                   lastSegment.size = lastSegment.end - lastSegment.start + 1;
                   newSegment = false;
                 }
@@ -253,8 +255,8 @@ export default {
                 // 如果pid变了或者需要新段
                 let segment = {
                   start: physicalAddress,
-                  end: physicalAddress + 7,
-                  size: 8, // 默认大小为8
+                  end: physicalAddress + this.details.page_size-1,
+                  size: this.details.page_size, // 默认大小为8
                 };
                 if (addressMap.has(item.value.pid)) {
                   addressMap.get(item.value.pid).push(segment);
