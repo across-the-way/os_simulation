@@ -9,25 +9,29 @@
       <el-table-column property="pid" label="p_id" />
       <el-table-column property="page_num_virtual" label="虚拟页号" />
     </el-table>
-   <!-- {{ details.lru_cache}} -->
+    <!-- {{ details.lru_cache}} -->
   </el-dialog>
-  <el-descriptions title="页式分配" style="
+  <el-descriptions
+    title="页式分配"
+    style="
       max-width: 800px;
       margin: auto;
       background-color: white;
       padding: 20px;
       margin-top: 20px;
-    " v-if="ioperation == 2 && strategy != 'Page'">
+    "
+    v-if="ioperation == 2 && strategy != 'Page'"
+  >
     <el-descriptions-item label="详情">
       <el-button @click="showdetail">展示</el-button>
       <!-- {{ visualpage }} -->
     </el-descriptions-item>
-    
+
     <el-descriptions-item label="Strategy">
       {{ strategy }}
     </el-descriptions-item>
     <el-descriptions-item label="Faults">
-      {{ details.faults/details.pages }}
+      {{ details.faults / details.pages }}
     </el-descriptions-item>
     <el-descriptions-item label="交换页数">
       {{ details.swapped_page_count }}
@@ -36,25 +40,33 @@
       {{ details.swapped_used_count }}
     </el-descriptions-item>
   </el-descriptions>
-  <el-descriptions title="分配方式" style="
+  <el-descriptions
+    title="分配方式"
+    style="
       max-width: 800px;
       margin: auto;
       background-color: white;
       padding: 20px;
       margin-top: 20px;
-    " v-else-if="strategy == 'Page'">
+    "
+    v-else-if="strategy == 'Page'"
+  >
     <!-- <el-descriptions-item label="Username1">{{ this.details.used_pages }}</el-descriptions-item> -->
     <el-descriptions-item label="Strategy">
       {{ strategy }}
     </el-descriptions-item>
   </el-descriptions>
-  <el-descriptions title="连续分配" style="
+  <el-descriptions
+    title="连续分配"
+    style="
       max-width: 800px;
       margin: auto;
       background-color: white;
       padding: 20px;
       margin-top: 20px;
-    " v-else>
+    "
+    v-else
+  >
     <el-descriptions-item label="Strategy">
       {{ strategy }}
     </el-descriptions-item>
@@ -139,28 +151,28 @@ export default {
     };
   },
   mounted() {
-    this.fetchdata()
+    this.fetchdata();
   },
   beforeUnmount() {
-    this.stopfetchData()
+    this.stopfetchData();
   },
 
   methods: {
-    showdetail(){
-      this.detail = true
+    showdetail() {
+      this.detail = true;
     },
     stopfetchData() {
       clearInterval(this.timer);
     },
     fetchdata() {
       this.timer = setInterval(() => {
-        this.data.labels = []
-        this.data.datasets[0].data = []
+        this.data.labels = [];
+        this.data.datasets[0].data = [];
         axios.get(serverURL + "/api/memory").then((response) => {
           console.log(response.data);
           if (this.continueallocate.includes(response.data.strategy)) {
             this.ioperation = 1;
-            console.log(response.data,'test');
+            console.log(response.data, "test");
             this.memory = response.data.details;
             this.strategy = response.data.strategy;
             this.temp = Object.entries(this.memory.used_memory).map(
@@ -187,15 +199,15 @@ export default {
 
             this.componentkey++;
             //将数据处理好塞到data中
-          }
-          else if(response.data.strategy == 'Page'){
-            console.log(response.data.details)
-            this.details = response.data.details
-            this.strategy = 'Page'
-            let temp = []
-            let sum = 0
-            const map = new Map()
-            this.data.labels = []
+          } else if (response.data.strategy == "Page") {
+            console.log(response.data.details);
+            this.details = response.data.details;
+            this.strategy = "Page";
+            let memory_size = this.details.memory_size
+            let temp = [];
+            let sum = 0;
+            const map = new Map();
+            this.data.labels = [];
 
             const up = Object.entries(this.details.used_pages).map(
               ([key, value]) => ({
@@ -203,19 +215,19 @@ export default {
                 value,
               })
             );
-            up.forEach(item => {
+            up.forEach((item) => {
               temp.push(item.value.size);
-              this.data.labels.push('pid-'+ item.key)
-              sum += item.value.size
-            })
-            temp.push(4096-sum)
-            this.data.datasets[0].data = temp
-            this.data.labels.push('free')
+              this.data.labels.push("pid-" + item.key);
+              sum += item.value.size;
+            });
+            temp.push(memory_size - sum);
+            this.data.datasets[0].data = temp;
+            this.data.labels.push("free");
             // console.log(temp)
-            this.componentkey++
-          } 
-          else {
+            this.componentkey++;
+          } else {
             this.ioperation = 2;
+            let memory_size = this.details.memory_size
             this.details = response.data.details;
             this.strategy = response.data.strategy;
             let temp = [];
@@ -229,55 +241,48 @@ export default {
             let addressMap = new Map();
 
             let virtualPageMap = new Map();
-            this.tmp = []
+            this.tmp = [];
             let lastPid = null; //////////////////////////////
-            lruCache.forEach(item => {
+            lruCache.forEach((item) => {
               // console.log(item.value)
               this.tmp.push(item.value);
-            })
-            lruCache.forEach((item) => {
-              //处理物理地址和大小
-              const physicalAddress = item.value.page_num_physical * this.details.page_size; // 乘以8得到物理地址
-              let newSegment = true;
-
-              if (item.value.pid === lastPid) {
-                let segments = addressMap.get(item.value.pid);
-                let lastSegment = segments[segments.length - 1];
-                if (lastSegment.end + 1 === physicalAddress) {
-                  // 如果地址连续，更新最后一段
-                  lastSegment.end = physicalAddress + this.page_size-1;
-                  lastSegment.size = lastSegment.end - lastSegment.start + 1;
-                  newSegment = false;
-                }
-              }
-
-              if (newSegment || lastPid !== item.value.pid) {
-                // 如果pid变了或者需要新段
-                let segment = {
-                  start: physicalAddress,
-                  end: physicalAddress + this.details.page_size-1,
-                  size: this.details.page_size, // 默认大小为8
-                };
-                if (addressMap.has(item.value.pid)) {
-                  addressMap.get(item.value.pid).push(segment);
-                } else {
-                  addressMap.set(item.value.pid, [segment]);
-                }
-              }
-
-              lastPid = item.value.pid; // 更新lastPid为当前处理的pid
-
-              // 收集虚拟页面号
-              if (virtualPageMap.has(item.value.pid)) {
-                let pages = virtualPageMap.get(item.value.pid);
-                if (!pages.includes(item.value.page_num_virtual)) {
-                  pages.push(item.value.page_num_virtual);
-                }
-                virtualPageMap.set(item.value.pid, pages);
-              } else {
-                virtualPageMap.set(item.value.pid, [item.value.page_num_virtual]);
-              }
             });
+            lruCache.forEach((item) => {
+              const physicalAddress =
+                item.value.page_num_physical * this.details.page_size;
+              let segments = addressMap.get(item.value.pid) || [];
+
+              if (
+                segments.length > 0 &&
+                segments[segments.length - 1].end + this.details.page_size ===
+                  physicalAddress
+              ) {
+                // 如果当前地址正好是上一个段的连续地址
+                let lastSegment = segments[segments.length - 1];
+                lastSegment.end = physicalAddress + this.details.page_size - 1;
+                lastSegment.size += this.details.page_size;
+              } else {
+                // 否则，创建一个新的段
+                let newSegment = {
+                  start: physicalAddress,
+                  end: physicalAddress + this.details.page_size - 1,
+                  size: this.details.page_size,
+                };
+                segments.push(newSegment);
+              }
+
+              // 更新地址Map
+              addressMap.set(item.value.pid, segments);
+
+              // 更新虚拟页面号信息
+              let pages = virtualPageMap.get(item.value.pid) || [];
+              if (!pages.includes(item.value.page_num_virtual)) {
+                pages.push(item.value.page_num_virtual);
+              }
+              virtualPageMap.set(item.value.pid, pages);
+            });
+
+            // 现在 addressMap 包含了所有处理后的段，可以按需要进一步处理或输出
 
             // 更新this.temp和this.visualpage
             this.temp = Array.from(addressMap, ([pid, value]) => ({
@@ -310,17 +315,16 @@ export default {
               temp.push(segment.size);
             });
             // console.log(temp);
-            temp.push(4096 - sum);
+            temp.push(memory_size - sum);
             this.data.labels.push("free");
-            
+
             this.data.datasets[0].data = temp;
             // console.log(this.data, "a");
             this.componentkey++;
             //将数据处理好塞入data中
           }
         });
-      }, 5000)
-
+      }, 5000);
     },
   },
 };

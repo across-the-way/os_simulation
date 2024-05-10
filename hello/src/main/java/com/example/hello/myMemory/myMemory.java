@@ -161,7 +161,7 @@ public class myMemory {
 
     public MemoryStatus getMemoryStatus() {
         MemoryStatus memoryStatus = new MemoryStatus(strategy.toString());
-
+        memoryStatus.addDetail("memory_size", allocator.total_memory_size);
         switch (strategy) {
             case FirstFit:
             case NextFit:
@@ -179,7 +179,7 @@ public class myMemory {
             case FIFO:
                 memoryStatus.addDetail("free_pages", ((DemandPageAllocator) allocator).page_table.free_pages.toString());
                 memoryStatus.addDetail("lru_cache", ((DemandPageAllocator) allocator).page_table.cache.cache);
-                memoryStatus.addDetail("used_pages", ((DemandPageAllocator) allocator).page_table.used_pages.entrySet());
+                memoryStatus.addDetail("used_pages", ((DemandPageAllocator) allocator).page_table.used_pages);
                 memoryStatus.addDetail("swapped_page_count", ((DemandPageAllocator) allocator).page_table.swap_partition.page_count);
                 memoryStatus.addDetail("swapped_used_count", ((DemandPageAllocator) allocator).page_table.swap_partition.used_count);
                 memoryStatus.addDetail("pages", ((DemandPageAllocator) allocator).pages);
