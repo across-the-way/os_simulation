@@ -137,12 +137,6 @@ export default {
       detail: false,
     };
   },
-  created() {
-    // this.fetchdata();
-    // console.log(this.temp)
-    // this.paintcon()
-    // .then()
-  },
   mounted() {
     this.fetchdata()
   },
@@ -161,7 +155,7 @@ export default {
       this.timer = setInterval(() => {
         this.data.labels = []
         this.data.datasets[0].data = []
-        axios.get(serverURL + "/memory").then((response) => {
+        axios.get(serverURL + "/api/memory").then((response) => {
           console.log(response.data);
           if (this.continueallocate.includes(response.data.strategy)) {
             this.ioperation = 1;

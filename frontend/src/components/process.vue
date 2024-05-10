@@ -39,7 +39,7 @@ export default {
     fetchData() {
       this.timer = setInterval(() => {
         console.log("Fetching data")
-        axios.get(serverURL + '/process/status')
+        axios.get(serverURL + '/api/process/status')
           .then(response => {
             this.pcb = []
             this.pcb = response.data; // 更新响应数据

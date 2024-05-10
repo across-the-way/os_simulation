@@ -94,7 +94,7 @@ public class hellocontroller {
     // return this.sysData.fileSystem.ls();
     // }
 
-    @PostMapping("/process")
+    @PostMapping("/api/process")
     public Instruction[] CreateProcess(@RequestBody Instruction[] instructions) {
         // System.out.println(instructions);
         this.kernel
@@ -102,23 +102,23 @@ public class hellocontroller {
         return instructions;
     }
 
-    @GetMapping("/process/status")
+    @GetMapping("/api/process/status")
     public List<PCB> getProcessStatus() {
         return this.kernel.getPm().getPCBs();
     }
 
-    @GetMapping("/process/queue")
+    @GetMapping("/api/process/queue")
     public ProcessQueue getProcessQueue() {
         return this.kernel.getPm().getQueue();
     }
 
-    @PostMapping("/filesystem")
+    @PostMapping("/api/filesystem")
     public List<Inode> getFilesystem(@RequestBody Location location) {
         location.setLocation(location.getLocation().substring(1));
         return this.kernel.getFs().filelist(location.getLocation());
     }
 
-    @GetMapping("/device")
+    @GetMapping("/api/device")
     public List<Device> getDevice() {
         return this.kernel.getIo().get();
     }
@@ -134,7 +134,7 @@ public class hellocontroller {
         this.kernel.getIo().deleteDevice(-1);
     }
 
-    @PostMapping("/terminal")
+    @PostMapping("/api/terminal")
     public String CreateProcess(@RequestBody Object[] instruction) throws InterruptedException {
         TerminalCallType type;
         try {
@@ -160,7 +160,7 @@ public class hellocontroller {
         return msg;
     }
 
-    @GetMapping("/memory")
+    @GetMapping("/api/memory")
     public MemoryStatus getMemoryStatus() {
         return this.kernel.getMm().getMemoryStatus();
     }

@@ -26,7 +26,7 @@ export default {
     console.log(window.location.pathname)
     name = window.location.pathname.split('/')
     console.log(name)
-    axios.post(serverURL + '/filesystem', { location: window.location.pathname })
+    axios.post(serverURL + '/api/filesystem', { location: window.location.pathname })
       .then(response => {
         // 处理响应结果
         console.log(response.data);

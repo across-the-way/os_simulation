@@ -21,7 +21,7 @@ export default {
     }
   },
   created() {
-    axios.post(serverURL + '/terminal', ['pwd'])
+    axios.post(serverURL + '/api/terminal', ['pwd'])
       .then(res => {
         this.content = res.data
         console.log(this.content)
@@ -31,7 +31,7 @@ export default {
       })
   },
   updated() {
-    axios.post(serverURL + '/terminal', ['pwd'])
+    axios.post(serverURL + '/api/terminal', ['pwd'])
       .then(res => {
         this.content = res.data
       })
@@ -53,7 +53,7 @@ export default {
           temp1.push(str) // 否则就直接添加
       })
       console.log(temp1)
-      axios.post(serverURL + '/terminal', temp1)
+      axios.post(serverURL + '/api/terminal', temp1)
         .then(response => {
           console.log(response.data)
           this.responseData = response.data.split('\n')
@@ -70,7 +70,7 @@ export default {
         .catch(error => {
           console.log(error)
         })
-      axios.post(serverURL + '/terminal', ['pwd'])
+      axios.post(serverURL + '/api/terminal', ['pwd'])
         .then(res => {
           this.content = res.data
         })

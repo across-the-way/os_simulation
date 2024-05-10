@@ -33,7 +33,7 @@ export default {
                 this.instructions.push(tempdir) //将处理好的指令加入数组中
             })
             console.log(this.instructions)
-            axios.post(serverURL + '/process', this.instructions)//发送指令队列
+            axios.post(serverURL + '/api/process', this.instructions)//发送指令队列
                 .then(response => {
                     // 处理响应结果
                     console.log(response.data);

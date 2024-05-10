@@ -19,7 +19,7 @@ export default {
     }
   },
   created() {
-    axios.get(serverURL + '/device', {})
+    axios.get(serverURL + '/api/device', {})
       .then(response => {
         // 处理响应结果
         console.log(response.data);

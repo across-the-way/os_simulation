@@ -86,7 +86,7 @@ export default {
       return temp;
     },
     getData() {
-      axios.get(serverURL + '/process/queue')
+      axios.get(serverURL + '/api/process/queue')
         .then(res => {
           this.res = res.data;
           this.processQueues = this.transformData(this.res); // 使用新数据更新 processQueues

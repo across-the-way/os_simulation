@@ -126,8 +126,6 @@ export default {
             }
         },
         submitForm() {
-            //ifvalid()
-            //axios
             let temp = []
             temp.push({type: 'Memory',arguments: [parseInt(this.instructionQueue.memory)]})
             temp.push({type: 'Priority',arguments: [this.instructionQueue.priority]})
@@ -147,7 +145,7 @@ export default {
             });
             let su = false;
             temp.push({type: 'Exit',arguments:[]})
-            axios.post(serverURL + '/process', temp)
+            axios.post(serverURL + '/api/process', temp)
             .then(res => {
                 let msg = res.data
                 if(msg === 'success'){
