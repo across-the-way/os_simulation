@@ -168,11 +168,12 @@ public class myMemory {
             case BestFit:
             case WorstFit:
                 memoryStatus.addDetail("free_blocks", ((ContiguousAllocator) allocator).free_blocks);
-                memoryStatus.addDetail("used_memory", ((ContiguousAllocator) allocator).used_memory.entrySet());
+                memoryStatus.addDetail("used_memory", ((ContiguousAllocator) allocator).used_memory);
                 break;
             case Page:
                 memoryStatus.addDetail("free_pages", ((PageAllocator) allocator).page_table.free_pages.toString());
                 memoryStatus.addDetail("used_pages", ((PageAllocator) allocator).page_table.used_pages);
+                memoryStatus.addDetail("page_size", kernel.getSysData().Page_Size);
                 break;
             case LRU:
             case FIFO:
@@ -183,6 +184,7 @@ public class myMemory {
                 memoryStatus.addDetail("swapped_used_count", ((DemandPageAllocator) allocator).page_table.swap_partition.used_count);
                 memoryStatus.addDetail("pages", ((DemandPageAllocator) allocator).pages);
                 memoryStatus.addDetail("faults", ((DemandPageAllocator) allocator).faults);
+                memoryStatus.addDetail("page_size", kernel.getSysData().Page_Size);
                 break;
         }
         return memoryStatus;

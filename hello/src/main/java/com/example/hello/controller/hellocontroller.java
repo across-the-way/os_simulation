@@ -96,9 +96,11 @@ public class hellocontroller {
 
     @PostMapping("/api/process")
     public Instruction[] CreateProcess(@RequestBody Instruction[] instructions) {
-        // System.out.println(instructions);
-        this.kernel
-                .receiveInterrupt(new myInterrupt(InterruptType.SystemCall, SystemCallType.ProcessNew, instructions));
+        if ((instructions.length - 2) * kernel.getSysData().Page_Size >= (int)instructions[0].getArguments()[0]) {
+            // System.out.println(instructions);
+            this.kernel
+                    .receiveInterrupt(new myInterrupt(InterruptType.SystemCall, SystemCallType.ProcessNew, instructions));
+        }
         return instructions;
     }
 
