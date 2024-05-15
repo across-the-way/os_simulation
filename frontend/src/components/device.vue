@@ -1,7 +1,7 @@
 <script setup>
 import axios from 'axios'
 import { serverURL } from '@/configjs/ServerURL'
-import { dialogEmits } from 'element-plus';
+import { ElMessage, dialogEmits } from 'element-plus';
 
 </script>
 
@@ -55,6 +55,16 @@ export default {
     handleSet(data) {
       this.dialogTableVisible = true
       this.displayList = data
+    },
+    handleDelete(deviceid,item){
+      axios.get(serverURL+'/device/delete'+'?deviceid='+deviceid)
+      .then(res=> {
+        ElMessage({message: '删除成功',type: 'success'})
+        this.mainkey++
+        console.log(res)})
+      .catch(err=> ElMessage({message: '删除失败',type: 'error'}))
+
+      this.fileLists.splice(deviceid, 1)
     },
     changeNowStatus(statusvalue) {
       console.log(statusvalue);
