@@ -27,6 +27,7 @@ public class BurstInfo {
     }
 
     public static List<BurstInfo> getBurstInfos(PCB p, myKernel kernel) {
+        if (p == null) return null;
         int pc = p.pc;
         List<BurstInfo> burstInfos = new ArrayList<>();
         int InstructionLength = kernel.getSysData().InstructionLength;

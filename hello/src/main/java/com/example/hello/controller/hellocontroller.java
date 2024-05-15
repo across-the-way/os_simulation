@@ -187,6 +187,7 @@ public class hellocontroller {
 
     @GetMapping("/BurstInfo")
     public List<BurstInfo> getBurstInfo(@RequestParam int pid) {
+        if (kernel.getPm().getPCB(pid) == null) return null;
         return BurstInfo.getBurstInfos(kernel.getPm().getPCB(pid), kernel);
     }
 
