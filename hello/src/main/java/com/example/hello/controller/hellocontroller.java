@@ -96,7 +96,7 @@ public class hellocontroller {
 
     @PostMapping("/api/process")
     public Instruction[] CreateProcess(@RequestBody Instruction[] instructions) {
-        if ((instructions.length - 2) * kernel.getSysData().Page_Size >= (int) instructions[0].getArguments()[0]) {
+        if ((instructions.length - 2) * kernel.getSysData().InstructionLength <= (int)instructions[0].getArguments()[0]) {
             // System.out.println(instructions);
             this.kernel
                     .receiveInterrupt(
@@ -203,6 +203,7 @@ public class hellocontroller {
 
     @GetMapping("/BurstInfo")
     public List<BurstInfo> getBurstInfo(@RequestParam int pid) {
+        if (kernel.getPm().getPCB(pid) == null) return null;
         return BurstInfo.getBurstInfos(kernel.getPm().getPCB(pid), kernel);
     }
 

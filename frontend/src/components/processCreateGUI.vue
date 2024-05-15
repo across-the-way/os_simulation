@@ -128,7 +128,7 @@ export default {
         submitForm() {
             let temp = []
             temp.push({type: 'Memory',arguments: [parseInt(this.instructionQueue.memory)]})
-            temp.push({type: 'Priority',arguments: [this.instructionQueue.priority]})
+            temp.push({type: 'Priority',arguments: [parseInt(this.instructionQueue.priority)]})
 
             this.instructionQueue.domains.forEach(element => {
                 let temp1 = []

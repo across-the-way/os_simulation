@@ -121,7 +121,7 @@ export default {
     },
     handleDelete(index, data) {
       if(data.type ==1){
-        axios.post(serverURL + '/terminal',['rm',data.name])
+        axios.post(serverURL + '/api/terminal',['rm',data.name])
       .then((response)=>{
         console.log(response.data)
       })
@@ -130,7 +130,7 @@ export default {
         })
       }
       else{
-        axios.post(serverURL + '/terminal',['rm','-r',data.name])
+        axios.post(serverURL + '/api/terminal',['rm','-r',data.name])
       .then((response)=>{
         console.log(response.data)
       })
@@ -156,7 +156,7 @@ export default {
       console.log(str)
 
       if(type == 1){
-        axios.post(serverURL + '/terminal', ['touch',str] )
+        axios.post(serverURL + '/api/terminal', ['touch',str] )
         .then(res => {
           console.log(res.data)
         })
@@ -165,7 +165,7 @@ export default {
         })
       }
       else {
-        axios.post(serverURL + '/terminal', ['mkdir',str] )
+        axios.post(serverURL + '/api/terminal', ['mkdir',str] )
         .then(res => {
           console.log(res.data)
         })
