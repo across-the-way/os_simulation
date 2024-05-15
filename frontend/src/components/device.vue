@@ -57,7 +57,7 @@ export default {
       this.displayList = data
     },
     handleDelete(deviceid,item){
-      axios.get(serverURL+'/device/delete'+'?deviceid='+deviceid)
+      axios.get(serverURL+'/device/delete'+'?id='+deviceid)
       .then(res=> {
         ElMessage({message: '删除成功',type: 'success'})
         this.mainkey++
@@ -144,7 +144,7 @@ export default {
       </el-table-column>
       <el-table-column label="Operations" width="180"v-if="operation == 'delete'">
         <template #default="scope">
-          <el-button size="small" type="danger" @click="handleDelete(scope.$index, scope.row)">Delete</el-button>
+          <el-button size="small" type="danger" @click="handleDelete(scope.row.device_id, scope.row)">Delete</el-button>
         </template>
       </el-table-column>
     </el-table></div>
