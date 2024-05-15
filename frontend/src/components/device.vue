@@ -30,6 +30,18 @@ export default {
         console.error(error);
       });
   },
+  // updated() {
+  //   axios.get(serverURL + '/api/device', {})
+  //     .then(response => {
+  //       // 处理响应结果
+  //       console.log(response.data);
+  //       this.responseData = response.data
+  //     })
+  //     .catch(error => {
+  //       // 处理错误
+  //       console.error(error);
+  //     });
+  // },
   computed: {
     buttonClass() {
       return this.operation == 'delete' ? 'danger' : 'primary';
@@ -39,15 +51,15 @@ export default {
     }
   },
   methods: {
-    newdevice(name){
+    newdevice(name) {
       console.log(name)
-      axios.post(serverURL+'/device/add',name)
-      .then(res=>{
-        console.log(res.data)
-      })
-      .catch(err=>{
-        console.log(err)
-      })
+      axios.post(serverURL + '/device/add', name)
+        .then(res => {
+          console.log(res.data)
+        })
+        .catch(err => {
+          console.log(err)
+        })
       this.ioperation = false
       this.name = ''
       this.mainkey++
@@ -56,27 +68,44 @@ export default {
       this.dialogTableVisible = true
       this.displayList = data
     },
-    handleDelete(deviceid,item){
-      axios.get(serverURL+'/device/delete'+'?deviceid='+deviceid)
-      .then(res=> {
-        ElMessage({message: '删除成功',type: 'success'})
-        this.mainkey++
-        console.log(res)})
-      .catch(err=> ElMessage({message: '删除失败',type: 'error'}))
+    handleDelete(deviceid, item) {
+      axios.get(serverURL + '/device/delete' + '?id=' + deviceid)
+        .then(res => {
+          if (res.data == true)
+            {
+              axios.get(serverURL + '/api/device', {})
+      .then(response => {
+        // 处理响应结果
+        console.log(response.data);
+        this.responseData = response.data
+      })
+      .catch(error => {
+        // 处理错误
+        console.error(error);
+      });
+              ElMessage({ message: '删除成功', type: 'success' })}
+          else
+            ElMessage.error("删除失败")
+          this.mainkey++
+          console.log(res)
+        })
+        .catch(err => ElMessage({ message: '删除失败', type: 'error' }))
 
-      this.fileLists.splice(deviceid, 1)
+      //this.fileLists.splice(deviceid, 1)
     },
     changeNowStatus(statusvalue) {
       console.log(statusvalue);
-      if (this.operation === 'default')
-        {this.operation = statusvalue
+      if (this.operation === 'default') {
+        this.operation = statusvalue
         console.log(this.operation);
-        if(statusvalue === 'add' && !this.ioperation){
+        if (statusvalue === 'add' && !this.ioperation) {
           this.ioperation = true
-        }}
-      else 
-        {this.operation = 'default'
-        console.log('default');}
+        }
+      }
+      else {
+        this.operation = 'default'
+        console.log('default');
+      }
     },
   }
 }
@@ -87,41 +116,41 @@ export default {
 
 <template>
   <div class="deviceheader">
-      <div class="left-aligned"></div>
-      <div class="right-aligned">
+    <div class="left-aligned"></div>
+    <div class="right-aligned">
 
-        <!-- 按时间排序/取消按钮 -->
-        <el-button @click="changeNowStatus('add')" type="success">
-          <el-icon style="margin-left: 0;margin-right: 5px;" >
-              <DocumentAdd />
-            </el-icon>
-          add device</el-button>
-        
+      <!-- 按时间排序/取消按钮 -->
+      <el-button @click="changeNowStatus('add')" type="success">
+        <el-icon style="margin-left: 0;margin-right: 5px;">
+          <DocumentAdd />
+        </el-icon>
+        add device</el-button>
 
-        <Transition name="scale">
-          <el-button :type="buttonClass" @click='changeNowStatus("delete")'>
-            <el-icon style="margin-left: 0;margin-right: 5px;" v-if="operation != 'delete'">
-              <setting />
-            </el-icon>
-            <el-icon style="margin-left: 0;margin-right: 5px;" v-if="operation == 'delete'">
-              <CircleClose />
-            </el-icon>
-            {{ buttonText }}</el-button>
-        </Transition>
-      </div>
 
+      <Transition name="scale">
+        <el-button :type="buttonClass" @click='changeNowStatus("delete")'>
+          <el-icon style="margin-left: 0;margin-right: 5px;" v-if="operation != 'delete'">
+            <setting />
+          </el-icon>
+          <el-icon style="margin-left: 0;margin-right: 5px;" v-if="operation == 'delete'">
+            <CircleClose />
+          </el-icon>
+          {{ buttonText }}</el-button>
+      </Transition>
     </div>
+
+  </div>
   <div><el-table :data="responseData" style="width: 100%" :key="mainkey">
       <el-table-column label="device_id" width="180">
         <template #default="scope">
-          
-            <span>{{ scope.row.device_id }}</span>
-          
+
+          <span>{{ scope.row.device_id }}</span>
+
         </template>
       </el-table-column>
       <el-table-column label="type" width="180">
         <template #default="scope">
-            <span>{{ scope.row.type }}</span>
+          <span>{{ scope.row.type }}</span>
         </template>
       </el-table-column>
       <el-table-column label="busy" width="180">
@@ -142,18 +171,18 @@ export default {
         </template>
 
       </el-table-column>
-      <el-table-column label="Operations" width="180"v-if="operation == 'delete'">
+      <el-table-column label="Operations" width="180" v-if="operation == 'delete'">
         <template #default="scope">
-          <el-button size="small" type="danger" @click="handleDelete(scope.$index, scope.row)">Delete</el-button>
+          <el-button size="small" type="danger" @click="handleDelete(scope.row.device_id, scope.row)">Delete</el-button>
         </template>
       </el-table-column>
     </el-table></div>
-    <el-dialog v-model="ioperation" title="apply device" width="500" align-center>
+  <el-dialog v-model="ioperation" title="apply device" width="500" align-center>
     <el-form :model="form">
       <el-form-item label="device name" label-width="140px">
         <el-input v-model="name" autocomplete="off" />
       </el-form-item>
-      
+
     </el-form>
     <template #footer>
       <div class="dialog-footer">
@@ -188,12 +217,14 @@ header {
     place-items: center;
     padding-right: calc(var(--section-gap) / 2);
   }
+
   .deviceheader {
 
-display: flex;
-justify-content: space-between;
-padding-bottom: 10px;
-}
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 10px;
+  }
+
   .logo {
     margin: 0 2rem 0 0;
   }

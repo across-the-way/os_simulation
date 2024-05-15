@@ -145,7 +145,7 @@ public class hellocontroller {
             }
             // 设备空闲，释放设备占用资源，释放后端设备对象
             else {
-                this.kernel.getIo().deleteDevice(id);
+                this.kernel.getIo().deleteDevice(device);
                 this.kernel.getSysData().ReleaseDevice(device.getType());
                 return true;
             }

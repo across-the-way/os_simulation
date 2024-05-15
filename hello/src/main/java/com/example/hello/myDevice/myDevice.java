@@ -97,12 +97,10 @@ public class myDevice {
             devices.add(new Device(type, deviceid));
     }
 
-    public boolean deleteDevice(int num) {
-        if (devices.get(num - 1).getWaitQueue().size() == 0) {
-            devices.remove(num - 1);
-            return true;
-        }
-        return false;
+    public boolean deleteDevice(Device device) {
+        devices.remove(device);
+        return true;
+
     }
 
     public List<Device> get() {
