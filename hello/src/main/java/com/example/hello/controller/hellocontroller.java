@@ -96,10 +96,11 @@ public class hellocontroller {
 
     @PostMapping("/api/process")
     public Instruction[] CreateProcess(@RequestBody Instruction[] instructions) {
-        if ((instructions.length - 2) * kernel.getSysData().Page_Size >= (int)instructions[0].getArguments()[0]) {
+        if ((instructions.length - 2) * kernel.getSysData().Page_Size >= (int) instructions[0].getArguments()[0]) {
             // System.out.println(instructions);
             this.kernel
-                    .receiveInterrupt(new myInterrupt(InterruptType.SystemCall, SystemCallType.ProcessNew, instructions));
+                    .receiveInterrupt(
+                            new myInterrupt(InterruptType.SystemCall, SystemCallType.ProcessNew, instructions));
         }
         return instructions;
     }
@@ -132,8 +133,23 @@ public class hellocontroller {
     }
 
     @GetMapping("/device/delete")
-    public void deleteDevice() {
-        this.kernel.getIo().deleteDevice(-1);
+    public boolean deleteDevice(@RequestParam int id) {
+        Device device = this.kernel.getIo().getDeviceByID(id);
+        // 没有设备，返回删除设备失败
+        if (device == null) {
+            return false;
+        } else {
+            // 设备忙，返回删除设备失败
+            if (device.isBusy()) {
+                return false;
+            }
+            // 设备空闲，释放设备占用资源，释放后端设备对象
+            else {
+                this.kernel.getIo().deleteDevice(id);
+                this.kernel.getSysData().ReleaseDevice(device.getType());
+                return true;
+            }
+        }
     }
 
     @PostMapping("/api/terminal")

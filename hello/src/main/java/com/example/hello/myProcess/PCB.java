@@ -34,6 +34,9 @@ public class PCB {
     public int pc;
     Instruction ir;
 
+    // 进程上下文切换保存现场的缓冲区
+    public Map<String, Integer> recover;
+
     /*
      * 等待时间,用于HRRN算法,不一定是int类型
      * 指的是进程在ready队列中的等待时间
@@ -74,6 +77,7 @@ public class PCB {
         bursts = new ArrayList<Instruction>();
         c_id = new ArrayList<Integer>();
         FileTable = new ArrayList<Integer>();
+        recover = new HashMap<>();
 
         for (Instruction instruction : instructions) {
             switch (instruction.getType()) {
@@ -114,6 +118,7 @@ public class PCB {
         FileTable = p.FileTable;
         memory_allocate = p.memory_allocate;
         priority = p.priority;
+        recover = new HashMap<>();
 
         for (Instruction instruction : p.bursts) {
             Instruction newinstruction = new Instruction(instruction.getType(), instruction.getArguments());
@@ -284,4 +289,6 @@ public class PCB {
         }
         return availableMap;
     }
+
+    
 }

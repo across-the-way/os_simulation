@@ -108,4 +108,13 @@ public class myDevice {
     public List<Device> get() {
         return this.devices;
     }
+
+    public Device getDeviceByID(int deviceid) {
+        for (Device device : this.devices) {
+            if (device.getDevice_id() == deviceid) {
+                return device;
+            }
+        }
+        return null;
+    }
 }

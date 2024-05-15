@@ -139,21 +139,51 @@ public class SysData {
                 String key = parts[0].trim();
                 String value = parts[1].trim();
                 switch (key) {
-                    case "SystemPulse": SystemPulse = Integer.parseInt(value);break;
-                    case "InstructionLength": InstructionLength = Integer.parseInt(value);break;
-                    case "Second_Queue_Threshold": Second_Queue_Threshold = Integer.parseInt(value);break;
-                    case "LongTermScale": LongTermScale = Integer.parseInt(value);break;
-                    case "MidTermScale": MidTermScale = Integer.parseInt(value);break;
-                    case "LongTerm_CeilThreshold": LongTerm_CeilThreshold = Integer.parseInt(value);break;
-                    case "LongTerm_FloorThreshold": LongTerm_FloorThreshold = Integer.parseInt(value);break;
-                    case "MidTerm_CeilThreshold": MidTerm_CeilThreshold = Double.parseDouble(value);break;
-                    case "MidTerm_FloorThreshold": MidTerm_FloorThreshold = Double.parseDouble(value);break;
-                    case "Memory_Size": Memory_Size = Integer.parseInt(value);break;
-                    case "Page_Size": Page_Size = Integer.parseInt(value);break;
-                    case "Printer_Number": Printer_Number = Integer.parseInt(value);break;
-                    case "Keyboard_Number": Keyboard_Number = Integer.parseInt(value);break;
-                    case "OtherDevice_Number": OtherDevice_Number = Integer.parseInt(value);break;
-                    default: System.out.println("invalid config keyword : " + key);break;
+                    case "SystemPulse":
+                        SystemPulse = Integer.parseInt(value);
+                        break;
+                    case "InstructionLength":
+                        InstructionLength = Integer.parseInt(value);
+                        break;
+                    case "Second_Queue_Threshold":
+                        Second_Queue_Threshold = Integer.parseInt(value);
+                        break;
+                    case "LongTermScale":
+                        LongTermScale = Integer.parseInt(value);
+                        break;
+                    case "MidTermScale":
+                        MidTermScale = Integer.parseInt(value);
+                        break;
+                    case "LongTerm_CeilThreshold":
+                        LongTerm_CeilThreshold = Integer.parseInt(value);
+                        break;
+                    case "LongTerm_FloorThreshold":
+                        LongTerm_FloorThreshold = Integer.parseInt(value);
+                        break;
+                    case "MidTerm_CeilThreshold":
+                        MidTerm_CeilThreshold = Double.parseDouble(value);
+                        break;
+                    case "MidTerm_FloorThreshold":
+                        MidTerm_FloorThreshold = Double.parseDouble(value);
+                        break;
+                    case "Memory_Size":
+                        Memory_Size = Integer.parseInt(value);
+                        break;
+                    case "Page_Size":
+                        Page_Size = Integer.parseInt(value);
+                        break;
+                    case "Printer_Number":
+                        Printer_Number = Integer.parseInt(value);
+                        break;
+                    case "Keyboard_Number":
+                        Keyboard_Number = Integer.parseInt(value);
+                        break;
+                    case "OtherDevice_Number":
+                        OtherDevice_Number = Integer.parseInt(value);
+                        break;
+                    default:
+                        System.out.println("invalid config keyword : " + key);
+                        break;
                 }
             }
         } catch (IOException | NumberFormatException e) {
@@ -197,5 +227,11 @@ public class SysData {
             this.availableMap.put("device..", this.availableMap.get("device..") + 5);
         else
             this.availableMap.put(ResourceName, this.availableMap.get(ResourceName) + 5);
+    }
+
+    public void ReleaseDevice(String ResourceName) {
+        if (!this.availableMap.containsKey(ResourceName))
+            return;
+        this.availableMap.put(ResourceName, this.availableMap.get(ResourceName) + 5);
     }
 }
