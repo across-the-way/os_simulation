@@ -131,6 +131,17 @@ public class myMemory {
         System.out.println("Pid: " + pid + " PC: " + pc + " page fault");
     }
 
+    public int[] getPidNode(int frame_number) {
+        int pid = -1, page_num = -1;
+        if (strategy == allocateStrategy.LRU || strategy == allocateStrategy.FIFO) {
+            if (!((DemandPageAllocator) allocator).page_table.free_pages.get(frame_number)) {
+                pid = ((DemandPageAllocator) allocator).page_table.cache.cache.get(frame_number).pid;
+                page_num = ((DemandPageAllocator) allocator).page_table.cache.cache.get(frame_number).page_num_virtual;
+            }
+        }
+        return new int[]{frame_number, pid, page_num};
+    }
+
     public int[] getPhysicalMemory(int pid, int logical_address) {
         int physical_address = -1, frame_number = -1;
         int page_number = -1, page_offset = -1;

@@ -207,6 +207,11 @@ public class hellocontroller {
         return BurstInfo.getBurstInfos(kernel.getPm().getPCB(pid), kernel);
     }
 
+    @GetMapping("/FrameInfo")
+    public List<BurstInfo> getFrameInfo(@RequestParam int frame_num) {
+        return BurstInfo.getBurstInfos(frame_num, kernel);
+    }
+
     @GetMapping("/ProcessResource")
     public Map<String, Integer> getProcessResource(@RequestParam int pid) {
         return kernel.getPm().getResourceMap(pid);
