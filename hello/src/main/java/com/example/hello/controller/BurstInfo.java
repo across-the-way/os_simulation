@@ -13,10 +13,12 @@ public class BurstInfo {
     private int physical_address;
     private int page_number;
     private int frame_number;
+    private int pid;
 
     public BurstInfo(PCB p, int logic_address, myKernel kernel) {
         int index = (logic_address - p.memory_start) / kernel.getSysData().InstructionLength;
         this.logic_address = logic_address;
+        this.pid = p.p_id;
         if (index >= p.bursts.size()) {
             this.instruction = new Instruction(InstructionType.Exit);
         } else {
@@ -104,4 +106,11 @@ public class BurstInfo {
         this.frame_number = frame_number;
     }
 
+    public int getPid() {
+        return pid;
+    }
+
+    public void setPid(int pid) {
+        this.pid = pid;
+    }
 }
