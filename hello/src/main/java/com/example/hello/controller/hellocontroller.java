@@ -15,6 +15,7 @@ import com.example.hello.myProcess.scheduleStrategy;
 import com.example.hello.myTerminal.TerminalCallType;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -205,6 +206,15 @@ public class hellocontroller {
     public List<BurstInfo> getBurstInfo(@RequestParam int pid) {
         if (kernel.getPm().getPCB(pid) == null) return null;
         return BurstInfo.getBurstInfos(kernel.getPm().getPCB(pid), kernel);
+    }
+
+    @GetMapping("/AllFrameInfo")
+    public List<List<BurstInfo>> getAllFrameInfo() {
+        List<List<BurstInfo>> list = new ArrayList<>();
+        for (int i = 0; i < kernel.getSysData().Memory_Size / kernel.getSysData().Page_Size; i++) {
+            list.add(BurstInfo.getBurstInfos(i, kernel));
+        }
+        return list;
     }
 
     @GetMapping("/FrameInfo")
