@@ -1,5 +1,6 @@
 <template>
-  <div style="height: 60vh; width: 60vw; margin: auto; align-items: center">
+  <Mem v-if="ioperation == 2 && strategy != 'Page'"></Mem>
+  <div style="height: 60vh; width: 60vw; margin: auto; align-items: center" v-else>
     <Doughnut :data="data" :options="options" :key="componentkey" />
   </div>
   <el-dialog v-model="detail" title="详情" width="500" align-center>
@@ -78,14 +79,15 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Doughnut, Pie } from "vue-chartjs";
 import axios from "axios";
 import { serverURL } from "@/configjs/ServerURL";
+import Mem from '@/components/Mem.vue';
 ChartJS.register(ArcElement, Tooltip, Legend);
 </script>
 
 <script>
 export default {
-  // components: {
-  //   Pie
-  // },
+  components: {
+    Mem
+  },
   data() {
     return {
       componentkey: 0,

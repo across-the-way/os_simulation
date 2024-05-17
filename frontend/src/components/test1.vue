@@ -1,107 +1,333 @@
 <template>
-  <el-table-v2 :columns="columns" :data="rowData" :width="700" :height="400" fixed />
+  <Mem v-if="ioperation == 2 && strategy != 'Page'"></Mem>
+  <div style="height: 60vh; width: 60vw; margin: auto; align-items: center" v-else>
+    <Doughnut :data="data" :options="options" :key="componentkey" />
+  </div>
+  <el-dialog v-model="detail" title="详情" width="500" align-center>
+    <!-- {{tmp}} -->
+    <el-table :data="tmp">
+      <el-table-column property="page_num_physical" label="物理页号" />
+      <el-table-column property="pid" label="p_id" />
+      <el-table-column property="page_num_virtual" label="虚拟页号" />
+    </el-table>
+    <!-- {{ details.lru_cache}} -->
+  </el-dialog>
+  <el-descriptions
+    title="页式分配"
+    style="
+      max-width: 800px;
+      margin: auto;
+      background-color: white;
+      padding: 20px;
+      margin-top: 20px;
+    "
+    v-if="ioperation == 2 && strategy != 'Page'"
+  >
+    <el-descriptions-item label="详情">
+      <el-button @click="showdetail">展示</el-button>
+      <!-- {{ visualpage }} -->
+    </el-descriptions-item>
+
+    <el-descriptions-item label="Strategy">
+      {{ strategy }}
+    </el-descriptions-item>
+    <el-descriptions-item label="Faults">
+      {{ details.faults / details.pages }}
+    </el-descriptions-item>
+    <el-descriptions-item label="交换页数">
+      {{ details.swapped_page_count }}
+    </el-descriptions-item>
+    <el-descriptions-item label="使用页数">
+      {{ details.swapped_used_count }}
+    </el-descriptions-item>
+  </el-descriptions>
+  <el-descriptions
+    title="分配方式"
+    style="
+      max-width: 800px;
+      margin: auto;
+      background-color: white;
+      padding: 20px;
+      margin-top: 20px;
+    "
+    v-else-if="strategy == 'Page'"
+  >
+    <!-- <el-descriptions-item label="Username1">{{ this.details.used_pages }}</el-descriptions-item> -->
+    <el-descriptions-item label="Strategy">
+      {{ strategy }}
+    </el-descriptions-item>
+  </el-descriptions>
+  <el-descriptions
+    title="连续分配"
+    style="
+      max-width: 800px;
+      margin: auto;
+      background-color: white;
+      padding: 20px;
+      margin-top: 20px;
+    "
+    v-else
+  >
+    <el-descriptions-item label="Strategy">
+      {{ strategy }}
+    </el-descriptions-item>
+  </el-descriptions>
 </template>
 
 <script setup>
-import { serverURL } from '@/configjs/ServerURL';
-import axios from 'axios';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
+import { Doughnut, Pie } from "vue-chartjs";
+import axios from "axios";
+import { serverURL } from "@/configjs/ServerURL";
+import Mem from '@/components/Mem.vue';
+ChartJS.register(ArcElement, Tooltip, Legend);
 </script>
 
 <script>
 export default {
+  components: {
+    Mem
+  },
   data() {
     return {
-      deviceMapping: {
-        0: 'Printer',
-        1: 'Keyboard',
-        2: 'FileRead',
-        3: 'FileWrite',
-        4: 'ForkWait',
-        5: 'Semaphore',
-        6: 'NewDevice',
-        7: 'NewDevice',
-        8: 'NewDevice',
-        9: 'NewDevice',
+      componentkey: 0,
+      timer: null,
+      data: {
+        labels: [],
+        datasets: [
+          {
+            backgroundColor: [
+              "#41B883",
+              "#E46651",
+              "#00D8FF",
+              "#DD1B16",
+              "#6a3f9b",
+            ],
+            data: [],
+          },
+        ],
       },
-      processQueues: [
-        { 'name1': [1, 2] },
-        { 'name2': [1, 2] },
-        { 'name3': [3, 4, 5] },
-      ],
-      columns: [1,1,2,3],
-      res: {
-        Waiting_Queues: [[1,2,3],[1,8],[1,3],[1,4,3],[],[1,8]],
-        Second_Queue: [1,3,4],
-        Swapped_Ready_Queue: [2,7,5],
-        Swapped_Waiting_Queue:[3,5],
-        Ready_Queue: [5,1],
+      strategy: "",
+      page: false,
+      memory: {
+        strategy: "",
+        free_blocks: [
+          {
+            start: 2200,
+            end: 4095,
+            size: 1896,
+          },
+        ],
+        used_memory: [],
+      },
+      details: {
+        faults: 0,
+        // strategy: '',
+        free_pages: {
+          empty: false,
         },
-      rowData: [],
-    }
+        lru_cache: [
+          {
+            page_num_physical: 2,
+            pid: 0,
+            page_num_virtual: 0,
+          },
+        ],
+        pages: 0,
+        page_size: 8,
+        swaped_page_count: 0,
+        swaped_used_count: 0,
+        used_pages: [],
+      },
+      visualpage: [],
+      continueallocate: ["FirstFit", "NextFit", "BestFit", "WorstFit"],
+      pageallocate: ["Page", "LRU", "FIFO"],
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+      },
+      temp: null,
+      ioperation: 0,
+      tmp: [],
+      detail: false,
+    };
   },
-  created() {
-    this.getData(); // 调用 getData 方法以从后端获取数据
+  mounted() {
+    this.fetchdata();
   },
-
+  beforeUnmount() {
+    this.stopfetchData();
+  },
 
   methods: {
-    maxLength(processQueue) {
-      return processQueue.reduce((max, item) => {
-        const arr = Object.values(item)[0];
-        return Math.max(max, arr.length);
-      }, 0);
+    showdetail() {
+      this.detail = true;
     },
+    stopfetchData() {
+      clearInterval(this.timer);
+    },
+    fetchdata() {
+      this.timer = setInterval(() => {
+        this.data.labels = [];
+        this.data.datasets[0].data = [];
+        axios.get(serverURL + "/api/memory").then((response) => {
+          console.log(response.data);
+          if (this.continueallocate.includes(response.data.strategy)) {
+            this.ioperation = 1;
+            console.log(response.data, "test");
+            this.memory = response.data.details;
+            this.strategy = response.data.strategy;
+            this.temp = Object.entries(this.memory.used_memory).map(
+              ([key, value]) => ({
+                key,
+                value,
+              })
+            );
+            // this.temp = []
+            let temp = [];
+            this.memory.free_blocks.forEach((block) => {
+              this.temp.push({ key: "free", value: block });
+            });
+            this.temp.sort((a, b) => a.value.start - b.value.start);
+            this.temp.forEach((item) => {
+              temp.push(item.value.size);
+              let data = item.key;
+              if (item.key === "free") {
+                this.data.labels.push(data);
+              } else this.data.labels.push("pid-" + data);
+            });
+            // console.log(temp);
+            this.data.datasets[0].data = temp;
 
-    generateQueueData(processQueue) {
-      this.rowData = processQueue.map((item, index) => {
-        const key = Object.keys(item)[0];
-        const value = item[key];
-        const row = { id: `Queue-${index}`, parentId: null };
-        this.columns.forEach((column, columnIndex) => {
-          row[column.dataKey] = columnIndex === 0 ? key : (value[columnIndex - 1] || '');
-        });
-        return row;
-      });
-    },
-    transformData(data) {
-      let temp = [];
-      
-      // 添加设备名称行
-      data.Waiting_Queues.forEach((queue, index) => {
-        let deviceName = this.deviceMapping[index];
-        temp.push({ [deviceName]: queue });
-      });
-      
-      // 添加其他队列名称行
-      temp.push({ 'Ready_Queue': data.Ready_Queue });
-      temp.push({ 'Second_Queue': data.Second_Queue });
-      temp.push({ 'Swapped_Ready_Queue': data.Swapped_Ready_Queue });
-      temp.push({ 'Swapped_Waiting_Queue': data.Swapped_Waiting_Queue });
+            this.componentkey++;
+            //将数据处理好塞到data中
+          } else if (response.data.strategy == "Page") {
+            console.log(response.data.details);
+            this.details = response.data.details;
+            this.strategy = "Page";
+            let memory_size = this.details.memory_size
+            let temp = [];
+            let sum = 0;
+            const map = new Map();
+            this.data.labels = [];
 
-      return temp;
-    },
-    getData() {
-      axios.get(serverURL + '/process/queue')
-        .then(res => {
-          this.res = res.data;
-          this.processQueues = this.transformData(this.res); // 使用新数据更新 processQueues
-          let max = this.maxLength(this.processQueues) + 1;
-          this.columns = this.generateColumns(max, { width: 100 }, 'Queue-'); // 根据新数据重新生成 columns
-          this.generateQueueData(this.processQueues); // 根据新数据重新生成 rowData
-        })
-        .catch(error => {
-          console.error("There was an error fetching the process queue data:", error);
-          // 这里可以处理错误情况，例如设置一些默认值或者显示错误信息
+            const up = Object.entries(this.details.used_pages).map(
+              ([key, value]) => ({
+                key,
+                value,
+              })
+            );
+            up.forEach((item) => {
+              temp.push(item.value.size);
+              this.data.labels.push("pid-" + item.key);
+              sum += item.value.size;
+            });
+            temp.push(memory_size - sum);
+            this.data.datasets[0].data = temp;
+            this.data.labels.push("free");
+            // console.log(temp)
+            this.componentkey++;
+          } else {
+            this.ioperation = 2;
+            let memory_size = this.details.memory_size
+            this.details = response.data.details;
+            this.strategy = response.data.strategy;
+            let temp = [];
+            const lruCache = Object.entries(this.details.lru_cache).map(
+              ([key, value]) => ({
+                key,
+                value,
+              })
+            );
+            let sum = 0;
+            let addressMap = new Map();
+
+            let virtualPageMap = new Map();
+            this.tmp = [];
+            let lastPid = null; //////////////////////////////
+            lruCache.forEach((item) => {
+              // console.log(item.value)
+              this.tmp.push(item.value);
+            });
+            lruCache.forEach((item) => {
+              const physicalAddress =
+                item.value.page_num_physical * this.details.page_size;
+              let segments = addressMap.get(item.value.pid) || [];
+
+              if (
+                segments.length > 0 &&
+                segments[segments.length - 1].end + this.details.page_size ===
+                  physicalAddress
+              ) {
+                // 如果当前地址正好是上一个段的连续地址
+                let lastSegment = segments[segments.length - 1];
+                lastSegment.end = physicalAddress + this.details.page_size - 1;
+                lastSegment.size += this.details.page_size;
+              } else {
+                // 否则，创建一个新的段
+                let newSegment = {
+                  start: physicalAddress,
+                  end: physicalAddress + this.details.page_size - 1,
+                  size: this.details.page_size,
+                };
+                segments.push(newSegment);
+              }
+
+              // 更新地址Map
+              addressMap.set(item.value.pid, segments);
+
+              // 更新虚拟页面号信息
+              let pages = virtualPageMap.get(item.value.pid) || [];
+              if (!pages.includes(item.value.page_num_virtual)) {
+                pages.push(item.value.page_num_virtual);
+              }
+              virtualPageMap.set(item.value.pid, pages);
+            });
+
+            // 现在 addressMap 包含了所有处理后的段，可以按需要进一步处理或输出
+
+            // 更新this.temp和this.visualpage
+            this.temp = Array.from(addressMap, ([pid, value]) => ({
+              key: `pid-${pid}`,
+              value: value,
+            }));
+            this.visualpage = Array.from(virtualPageMap, ([pid, pages]) => ({
+              pid: pid,
+              pages: pages,
+            }));
+
+            // console.log(this.temp, "aa");
+
+            //处理temp
+            this.temp = Array.from(addressMap, ([pid, segments]) => {
+              return segments.map((segment) => ({
+                ...segment,
+                pid: pid, // 保留pid信息
+              }));
+            }).flat(); // 将所有pid的数组扁平化成一个数组
+            // 根据start地址排序
+            this.temp.sort((a, b) => a.start - b.start);
+
+            // 输出地址和大小的计算结果
+            console.log(this.visualpage); // 输出虚拟页面号的结果
+
+            this.temp.forEach((segment) => {
+              sum += segment.size;
+              this.data.labels.push(`pid-${segment.pid}`);
+              temp.push(segment.size);
+            });
+            // console.log(temp);
+            temp.push(memory_size - sum);
+            this.data.labels.push("free");
+
+            this.data.datasets[0].data = temp;
+            // console.log(this.data, "a");
+            this.componentkey++;
+            //将数据处理好塞入data中
+          }
         });
+      }, 2000);
     },
-    generateColumns(length, props, prefix = 'Column-') {
-      return Array.from({ length }, (_, columnIndex) => ({
-        ...props,
-        dataKey: `${prefix}${columnIndex}`,
-        title: columnIndex === 0 ? 'Queue Name' : `pid`,
-        width: columnIndex === 0 ? 200 : 150,
-      }));
-    },
-  }
-  }
-  </script>
+  },
+};
+</script>

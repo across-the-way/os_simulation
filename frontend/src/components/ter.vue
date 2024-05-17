@@ -63,8 +63,6 @@ export default {
               content: res
             })
           })
-
-
           console.log(this.responseData)
         })
         .catch(error => {

@@ -150,12 +150,12 @@ export default {
           </el-icon>
           <router-link to="/filesystem">文件系统</router-link>
         </el-menu-item>
-        <!-- <el-menu-item index="3">
+        <el-menu-item index="6">
           <el-icon>
             <Operation />
           </el-icon>
           <router-link to="/test">测试</router-link>
-        </el-menu-item> -->
+        </el-menu-item>
         <el-menu-item index="4">
           <el-icon>
             <Switch />
