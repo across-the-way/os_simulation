@@ -15,10 +15,7 @@ import com.example.hello.myProcess.scheduleStrategy;
 import com.example.hello.myTerminal.TerminalCallType;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @CrossOrigin
@@ -220,6 +217,16 @@ public class hellocontroller {
     @GetMapping("/FrameInfo")
     public List<BurstInfo> getFrameInfo(@RequestParam int frame_num) {
         return BurstInfo.getBurstInfos(frame_num, kernel);
+    }
+
+    @GetMapping("/FrameAbstract")
+    public Map<String, Integer> getFrameAbstract(@RequestParam int frame_num) {
+        Map<String, Integer> map = new HashMap<>();
+        int[] res = kernel.getMm().getPidNode(frame_num);
+        map.put("frame_number", res[0]);
+        map.put("pid", res[1]);
+        map.put("page_num", res[2]);
+        return map;
     }
 
     @GetMapping("/ProcessResource")
