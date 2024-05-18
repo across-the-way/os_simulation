@@ -10,7 +10,7 @@
                 虚拟页号：{{ item.page_num_virtual }}
             </div>
           </template>
-          <Memorydetail :msg="item.page_num_physical"></Memorydetail>
+          <Memorydetail :msg="item.page_num_physical" :pid="item.pid"></Memorydetail>
         </el-popover>
       </div>
     </div>

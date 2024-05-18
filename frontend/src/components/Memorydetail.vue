@@ -25,7 +25,9 @@ import { serverURL } from '@/configjs/ServerURL'
 defineProps({
     msg: {
         type: Number,
-        required: true
+    },
+    pid: {
+        type: Number,
     }
 })
 </script>
@@ -72,7 +74,7 @@ export default {
                     console.log(res.data)
                 })
         }, fetchdata2() {
-            axios.get(serverURL + '/ProcessResource' + '?pid=1')
+            axios.get(serverURL + '/ProcessResource' + '?pid='+this.pid)
                 .then(res => {
                     this.res = res.data
                     console.log(res.data)
