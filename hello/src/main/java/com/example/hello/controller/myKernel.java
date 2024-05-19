@@ -161,7 +161,7 @@ public class myKernel implements Runnable {
         fs.update();
         io.update();
         System.out.println(sysData.CPUstrategy.toString() + " " + sysData.MMstrategy.toString());
-        test.doTest();
+        // test.doTest();
     }
 
     private void timeout(Object[] objects) {

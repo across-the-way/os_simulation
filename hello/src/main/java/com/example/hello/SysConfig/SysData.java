@@ -59,7 +59,7 @@ public class SysData {
 
     public SysData() {
         // 单位毫秒
-        SystemPulse = 100;
+        SystemPulse = 1000;
 
         InstructionLength = 4;
 
@@ -78,7 +78,7 @@ public class SysData {
 
         MMstrategy = allocateStrategy.LRU;
 
-        Memory_Size = 1536;
+        Memory_Size = 4096;
         Page_Size = 512;
 
         Printer_Number = 3;

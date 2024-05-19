@@ -45,6 +45,7 @@ export default {
                 axios.get(serverURL + "/api/memory")
                     .then(res => {
                         if (res.data.strategy === 'LRU' || res.data.strategy === 'FIFO') {
+                            this.tmp = []
                             let page = res.data.details.free_pages
                             let temp = page.slice(1, -1).split(',')
                             console.log(temp.length)
